@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}"
           echo "DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}"
-g
+
       - name: 🐳 Docker build & push
         run:  |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
