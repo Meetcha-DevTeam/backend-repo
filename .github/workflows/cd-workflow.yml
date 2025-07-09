@@ -25,7 +25,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           server-id: github
-          setting-path: ${{ github.workspace }}
+          settings-path: ${{ github.workspace }}
 
       - name: 👏🏻 grant execute permission for gradlew
         run: chmod +x gradlew
