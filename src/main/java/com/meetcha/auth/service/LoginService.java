@@ -17,11 +17,11 @@ public class LoginService {
     private final UserRepository userRepository;
 
     public LoginResponseDto googleLogin(LoginRequestDto request){
-        String mockEmail = "kuit@gmail.com";
+        String mockEmail = "kuit@naver.com";
         String mockName = "kuit";
         String mockGoogleToken = "mock-google-token-123";
         String mockProfileImage = "https://example.com/profile.png";
-        Optional<UserEntity> optionalUser = userRepository.findByEmail(mockEmail);
+       Optional<UserEntity> optionalUser = userRepository.findByEmail(mockEmail);
 
         UserEntity user = optionalUser.orElseGet(() -> {
             return userRepository.save(

@@ -23,6 +23,7 @@ public class UserController {
             LoginResponseDto response = loginService.googleLogin(request);
             return ResponseEntity.ok(LoginApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
         } catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.status(401).body((LoginApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
         }
     }
