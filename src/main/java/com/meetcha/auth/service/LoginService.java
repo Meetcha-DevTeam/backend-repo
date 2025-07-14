@@ -1,44 +1,97 @@
 package com.meetcha.auth.service;
 
+import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.LoginResponseDto;
 import com.meetcha.auth.entity.UserEntity;
 import com.meetcha.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class LoginService {
+
+    private final GoogleOAuthProperties googleProps;
     private final UserRepository userRepository;
 
     public LoginResponseDto googleLogin(LoginRequestDto request) {
-        String email = "kuit@google.com";
-        String name = "kuit";
-        String googleToken = "mock-google-token-12345";
-        String profileImage = "https://example.com/profile.png";
+        String code = request.getCode();
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
+        tokenParams.add("code", code);
+        tokenParams.add("client_id", googleProps.getClientId());
+        tokenParams.add("client_secret", googleProps.getClientSecret());
+        tokenParams.add("redirect_uri", googleProps.getRedirectUri());
+        tokenParams.add("grant_type", "authorization_code");
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequest =
+                new HttpEntity<>(tokenParams, tokenHeaders);
+
+        ResponseEntity<Map> tokenResponse = restTemplate.exchange(
+                "https://oauth2.googleapis.com/token",
+                HttpMethod.POST,
+                tokenRequest,
+                Map.class
+        );
+
+        if (!tokenResponse.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("구글 토큰 요청 실패");
+        }
+
+        String accessToken = (String) tokenResponse.getBody().get("access_token");
+
+        HttpHeaders userInfoHeaders = new HttpHeaders();
+        userInfoHeaders.setBearerAuth(accessToken);
+
+        HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
+
+        ResponseEntity<Map> userInfoResponse = restTemplate.exchange(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                HttpMethod.GET,
+                userInfoRequest,
+                Map.class
+        );
+
+        if (!userInfoResponse.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("구글 유저 정보 요청 실패");
+        }
+
+        Map<String, Object> userInfo = userInfoResponse.getBody();
+        String email = (String) userInfo.get("email");
+        String name = (String) userInfo.get("name");
+        String picture = (String) userInfo.get("picture");
 
         Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
 
         if (optionalUser.isEmpty()) {
             UserEntity newUser = UserEntity.builder()
-                    .name(name)
                     .email(email)
-                    .googleToken(googleToken)
+                    .name(name)
+                    .googleToken(accessToken)
+                    .profileImgSrc(picture)
                     .createdAt(LocalDateTime.now())
-                    .profileImgSrc(profileImage)
                     .build();
-
             userRepository.save(newUser);
         }
 
-        String accessToken = "mock-access-token-abc1";
-        String refreshToken = "mock-refresh-token-xyz1";
+        // 임시 mock 토큰
+        String jwtAccessToken = "generated-access-token";
+        String jwtRefreshToken = "generated-refresh-token";
 
-        return new LoginResponseDto(accessToken, refreshToken);
+        return new LoginResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 }
