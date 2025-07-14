@@ -42,7 +42,6 @@ public class LoginService {
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest =
                 new HttpEntity<>(tokenParams, tokenHeaders);
-        System.out.println("👉 요청할 리디렉션 URI: " + googleProps.getRedirectUri());
 
         ResponseEntity<Map> tokenResponse = restTemplate.exchange(
                 "https://oauth2.googleapis.com/token",
