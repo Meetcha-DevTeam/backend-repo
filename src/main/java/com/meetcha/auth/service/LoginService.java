@@ -16,26 +16,29 @@ import java.util.UUID;
 public class LoginService {
     private final UserRepository userRepository;
 
-    public LoginResponseDto googleLogin(LoginRequestDto request){
-        String Email = "kuit@naver.com";
-        String Name = "kuit";
-        String GoogleToken = "mock-google-token-123";
-        String ProfileImage = "https://example.com/profile.png";
-       Optional<UserEntity> optionalUser = userRepository.findByEmail(Email);
+    public LoginResponseDto googleLogin(LoginRequestDto request) {
+        String email = "kuit@google.com";
+        String name = "kuit";
+        String googleToken = "mock-google-token-12345";
+        String profileImage = "https://example.com/profile.png";
 
-        UserEntity user = UserEntity.builder()
-                .name(Name)
-                .email(Email)
-                .googleToken(GoogleToken)
-                .createdAt(LocalDateTime.now())
-                .profileImgSrc(ProfileImage)
-                .build();
+        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
 
-        userRepository.save(user);
+        if (optionalUser.isEmpty()) {
+            UserEntity newUser = UserEntity.builder()
+                    .userId(UUID.randomUUID()) // UUID 명시!
+                    .name(name)
+                    .email(email)
+                    .googleToken(googleToken)
+                    .createdAt(LocalDateTime.now())
+                    .profileImgSrc(profileImage)
+                    .build();
 
+            userRepository.save(newUser);
+        }
 
-        String accessToken = "mock-access-token-abc";
-        String refreshToken = "mock-refresh-token-xyz";
+        String accessToken = "mock-access-token-abc1";
+        String refreshToken = "mock-refresh-token-xyz1";
 
         return new LoginResponseDto(accessToken, refreshToken);
     }
