@@ -4,6 +4,7 @@ import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.LoginResponseDto;
 import com.meetcha.auth.entity.UserEntity;
+import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -22,6 +23,7 @@ public class LoginService {
 
     private final GoogleOAuthProperties googleProps;
     private final UserRepository userRepository;
+    private final JwtProvider jwtProvider;
 
     public LoginResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
@@ -77,7 +79,7 @@ public class LoginService {
 
         Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
 
-        if (optionalUser.isEmpty()) {
+        UserEntity user = optionalUser.orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
                     .name(name)
@@ -85,12 +87,11 @@ public class LoginService {
                     .profileImgSrc(picture)
                     .createdAt(LocalDateTime.now())
                     .build();
-            userRepository.save(newUser);
-        }
+            return userRepository.save(newUser);
+        });
 
-        // 임시 mock 토큰
-        String jwtAccessToken = "generated-access-token";
-        String jwtRefreshToken = "generated-refresh-token";
+        String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
+        String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
 
         return new LoginResponseDto(jwtAccessToken, jwtRefreshToken);
     }
