@@ -23,17 +23,16 @@ public class LoginService {
         String ProfileImage = "https://example.com/profile.png";
        Optional<UserEntity> optionalUser = userRepository.findByEmail(Email);
 
-        if (optionalUser.isEmpty()) {
-            UserEntity newUser = UserEntity.builder()
-                    .userId(UUID.randomUUID())
-                    .email(Email)
-                    .name(Name)
-                    .googleToken(GoogleToken)
-                    .profileImgSrc(ProfileImage)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            userRepository.save(newUser);
-        }
+        UserEntity user = UserEntity.builder()
+                .name(Name)
+                .email(Email)
+                .googleToken(GoogleToken)
+                .createdAt(LocalDateTime.now())
+                .profileImgSrc(ProfileImage)
+                .build();
+
+        userRepository.save(user);
+
 
         String accessToken = "mock-access-token-abc";
         String refreshToken = "mock-refresh-token-xyz";
