@@ -26,7 +26,6 @@ public class LoginService {
 
         if (optionalUser.isEmpty()) {
             UserEntity newUser = UserEntity.builder()
-                    .userId(UUID.randomUUID()) // UUID 명시!
                     .name(name)
                     .email(email)
                     .googleToken(googleToken)
