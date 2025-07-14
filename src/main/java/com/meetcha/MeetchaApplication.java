@@ -1,4 +1,4 @@
-package com.meetcha.meetcha;
+package com.meetcha;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
