@@ -35,9 +35,9 @@ public class LoginService {
             userRepository.save(newUser);
         }
 
-        String accessToekn = "mock-access-token-abc";
+        String accessToken = "mock-access-token-abc";
         String refreshToken = "mock-refresh-token-xyz";
 
-        return new LoginResponseDto(accessToekn, refreshToken);
+        return new LoginResponseDto(accessToken, refreshToken);
     }
 }
