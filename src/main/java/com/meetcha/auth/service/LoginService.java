@@ -17,24 +17,23 @@ public class LoginService {
     private final UserRepository userRepository;
 
     public LoginResponseDto googleLogin(LoginRequestDto request){
-        String mockEmail = "kuit@naver.com";
-        String mockName = "kuit";
-        String mockGoogleToken = "mock-google-token-123";
-        String mockProfileImage = "https://example.com/profile.png";
-       Optional<UserEntity> optionalUser = userRepository.findByEmail(mockEmail);
+        String Email = "kuit@naver.com";
+        String Name = "kuit";
+        String GoogleToken = "mock-google-token-123";
+        String ProfileImage = "https://example.com/profile.png";
+       Optional<UserEntity> optionalUser = userRepository.findByEmail(Email);
 
-        UserEntity user = optionalUser.orElseGet(() -> {
-            return userRepository.save(
-                    UserEntity.builder()
-                            .userId(UUID.randomUUID())
-                            .email(mockEmail)
-                            .name(mockName)
-                            .googleToken(mockGoogleToken)
-                            .profileImgSrc(mockProfileImage)
-                            .createdAt(LocalDateTime.now())
-                            .build()
-            );
-        });
+        if (optionalUser.isEmpty()) {
+            UserEntity newUser = UserEntity.builder()
+                    .userId(UUID.randomUUID())
+                    .email(Email)
+                    .name(Name)
+                    .googleToken(GoogleToken)
+                    .profileImgSrc(ProfileImage)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            userRepository.save(newUser);
+        }
 
         String accessToekn = "mock-access-token-abc";
         String refreshToken = "mock-refresh-token-xyz";
