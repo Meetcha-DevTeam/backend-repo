@@ -22,10 +22,10 @@ public class RefreshTokenService {
 
     public TokenResponseDto reissueAccessToken(String refreshToken) {
         RefreshTokenEntity entity = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("유효하지 않은 refreshToken입니다."));
+                .orElseThrow(() -> new RuntimeException("유효하지 않은 refresh Token입니다."));
 
         if (entity.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("만료된 refreshToken입니다.");
+            throw new RuntimeException("만료된 refresh Token입니다.");
         }
 
         UserEntity user = userRepository.findById(entity.getUserId())
