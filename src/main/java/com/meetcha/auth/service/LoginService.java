@@ -3,8 +3,10 @@ package com.meetcha.auth.service;
 import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.LoginResponseDto;
+import com.meetcha.auth.entity.RefreshTokenEntity;
 import com.meetcha.auth.entity.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.auth.repository.RefreshTokenRepository;
 import com.meetcha.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -24,6 +26,7 @@ public class LoginService {
     private final GoogleOAuthProperties googleProps;
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public LoginResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
@@ -92,6 +95,13 @@ public class LoginService {
 
         String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
         String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
+
+        RefreshTokenEntity tokenEntity = new RefreshTokenEntity(
+                user.getUserId(),
+                jwtRefreshToken,
+                LocalDateTime.now().plusDays(14)
+        );
+        refreshTokenRepository.save(tokenEntity);
 
         return new LoginResponseDto(jwtAccessToken, jwtRefreshToken);
     }
