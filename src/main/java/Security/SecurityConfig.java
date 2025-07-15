@@ -1,4 +1,4 @@
-package com.meetcha.auth.config;
+package Security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +13,9 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/oauth/google").permitAll() //로그인 API만 열어줌
-                        .anyRequest().authenticated()                //나머지는 인증 필요
+                                .anyRequest().permitAll()  //개발할땐 우선 다 오픈!! 대신 배포 직전에 밑 코드로 수정필요
+                        //.requestMatchers("/oauth/google").permitAll() //로그인은 누구나
+                        //.anyRequest().authenticated()                //나머지는 인증 필요
                 )
                 .build();
     }
