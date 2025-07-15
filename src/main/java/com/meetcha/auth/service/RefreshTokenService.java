@@ -24,7 +24,7 @@ public class RefreshTokenService {
         RefreshTokenEntity entity = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new RuntimeException("유효하지 않은 refresh Token입니다."));
 
-        if (entity.getExpiryDate().isBefore(LocalDateTime.now())) {
+        if (entity.getExpiryDate().isBefore(LocalDagteTime.now())) {
             throw new RuntimeException("만료된 refresh Token입니다.");
         }
 
