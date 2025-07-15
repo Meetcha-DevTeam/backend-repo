@@ -47,6 +47,8 @@ public class MeetingEntity {
     @Column(name = "project_id", nullable = false)
     private UUID projectId;
 
+    @Column(name = "code", nullable = false, unique = true)
+    private String code;
     // todo 미팅 생성 시 디폴트 값 설정
 
 }
