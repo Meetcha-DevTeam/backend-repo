@@ -28,5 +28,11 @@ public class JoinMeetingController {
 
     }
 
+    @GetMapping("/meeting/{code}")
+    public ResponseEntity<Void> validateMeetingCode(@PathVariable String code) {
+        joinMeetingService.validateMeetingCode(code);
+        return ResponseEntity.ok().build();
+    }
+
 
 }
