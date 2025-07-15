@@ -2,7 +2,7 @@ package com.meetcha.auth.service;
 
 import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
-import com.meetcha.auth.dto.LoginResponseDto;
+import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.entity.RefreshTokenEntity;
 import com.meetcha.auth.entity.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
@@ -28,7 +28,7 @@ public class LoginService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-    public LoginResponseDto googleLogin(LoginRequestDto request) {
+    public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
 
         RestTemplate restTemplate = new RestTemplate();
@@ -103,6 +103,6 @@ public class LoginService {
         );
         refreshTokenRepository.save(tokenEntity);
 
-        return new LoginResponseDto(jwtAccessToken, jwtRefreshToken);
+        return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 }
