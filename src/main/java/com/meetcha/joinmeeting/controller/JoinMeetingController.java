@@ -6,6 +6,7 @@ import com.meetcha.joinmeeting.service.JoinMeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.meetcha.meeting.dto.MeetingInfoResponse;
 
 import java.util.UUID;
 
@@ -13,11 +14,10 @@ import java.util.UUID;
 @RequestMapping("/meeting")
 @RequiredArgsConstructor
 public class JoinMeetingController {
-    //meetings/{id}/join 엔드포인트 처리
-    //미팅 참가 요청을 받고 응답 반환
 
     private final JoinMeetingService joinMeetingService;
 
+    //미팅 참여
     @PostMapping("/{meetingId}/join")
     public ResponseEntity<JoinMeetingResponse> joinMeeeting(
             @PathVariable UUID meetingId,
@@ -28,11 +28,17 @@ public class JoinMeetingController {
 
     }
 
+    //미팅 코드 유효성 검사
     @GetMapping("/meeting/{code}")
     public ResponseEntity<Void> validateMeetingCode(@PathVariable String code) {
         joinMeetingService.validateMeetingCode(code);
         return ResponseEntity.ok().build();
     }
 
+    // 미팅 정보 조회
+    @GetMapping("/meeting/{meetingId}")
+    public MeetingInfoResponse getMeetingInfo(@PathVariable UUID meetingId) {
+        return joinMeetingService.getMeetingInfo(meetingId);
+    }
 
 }

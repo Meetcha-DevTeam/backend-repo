@@ -8,8 +8,8 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +69,19 @@ public class JoinMeetingService {
     }
 
 
+    //미팅 참여, 미팅정보확인 시 사용
+    public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
+        MeetingEntity meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("미팅을 찾을 수 없습니다."));//todo
+
+        return new MeetingInfoResponse(
+                meeting.getMeetingId(),
+                meeting.getTitle(),
+                meeting.getDescription(),
+                meeting.getDeadline(),
+                meeting.getDurationMinutes()
+        );
+    }
 
     protected UUID getCurrentUserId() {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
