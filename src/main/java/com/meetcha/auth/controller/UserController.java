@@ -1,9 +1,11 @@
 package com.meetcha.auth.controller;
 
-import com.meetcha.auth.dto.LoginApiResponse;
+import com.meetcha.auth.dto.AuthApiResponse;
 import com.meetcha.auth.dto.LoginRequestDto;
-import com.meetcha.auth.dto.LoginResponseDto;
+import com.meetcha.auth.dto.RefreshTokenRequestDto;
+import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
+import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,15 +18,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
     private final LoginService loginService;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/google")
-    public ResponseEntity<LoginApiResponse<LoginResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
+    public ResponseEntity<AuthApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
         try{
-            LoginResponseDto response = loginService.googleLogin(request);
-            return ResponseEntity.ok(LoginApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+            TokenResponseDto response = loginService.googleLogin(request);
+            return ResponseEntity.ok(AuthApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
         } catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.status(401).body((LoginApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
+            return ResponseEntity.status(401).body((AuthApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
         }
     }
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
+        try {
+            TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
+            return ResponseEntity.ok(AuthApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401)
+                    .body(AuthApiResponse.fail(401, e.getMessage()));
+        }
+    }
+
 }
