@@ -1,6 +1,6 @@
 package com.meetcha.auth.controller;
 
-import com.meetcha.auth.dto.AuthApiResponse;
+import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.RefreshTokenRequestDto;
 import com.meetcha.auth.dto.TokenResponseDto;
@@ -21,23 +21,23 @@ public class UserController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/google")
-    public ResponseEntity<AuthApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
+    public ResponseEntity<ApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
         try{
             TokenResponseDto response = loginService.googleLogin(request);
-            return ResponseEntity.ok(AuthApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+            return ResponseEntity.ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
         } catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.status(401).body((AuthApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
+            return ResponseEntity.status(401).body((ApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
         }
     }
     @PostMapping("/refresh")
-    public ResponseEntity<AuthApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
+    public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
         try {
             TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
-            return ResponseEntity.ok(AuthApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+            return ResponseEntity.ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401)
-                    .body(AuthApiResponse.fail(401, e.getMessage()));
+                    .body(ApiResponse.fail(401, e.getMessage()));
         }
     }
 
