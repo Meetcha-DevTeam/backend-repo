@@ -1,6 +1,7 @@
 package com.meetcha.meeting.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.exception.UnauthorizedException;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.meeting.service.MeetingService;
@@ -33,6 +34,6 @@ public class MeetingController {
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7);
         }
-        throw new IllegalArgumentException("Invalid Authorization header.");
+        throw new UnauthorizedException("인증이 필요합니다.");
     }
 }

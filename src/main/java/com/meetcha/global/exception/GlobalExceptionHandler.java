@@ -17,4 +17,13 @@ public class GlobalExceptionHandler {
                 "errors", e.getFieldErrors()
         ));
     }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorized(UnauthorizedException e) {
+        return ResponseEntity.status(401).body(Map.of(
+                "code", 401,
+                "message", "인증이 필요합니다."
+        ));
+    }
+
 }
