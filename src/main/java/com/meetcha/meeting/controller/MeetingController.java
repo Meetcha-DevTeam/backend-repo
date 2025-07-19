@@ -18,7 +18,7 @@ public class MeetingController {
     private final MeetingService meetingService;
     private final JwtProvider jwtProvider;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<MeetingCreateResponse> createMeeting(
             @RequestBody MeetingCreateRequest request,
             @RequestHeader("Authorization") String authHeader
