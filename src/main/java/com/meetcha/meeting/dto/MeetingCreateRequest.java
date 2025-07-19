@@ -3,6 +3,7 @@ package com.meetcha.meeting.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public record MeetingCreateRequest (
@@ -11,4 +12,5 @@ public record MeetingCreateRequest (
     int durationMinutes,
     List<LocalDate> candidateDates,
     LocalDateTime deadline,
-    UUID projectId) {}
+    Optional<UUID> projectId
+) {}

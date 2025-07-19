@@ -34,7 +34,7 @@ public class MeetingService {
                 .meetingStatus(MeetingStatus.BEFORE)
                 .confirmedTime(null)
                 .createdBy(creatorId)
-                .projectId(request.projectId())
+                .projectId(request.projectId().orElse(null))
                 .code(UUID.randomUUID().toString().substring(0, 8))
                 .build();
 
