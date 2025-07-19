@@ -24,7 +24,7 @@ public class MeetingController {
             @RequestHeader("Authorization") String authHeader
     ) {
         String token = extractToken(authHeader);
-        UUID creatorBy = jwtProvider.getUserId(token); //
+        UUID creatorBy = jwtProvider.getUserId(token);
         MeetingCreateResponse response = meetingService.createMeeting(request, creatorBy);
         return ResponseEntity.status(201).body(response);
     }
