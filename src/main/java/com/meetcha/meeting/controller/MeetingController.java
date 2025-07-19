@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/meetings")
+@RequestMapping("/meeting")
 @RequiredArgsConstructor
 public class MeetingController {
 
