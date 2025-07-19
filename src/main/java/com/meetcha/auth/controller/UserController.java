@@ -27,7 +27,7 @@ public class UserController {
             return ResponseEntity.ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
         } catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.status(401).body((ApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.")));
+            return ResponseEntity.status(401).body(ApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.", null));
         }
     }
     @PostMapping("/refresh")
@@ -37,7 +37,7 @@ public class UserController {
             return ResponseEntity.ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401)
-                    .body(ApiResponse.fail(401, e.getMessage()));
+                    .body(ApiResponse.fail(401, e.getMessage(), null));
         }
     }
 
