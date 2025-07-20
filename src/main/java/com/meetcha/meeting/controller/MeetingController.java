@@ -25,19 +25,25 @@ public class MeetingController {
     public ResponseEntity<ApiResponse<MeetingCreateResponse>> createMeeting(
             @RequestBody MeetingCreateRequest request,
             @RequestHeader("Authorization") String authHeader
-        ) {
-        String token = extractToken(authHeader);
-        UUID creatorBy = jwtProvider.getUserId(token);
-        MeetingCreateResponse response = meetingService.createMeeting(request, creatorBy);
-        return ResponseEntity
-                .status(201)
-                .body(ApiResponse.success(201, "미팅이 성공적으로 생성되었습니다.", response));
+    ) {
+        try {
+            String token = extractToken(authHeader);
+            UUID creatorId = jwtProvider.getUserId(token);
+            MeetingCreateResponse response = meetingService.createMeeting(request, creatorId);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(ApiResponse.success(201, "미팅이 성공적으로 생성되었습니다.", response));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.fail(401, "인증이 필요합니다.", null));
         }
+    }
 
     private String extractToken(String header) {
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7);
         }
-        throw new UnauthorizedException("인증이 필요합니다.");
+        throw new UnauthorizedException("인증 토큰이 필요합니다.");
     }
 }
