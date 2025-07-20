@@ -8,6 +8,7 @@ import com.meetcha.auth.entity.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.repository.RefreshTokenRepository;
 import com.meetcha.auth.repository.UserRepository;
+import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidGoogleCodeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -55,11 +56,11 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
-            throw new InvalidGoogleCodeException("유효하지 않은 구글 인가 코드입니다.");
+            throw new InvalidGoogleCodeException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful()) {
-            throw new InvalidGoogleCodeException("구글 토큰 요청 실패");
+            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
         String accessToken = (String) tokenResponse.getBody().get("access_token");
@@ -77,12 +78,12 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) { //예외발생
-            throw new InvalidGoogleCodeException("구글 유저 정보 요청 실패");
+            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         //응답왔는데 200번대아님
         if (!userInfoResponse.getStatusCode().is2xxSuccessful()) {
-            throw new InvalidGoogleCodeException("구글 유저 정보 요청 실패");
+            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         Map<String, Object> userInfo = userInfoResponse.getBody();

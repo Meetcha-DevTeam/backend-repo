@@ -1,7 +1,13 @@
 package com.meetcha.global.exception;
 
+import lombok.Getter;
+
+@Getter
 public class RefreshTokenInvalidException extends RuntimeException {
-    public RefreshTokenInvalidException(String message) {
-        super(message);
+    private final ErrorCode errorCode;
+
+    public RefreshTokenInvalidException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
     }
 }

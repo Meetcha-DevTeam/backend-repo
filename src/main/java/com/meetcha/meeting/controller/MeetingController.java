@@ -2,6 +2,7 @@ package com.meetcha.meeting.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.UnauthorizedException;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
@@ -39,6 +40,6 @@ public class MeetingController {
         if (header != null && header.startsWith("Bearer ")) {
             return header.substring(7);
         }
-        throw new UnauthorizedException("인증 토큰이 필요합니다.");
+        throw new UnauthorizedException(ErrorCode.MISSING_AUTH_TOKEN);
     }
 }

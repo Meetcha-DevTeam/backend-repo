@@ -7,6 +7,7 @@ import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,12 +24,16 @@ public class UserController {
     @PostMapping("/google")
     public ResponseEntity<ApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
         TokenResponseDto response = loginService.googleLogin(request);
-        return ResponseEntity.ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
         TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
-        return ResponseEntity.ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
     }
 }
