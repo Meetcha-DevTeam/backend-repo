@@ -12,6 +12,15 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(InvalidGoogleCodeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidGoogleCode(InvalidGoogleCodeException e) {
+        return ResponseEntity.status(401).body(ApiResponse.fail(401, e.getMessage(), null));
+    }
+
+    @ExceptionHandler(RefreshTokenInvalidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenInvalid(RefreshTokenInvalidException e) {
+        return ResponseEntity.status(401).body(ApiResponse.fail(401, e.getMessage(), null));
+    }
 
     @ExceptionHandler(InvalidMeetingRequestException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleInvalidMeetingRequest(InvalidMeetingRequestException e) {

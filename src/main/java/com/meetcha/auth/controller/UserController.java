@@ -22,23 +22,13 @@ public class UserController {
 
     @PostMapping("/google")
     public ResponseEntity<ApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
-        try{
-            TokenResponseDto response = loginService.googleLogin(request);
-            return ResponseEntity.ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
-        } catch (Exception e){
-            e.printStackTrace();
-            return ResponseEntity.status(401).body(ApiResponse.fail(401, "유효하지 않은 구글 인가 코드입니다.", null));
-        }
-    }
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
-        try {
-            TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
-            return ResponseEntity.ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(401)
-                    .body(ApiResponse.fail(401, e.getMessage(), null));
-        }
+        TokenResponseDto response = loginService.googleLogin(request);
+        return ResponseEntity.ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
     }
 
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
+        TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
+        return ResponseEntity.ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+    }
 }

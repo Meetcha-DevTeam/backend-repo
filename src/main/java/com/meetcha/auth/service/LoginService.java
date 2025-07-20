@@ -8,6 +8,7 @@ import com.meetcha.auth.entity.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.repository.RefreshTokenRepository;
 import com.meetcha.auth.repository.UserRepository;
+import com.meetcha.global.exception.InvalidGoogleCodeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ public class LoginService {
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
-
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders tokenHeaders = new HttpHeaders();
@@ -46,33 +46,43 @@ public class LoginService {
         HttpEntity<MultiValueMap<String, String>> tokenRequest =
                 new HttpEntity<>(tokenParams, tokenHeaders);
 
-        ResponseEntity<Map> tokenResponse = restTemplate.exchange(
-                "https://oauth2.googleapis.com/token",
-                HttpMethod.POST,
-                tokenRequest,
-                Map.class
-        );
+        ResponseEntity<Map> tokenResponse;
+        try {
+            tokenResponse = restTemplate.exchange(
+                    "https://oauth2.googleapis.com/token",
+                    HttpMethod.POST,
+                    tokenRequest,
+                    Map.class
+            );
+        } catch (Exception e) {
+            throw new InvalidGoogleCodeException("유효하지 않은 구글 인가 코드입니다.");
+        }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("구글 토큰 요청 실패");
+            throw new InvalidGoogleCodeException("구글 토큰 요청 실패");
         }
 
         String accessToken = (String) tokenResponse.getBody().get("access_token");
 
         HttpHeaders userInfoHeaders = new HttpHeaders();
         userInfoHeaders.setBearerAuth(accessToken);
-
         HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
 
-        ResponseEntity<Map> userInfoResponse = restTemplate.exchange(
-                "https://www.googleapis.com/oauth2/v3/userinfo",
-                HttpMethod.GET,
-                userInfoRequest,
-                Map.class
-        );
+        ResponseEntity<Map> userInfoResponse;
+        try {
+            userInfoResponse = restTemplate.exchange(
+                    "https://www.googleapis.com/oauth2/v3/userinfo",
+                    HttpMethod.GET,
+                    userInfoRequest,
+                    Map.class
+            );
+        } catch (Exception e) { //예외발생
+            throw new InvalidGoogleCodeException("구글 유저 정보 요청 실패");
+        }
 
+        //응답왔는데 200번대아님
         if (!userInfoResponse.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("구글 유저 정보 요청 실패");
+            throw new InvalidGoogleCodeException("구글 유저 정보 요청 실패");
         }
 
         Map<String, Object> userInfo = userInfoResponse.getBody();
@@ -80,9 +90,7 @@ public class LoginService {
         String name = (String) userInfo.get("name");
         String picture = (String) userInfo.get("picture");
 
-        Optional<UserEntity> optionalUser = userRepository.findByEmail(email);
-
-        UserEntity user = optionalUser.orElseGet(() -> {
+        UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
                     .name(name)
