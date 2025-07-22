@@ -1,5 +1,7 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
@@ -61,10 +63,10 @@ public class JoinMeetingService {
 
     public void validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("미팅을 찾을 수 없습니다"));//todo
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("미팅 참여마감시간이 지났습니다.");//todo
+            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);//todo
         }
     }
 
@@ -72,7 +74,7 @@ public class JoinMeetingService {
     //미팅 참여, 미팅정보확인 시 사용
     public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new RuntimeException("미팅을 찾을 수 없습니다."));//todo
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
