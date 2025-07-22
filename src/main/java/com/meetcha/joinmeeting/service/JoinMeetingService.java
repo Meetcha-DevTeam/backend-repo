@@ -66,7 +66,7 @@ public class JoinMeetingService {
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline().isBefore(LocalDateTime.now())) {
-            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);//todo
+            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
     }
 
