@@ -60,13 +60,13 @@ public class MeetingService {
 
             boolean anyPastOrToday = dates.stream().anyMatch(d -> !d.isAfter(today));
             if (anyPastOrToday) {
-                errors.put("candidateDates", ErrorCode.CANDIDATE_DATE_IN_PAST.getMessage());
+                errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
             }
 
             LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
             if (earliestCandidate != null &&
                     request.deadline().toLocalDate().isAfter(earliestCandidate)) {
-                errors.put("deadline", ErrorCode.DEADLINE_AFTER_CANDIDATE.getMessage());
+                errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
             }
         }
 

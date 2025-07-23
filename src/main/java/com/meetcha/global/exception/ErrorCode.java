@@ -8,11 +8,11 @@ public enum ErrorCode {
 
     //400 Bad Request
     INVALID_GOOGLE_CODE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 구글 인가 코드입니다."),
-    DEADLINE_AFTER_CANDIDATE(HttpStatus.BAD_REQUEST, 400, "참여 마감 시간은 후보 날짜보다 이르거나 같아야 합니다."),
+    INVALID_MEETING_DEADLINE(HttpStatus.BAD_REQUEST, 400, "참여 마감 시간은 후보 날짜보다 이르거나 같아야 합니다."),
     INVALID_MEETING_REQUEST(HttpStatus.BAD_REQUEST, 400, "입력값이 유효하지 않습니다."),
     INVALID_DURATION(HttpStatus.BAD_REQUEST, 400, "1분 이상 719분 이하로 설정해주세요."),
     INVALID_CANDIDATE_DATES(HttpStatus.BAD_REQUEST, 400, "후보 날짜는 최소 1개 이상, 최대 10개까지 가능합니다."),
-    CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, 400, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
+    INVALID_CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, 400, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, 400, "미팅 참여마감시간이 지났습니다."),
 
     //401 Unauthorized
