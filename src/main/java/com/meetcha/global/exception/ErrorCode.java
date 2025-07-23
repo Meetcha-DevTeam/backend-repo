@@ -20,11 +20,11 @@ public enum ErrorCode {
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, 401, "JWT 토큰이 만료되었습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유효하지 않은 refresh Token입니다."),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "만료된 refresh Token입니다."),
-    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "사용자를 찾을 수 없습니다."),/// ? 404가 아닌 401인 이유?
     GOOGLE_TOKEN_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 토큰 요청 실패"),
     GOOGLE_USERINFO_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 유저 정보 요청 실패"),
 
     //404 Not Found
+    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "사용자를 찾을 수 없습니다."),
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
 
     //500 Internal Server Error
