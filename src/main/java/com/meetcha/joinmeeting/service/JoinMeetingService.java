@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
@@ -91,10 +92,10 @@ public class JoinMeetingService {
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));/// CustomException으로 통합
 
         if (meeting.isDeadlinePassed()) {
-            throw new RuntimeException();///ErrorCode.MEETING_ALREADY_CLOSED
+            throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
 
         // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
@@ -103,7 +104,7 @@ public class JoinMeetingService {
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
                 .findByMeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new RuntimeException());///ErrorCode.PARTICIPANT_NOT_FOUND
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         UUID participantId = participant.getParticipantId();
 

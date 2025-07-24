@@ -14,6 +14,7 @@ public enum ErrorCode {
     INVALID_CANDIDATE_DATES(HttpStatus.BAD_REQUEST, 400, "후보 날짜는 최소 1개 이상, 최대 10개까지 가능합니다."),
     CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, 400, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, 400, "미팅 참여마감시간이 지났습니다."),
+    ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, 400, "이미 대안시간 투표를 제출하였습니다."),
 
     //401 Unauthorized
     MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "인증 토큰이 필요합니다."),
@@ -24,9 +25,9 @@ public enum ErrorCode {
     GOOGLE_USERINFO_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 유저 정보 요청 실패"),
 
     //404 Not Found
-    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "사용자를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "사용자를 찾을 수 없습니다."),/// 첫번째 인자 HttpStatus.NOT_FOUND로 수정하기
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
-
+    PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
     //500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "알 수 없는 서버 오류가 발생했습니다.");
 

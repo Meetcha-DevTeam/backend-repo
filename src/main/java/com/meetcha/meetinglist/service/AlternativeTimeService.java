@@ -1,5 +1,8 @@
 package com.meetcha.meetinglist.service;
 
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.exception.InvalidAlternativeTimeException;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import com.meetcha.meetinglist.dto.AlternativeTimeDto;
@@ -54,12 +57,12 @@ public class AlternativeTimeService {
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
                 .findByMeetingIdAndStartTime(meetingId, request.getAlternativeTime().toLocalDateTime())
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 미팅입니다."));///
+                .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));///CustomException 로 통합
 
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTimeIdAndUserIdNotNull(meetingId, userId);
         if (alreadyVoted) {
-            throw new IllegalArgumentException("이미 대안시간 투표를 제출하였습니다.");///
+            throw new CustomException(ErrorCode.ALREADY_VOTED_ALTERNATIVE);///
         }
 
         // 3. 대안시간 투표 저장
