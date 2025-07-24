@@ -1,6 +1,8 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.meeting.dto.MeetingInfoResponse;
+import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
+import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.joinmeeting.service.JoinMeetingService;
 import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
@@ -17,6 +19,7 @@ public class MeetingListController {
 
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
+    private final JoinMeetingService joinMeetingService;
 
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
@@ -59,5 +62,17 @@ public class MeetingListController {
     ) {
         return ResponseEntity.ok(alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader));
     }
+
+
+    // 미팅 참여 정보 수정
+    @PatchMapping("/{meetingId")
+    public ResponseEntity<JoinMeetingResponse> updateParticipation(
+            @PathVariable UUID meetingId,
+            @RequestBody JoinMeetingRequest request
+    ) {
+        JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request);
+        return ResponseEntity.ok(response);
+    }
+
 
 }
