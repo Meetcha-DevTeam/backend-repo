@@ -33,7 +33,7 @@ public class MeetingReflectionEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @Column(name = "project_id", nullable = false)
+    @Column(name = "project_id", nullable = true)
     private UUID projectId;
 
     @Column(name = "contribution")
