@@ -1,6 +1,6 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.meeting.dto.MeetingInfoResponse;
 import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
@@ -20,7 +20,7 @@ public class MeetingListController {
 
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
-    public ResponseEntity<ApiResponse<MeetingDetailResponse>> getMeetingDetail(
+    public ResponseEntity<MeetingDetailResponse> getMeetingDetail(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -28,29 +28,21 @@ public class MeetingListController {
     }
 
 
+
     //미팅 참가자 목록 조회
     @GetMapping("/{meetingId}/participants")
-    public ResponseEntity<ApiResponse<ParticipantsResponse>> getParticipants(
+    public ResponseEntity<MeetingDetailResponse> getParticipants(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        return ResponseEntity.ok(meetingListService.getParticipants(meetingId, authorizationHeader));
-    }
-
-    //미팅 참여 정보 수정
-    @PatchMapping("/{meetingId}")
-    public ResponseEntity<ApiResponse<ParticipationUpdateResponse>> updateParticipation(
-            @PathVariable UUID meetingId,
-            @RequestBody ParticipationUpdateRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
-    ) {
-        return ResponseEntity.ok(meetingListService.updateParticipation(meetingId, request, authorizationHeader));
+        return ResponseEntity.ok(meetingListService.getMeetingDetail(meetingId, authorizationHeader));
     }
 
 
-    //대안시간 후보 조회
+
+    //대안 시간 후보 조회
     @GetMapping("{meetingId}/alternative-times")
-    public ResponseEntity<ApiResponse<AlternativeTimeListResponse>> getAlternativeTimeList(
+    public ResponseEntity<AlternativeTimeListResponse> getAlternativeTimeList(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -60,7 +52,7 @@ public class MeetingListController {
 
     //대안 시간 투표 제출
     @PostMapping("/{meetingId}/alternative-vote")
-    public ResponseEntity<ApiResponse<AlternativeVoteResponse>> submitAlternativeVote(
+    public ResponseEntity<AlternativeVoteResponse> submitAlternativeVote(
             @PathVariable UUID meetingId,
             @RequestBody AlternativeVoteRequest request,
             @RequestHeader("Authorization") String authorizationHeader

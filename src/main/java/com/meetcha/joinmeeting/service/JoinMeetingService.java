@@ -80,8 +80,10 @@ public class JoinMeetingService {
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
+                meeting.getMeetingStatus(),
                 meeting.getDeadline(),
-                meeting.getDurationMinutes()
+                meeting.getDurationMinutes(),
+                meeting.getConfirmedTime()
         );
     }
 

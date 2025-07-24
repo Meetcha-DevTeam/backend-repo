@@ -1,7 +1,22 @@
 package com.meetcha.meetinglist.dto;
 
-public class MeetingDetailResponse {
-    // 미팅 상세 조회 시 사용
-    // 미팅 상세(성공/매칭중/실패) - 미팅 정보 조회 api와 동일
+import com.meetcha.meeting.domain.MeetingStatus;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+@Getter
+@AllArgsConstructor
+public class MeetingDetailResponse {
+    private UUID meetingId;
+    private String title;
+    private String description;
+    private MeetingStatus meetingStatus;
+    private LocalDateTime deadline;
+    private Integer durationMinutes;
+    private LocalDateTime confirmedTime;
+    private List<ParticipantDto> participants;
 }
