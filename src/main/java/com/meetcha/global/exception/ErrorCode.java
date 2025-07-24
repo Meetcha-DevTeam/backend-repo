@@ -25,7 +25,7 @@ public enum ErrorCode {
     GOOGLE_USERINFO_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 유저 정보 요청 실패"),
 
     //404 Not Found
-    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 404, "사용자를 찾을 수 없습니다."),/// 첫번째 인자 HttpStatus.NOT_FOUND로 수정하기
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
     //500 Internal Server Error
