@@ -1,4 +1,4 @@
-package com.meetcha.auth.entity;
+package com.meetcha.auth.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
