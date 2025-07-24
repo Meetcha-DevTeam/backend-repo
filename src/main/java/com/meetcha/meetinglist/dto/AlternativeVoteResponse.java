@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.dto;
+/*package com.meetcha.meetinglist.dto;
 
 import lombok.*;
 import java.util.UUID;
@@ -10,4 +10,4 @@ import java.util.UUID;
 public class AlternativeVoteResponse {
     //대안 시간 투표 제출 응답
     private UUID voteId;
-}
+}*/

@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.service;
+/*package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
@@ -57,4 +57,4 @@ public class MeetingListService {
         //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)
         return null;
     }*/
-}
+//}

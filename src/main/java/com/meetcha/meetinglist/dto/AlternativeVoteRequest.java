@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.dto;
+/*package com.meetcha.meetinglist.dto;
 
 import lombok.*;
 import java.time.ZonedDateTime;
@@ -11,3 +11,4 @@ public class AlternativeVoteRequest {
     //대안 시간 투표 제출 요청
     private ZonedDateTime alternativeTime;
 }
+*/

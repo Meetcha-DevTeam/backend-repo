@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.dto;
+/*package com.meetcha.meetinglist.dto;
 
 import lombok.*;
 
@@ -31,3 +31,4 @@ public class AlternativeTimeListResponse {
                 .build();
     }
 }
+*/

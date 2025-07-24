@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.repository;
+/*package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.ParticipantEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,3 +12,4 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
     List<ParticipantEntity> findByMeeting_MeetingId(UUID meetingId);
 }
+*/

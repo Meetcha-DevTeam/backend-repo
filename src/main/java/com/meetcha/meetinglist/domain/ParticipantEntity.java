@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.domain;
+/*package com.meetcha.meetinglist.domain;
 
 import com.meetcha.meeting.domain.MeetingEntity;
 import jakarta.persistence.*;
@@ -31,4 +31,4 @@ public class ParticipantEntity {
     @JoinColumn(name = "meeting_id", nullable = false)
     private MeetingEntity meeting;
 
-}
+}*/

@@ -1,4 +1,4 @@
-package com.meetcha.meetinglist.dto;
+/*package com.meetcha.meetinglist.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,3 +12,4 @@ public class ParticipantDto {
     private String nickname;
     private String profileImageUrl; // 예: S3 저장 URL 등
 }
+*/
