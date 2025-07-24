@@ -33,7 +33,7 @@ public class JoinMeetingService {
         UUID userId = getCurrentUserId();
 
         // 중복 참가 방지
-        if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
+        if (participantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId)) {
             throw new RuntimeException("중복 참가");
         }
 

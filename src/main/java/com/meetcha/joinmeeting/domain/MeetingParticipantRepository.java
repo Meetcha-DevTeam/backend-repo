@@ -6,5 +6,5 @@ import java.util.UUID;
 
 public interface MeetingParticipantRepository extends JpaRepository<MeetingParticipant, UUID> {
 
-    boolean existsByMeetingIdAndUserId(UUID meetingId, UUID userId);
+    boolean existsByMeeting_MeetingIdAndUserId(UUID meetingId, UUID userId);
 }

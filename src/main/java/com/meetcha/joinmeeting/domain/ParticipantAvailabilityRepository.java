@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface ParticipantAvailabilityRepository extends JpaRepository<ParticipantAvailability, UUID> {
 
-    List<ParticipantAvailability> findAllByMeetingIdAndParticipantId(UUID meetingId, UUID participantId);
+    List<ParticipantAvailability> findAllByMeeting_MeetingIdAndParticipant_ParticipantId(UUID meetingId, UUID participantId);
+
 }
