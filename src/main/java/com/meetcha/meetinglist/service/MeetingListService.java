@@ -29,7 +29,7 @@ public class MeetingListService {
 
 
         // 참여자 조회
-        List<ParticipantEntity> participantEntities = participantRepository.findByMeetingId(meetingId);
+        List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
 
         List<ParticipantDto> participantDtos = participantEntities.stream()
                 .map(p -> new ParticipantDto(
