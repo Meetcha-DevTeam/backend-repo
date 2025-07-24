@@ -103,7 +103,7 @@ public class JoinMeetingService {
 
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
-                .findByMeeting_MeetingIdAndUserId(meetingId, userId)
+                .findByMeetingIdAndUserId(meetingId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         UUID participantId = participant.getParticipantId();
