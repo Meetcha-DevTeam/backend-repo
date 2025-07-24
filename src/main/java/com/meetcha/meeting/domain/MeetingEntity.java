@@ -52,4 +52,9 @@ public class MeetingEntity {
     private String code;
     // todo 미팅 생성 시 디폴트 값 설정 -> Service에서 직접 UUID 생성 후 채워넣음
 
+
+    public boolean isDeadlinePassed() {
+        return deadline != null && deadline.isBefore(LocalDateTime.now());
+    }
+
 }

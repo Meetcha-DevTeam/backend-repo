@@ -1,7 +1,10 @@
 package com.meetcha.global.exception;
 
+import lombok.Getter;
+
 import java.util.Map;
 
+@Getter
 public class InvalidMeetingRequestException extends RuntimeException {
     private final Map<String, String> fieldErrors;
     private final ErrorCode errorCode;
@@ -12,11 +15,4 @@ public class InvalidMeetingRequestException extends RuntimeException {
         this.fieldErrors = fieldErrors;
     }
 
-    public Map<String, String> getFieldErrors() {
-        return fieldErrors;
-    }
-
-    public ErrorCode getErrorCode() {
-        return errorCode;
-    }
 }

@@ -1,5 +1,7 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
@@ -61,10 +63,10 @@ public class JoinMeetingService {
 
     public void validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("미팅을 찾을 수 없습니다"));//todo
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("미팅 참여마감시간이 지났습니다.");//todo
+            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
     }
 
@@ -72,16 +74,58 @@ public class JoinMeetingService {
     //미팅 참여, 미팅정보확인 시 사용
     public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new RuntimeException("미팅을 찾을 수 없습니다."));//todo
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
+                meeting.getMeetingStatus(),
                 meeting.getDeadline(),
-                meeting.getDurationMinutes()
+                meeting.getDurationMinutes(),
+                meeting.getConfirmedTime()
         );
     }
+
+    @Transactional
+    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
+        // 1. 미팅 유효성 체크
+        MeetingEntity meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+
+        if (meeting.isDeadlinePassed()) {
+            throw new RuntimeException();///ErrorCode.MEETING_ALREADY_CLOSED
+        }
+
+        // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
+        UUID userId = getCurrentUserId();
+
+        // 3. 기존 참여자 존재 확인
+        MeetingParticipant participant = participantRepository
+                .findByMeetingIdAndUserId(meetingId, userId)
+                .orElseThrow(() -> new RuntimeException());///ErrorCode.PARTICIPANT_NOT_FOUND
+
+        UUID participantId = participant.getParticipantId();
+
+        // 4. 기존 availability 삭제
+        availabilityRepository.deleteByMeetingIdAndParticipantId(meetingId, participantId);
+
+        // 5. 새 availability 저장
+        List<ParticipantAvailability> availabilities = request.selectedTimes().stream()
+                .map(slot -> ParticipantAvailability.create(
+                        participantId,
+                        meetingId,
+                        slot.startAt(),
+                        slot.endAt()
+                ))
+                .toList();
+
+        availabilityRepository.saveAll(availabilities);
+
+        // 6. 응답 반환
+        return new JoinMeetingResponse(meetingId, participantId);
+    }
+
 
     protected UUID getCurrentUserId() {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
