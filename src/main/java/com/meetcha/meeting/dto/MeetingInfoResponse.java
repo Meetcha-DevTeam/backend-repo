@@ -1,5 +1,7 @@
 package com.meetcha.meeting.dto;
 
+import com.meetcha.meeting.domain.MeetingStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -8,6 +10,8 @@ public record MeetingInfoResponse(
         UUID meetingId,
         String title,
         String description,
+        MeetingStatus meetingStatus,
         LocalDateTime deadline,
-        int durationMinutes
+        Integer durationMinutes,
+        LocalDateTime confirmedTime
 ) {}
