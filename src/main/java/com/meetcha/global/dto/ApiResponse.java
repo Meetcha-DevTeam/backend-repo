@@ -24,4 +24,14 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> fail(int code, String message, T data) {
         return new ApiResponse<>(false, code, message, data);
     }
+
+    // 반환데이터가 없는 경우
+    public static <T> ApiResponse<T> success(int code, String message) {
+        return new ApiResponse<>(true, code, message, null);
+    }
+
+    public static <T> ApiResponse<T> fail(int code, String message) {
+        return new ApiResponse<>(false, code, message, null);
+    }
+
 }
