@@ -12,6 +12,7 @@ import com.meetcha.meetinglist.dto.AlternativeVoteResponse;
 import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
 import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlternativeTimeService {
@@ -103,6 +105,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
     //테스트용
     @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
+        log.info(" 요청 들어옴: meetingId={}, alternativeTime={}", meetingId, request.getAlternativeTime());
         // 더미 유저 ID (SecurityContextHolder 구현 전 임시)
         UUID userId = getCurrentUserId();
 
