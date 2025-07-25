@@ -58,8 +58,18 @@ public class MeetingListService {
                 .toList();
 
 */
+        return new MeetingDetailResponse(
+                UUID.randomUUID(),
+                "더미 제목",
+                "더미 설명",
+                MeetingStatus.ONGOING,
+                LocalDateTime.now().plusDays(1),
+                60,
+                null,
+                List.of(new ParticipantDto(UUID.randomUUID(), "더미 유저", null))
+        );}}
 
-
+/*
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
@@ -71,6 +81,7 @@ public class MeetingListService {
                 participantDtos
         );
     }}
+*/
 
 /*    public ParticipantsResponse getParticipants(UUID meetingId, String authorizationHeader) {
         //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)
