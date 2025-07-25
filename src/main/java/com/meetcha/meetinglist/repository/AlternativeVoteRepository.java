@@ -20,5 +20,5 @@ public interface AlternativeVoteRepository extends JpaRepository<AlternativeVote
     // 유저가 특정 미팅에서 이미 어떤 시간에든 투표했는지 (추가 조건)
     boolean existsByUserIdAndCheckedTrue(UUID userId);
 
-    boolean existsByAlternativeTimeIdAndUserIdNotNull(UUID meetingId, UUID userId);
+    boolean existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(UUID meetingId, UUID userId);
 }

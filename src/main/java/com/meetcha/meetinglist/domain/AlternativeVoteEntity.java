@@ -27,6 +27,10 @@ public class AlternativeVoteEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "alternative_times_id", insertable = false, updatable = false)
+    private AlternativeTimeEntity alternativeTime;
+
     public static AlternativeVoteEntity create(UUID alternativeTimeId, UUID userId) {
         return AlternativeVoteEntity.builder()
                 .alternativeTimeId(alternativeTimeId)

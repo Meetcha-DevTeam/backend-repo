@@ -60,7 +60,7 @@ public class AlternativeTimeService {
                 .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));///CustomException 로 통합
 
         // 2. 이미 투표했는지 확인
-        boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTimeIdAndUserIdNotNull(meetingId, userId);
+        boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);
         if (alreadyVoted) {
             throw new CustomException(ErrorCode.ALREADY_VOTED_ALTERNATIVE);///
         }
