@@ -43,8 +43,6 @@ public class AlternativeTimeService {
                 .toList();
 
         return AlternativeTimeListResponse.of(dtoList);
-
-
     }
 
 

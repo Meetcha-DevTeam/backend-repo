@@ -5,6 +5,7 @@ import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 
+import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meetinglist.domain.ParticipantEntity;
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.ParticipantDto;
@@ -12,6 +13,7 @@ import com.meetcha.meetinglist.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,8 +26,21 @@ public class MeetingListService {
 
     public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
         // 미팅 상세 조회 로직
-        MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+//        MeetingEntity meeting = meetingRepository.findById(meetingId)
+//                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+
+        //테스트용
+        MeetingEntity meeting = MeetingEntity.builder()
+                .meetingId(meetingId)
+                .title("테스트 미팅")
+                .description("설명 없음")
+                .meetingStatus(MeetingStatus.ONGOING)
+                .deadline(LocalDateTime.now().plusDays(1))
+                .durationMinutes(60)
+                .confirmedTime(null)
+                .build();
+
+
 
 
         // 참여자 조회

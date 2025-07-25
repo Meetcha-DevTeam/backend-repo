@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
     }
 
-    // JWT 토큰 형식이 잘못된 경우 예외 처리
+    // JWT 토큰 형식이 잘못된 경우 예외 처리///todo 해당 예외 발생안함
     @ExceptionHandler(io.jsonwebtoken.MalformedJwtException.class)
     public ResponseEntity<ApiResponse<Void>> handleMalformedJwt(io.jsonwebtoken.MalformedJwtException e) {
         return ResponseEntity
