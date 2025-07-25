@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.controller;
+package com.meetcha.meetinglist.controller;
 
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
@@ -75,4 +75,4 @@ public class MeetingListController {
     }
 
 
-}*/
+}

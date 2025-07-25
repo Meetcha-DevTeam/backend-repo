@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.service;
+package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
@@ -83,4 +83,4 @@ public class AlternativeTimeService {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
         return UUID.randomUUID(); // 예시용
     }
-}*/
+}

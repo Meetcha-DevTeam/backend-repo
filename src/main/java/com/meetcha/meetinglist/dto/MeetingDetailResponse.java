@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.dto;
+package com.meetcha.meetinglist.dto;
 
 import com.meetcha.meeting.domain.MeetingStatus;
 import lombok.AllArgsConstructor;
@@ -20,4 +20,3 @@ public class MeetingDetailResponse {
     private LocalDateTime confirmedTime;
     private List<ParticipantDto> participants;
 }
-*/

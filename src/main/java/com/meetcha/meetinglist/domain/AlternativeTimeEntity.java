@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.domain;
+package com.meetcha.meetinglist.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -50,4 +50,3 @@ public class AlternativeTimeEntity {
                 .build();
     }
 }
-*/

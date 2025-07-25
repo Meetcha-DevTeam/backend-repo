@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.dto;
+package com.meetcha.meetinglist.dto;
 
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import lombok.*;
@@ -19,4 +19,4 @@ public class AlternativeTimeDto {
                 .checked(checked)
                 .build();
     }
-}*/
+}

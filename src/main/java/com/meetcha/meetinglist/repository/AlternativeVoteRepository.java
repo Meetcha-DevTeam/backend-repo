@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.repository;
+package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +22,3 @@ public interface AlternativeVoteRepository extends JpaRepository<AlternativeVote
 
     boolean existsByAlternativeTimeIdAndUserIdNotNull(UUID meetingId, UUID userId);
 }
-*/

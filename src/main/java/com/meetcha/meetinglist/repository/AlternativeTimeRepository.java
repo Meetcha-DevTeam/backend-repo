@@ -1,4 +1,4 @@
-/*package com.meetcha.meetinglist.repository;
+package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
@@ -14,4 +14,3 @@ public interface AlternativeTimeRepository extends JpaRepository<AlternativeVote
 
     List<AlternativeTimeEntity> findByMeetingId(UUID meetingId);
 }
-*/
