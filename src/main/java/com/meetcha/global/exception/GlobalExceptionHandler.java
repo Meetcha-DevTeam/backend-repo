@@ -14,6 +14,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // 유효하지 않은 구글 인증 코드 예외 처리
     @ExceptionHandler(InvalidGoogleCodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidGoogleCode(InvalidGoogleCodeException e) {
         return ResponseEntity
@@ -21,6 +22,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.INVALID_GOOGLE_CODE.getCode(), ErrorCode.INVALID_GOOGLE_CODE.getMessage(), null));
     }
 
+    // 리프레시 토큰이 유효하지 않을 경우 예외 처리
     @ExceptionHandler(RefreshTokenInvalidException.class)
     public ResponseEntity<ApiResponse<Void>> handleRefreshTokenInvalid(RefreshTokenInvalidException e) {
         return ResponseEntity
@@ -28,6 +30,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.INVALID_REFRESH_TOKEN.getCode(), ErrorCode.INVALID_REFRESH_TOKEN.getMessage(), null));
     }
 
+    // 약속 생성 요청이 잘못된 경우의 예외 처리
     @ExceptionHandler(InvalidMeetingRequestException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleInvalidMeetingRequest(InvalidMeetingRequestException e) {
         ErrorCode errorCode = e.getErrorCode();
@@ -37,7 +40,7 @@ public class GlobalExceptionHandler {
     }
 
 
-
+    // 인증 정보가 없거나 유효하지 않은 경우의 예외 처리
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException e) {
         return ResponseEntity
@@ -45,6 +48,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.MISSING_AUTH_TOKEN.getCode(), ErrorCode.MISSING_AUTH_TOKEN.getMessage(), null));
     }
 
+    // JWT 토큰이 만료된 경우 예외 처리
     @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
     public ResponseEntity<ApiResponse<Void>> handleJwtExpired(io.jsonwebtoken.ExpiredJwtException e) {
         return ResponseEntity
@@ -52,6 +56,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.EXPIRED_JWT.getCode(), ErrorCode.EXPIRED_JWT.getMessage(), null));
     }
 
+    // 처리되지 않은 일반적인 예외를 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception e) {
         log.error("Unhandled exception occurred", e);
@@ -60,12 +65,21 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), null));
     }
 
+    // 약속 참가 요청이 잘못된 경우의 예외 처리
     @ExceptionHandler(InvalidJoinMeetingRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidJoinMeetingRequest(InvalidJoinMeetingRequestException e) {
         ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+    }
+
+    // JWT 토큰 형식이 잘못된 경우 예외 처리
+    @ExceptionHandler(io.jsonwebtoken.MalformedJwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMalformedJwt(io.jsonwebtoken.MalformedJwtException e) {
+        return ResponseEntity
+                .status(ErrorCode.MALFORMED_JWT.getHttpStatus())
+                .body(ApiResponse.fail(ErrorCode.MALFORMED_JWT.getCode(), ErrorCode.MALFORMED_JWT.getMessage(), null));
     }
 
 }
