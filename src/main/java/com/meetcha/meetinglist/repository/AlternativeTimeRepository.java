@@ -1,7 +1,6 @@
 package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
-import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
