@@ -17,7 +17,7 @@ public class UserScheduleController {
     private final UserScheduleService userScheduleService;
 
     //유저 스케줄 조회
-    @GetMapping("/user/me/busy-times")
+    @GetMapping("/user/schedule")
     public List<BusyTimeResponse> getBusyTimes(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
