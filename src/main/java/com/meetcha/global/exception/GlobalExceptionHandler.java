@@ -59,4 +59,13 @@ public class GlobalExceptionHandler {
                 .status(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus())
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), null));
     }
+
+    @ExceptionHandler(InvalidJoinMeetingRequestException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidJoinMeetingRequest(InvalidJoinMeetingRequestException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+    }
+
 }
