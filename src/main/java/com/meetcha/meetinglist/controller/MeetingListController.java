@@ -62,8 +62,6 @@ public class MeetingListController {
             @RequestBody AlternativeVoteRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        log.info("POST /meeting-lists/{}/alternative-vote 도달", meetingId);
-        log.info("request.getAlternativeTime(): {}", request.getAlternativeTime());
         return ResponseEntity.ok(alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader));
     }
 

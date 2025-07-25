@@ -88,6 +88,8 @@ public class JoinMeetingService {
         );
     }
 
+/*
+    //미팅정보 수정 로직
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
         // 1. 미팅 유효성 체크
@@ -126,6 +128,32 @@ public class JoinMeetingService {
         // 6. 응답 반환
         return new JoinMeetingResponse(meetingId, participantId);
     }
+*/
+
+    @Transactional
+    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
+        // 1. 더미 meetingId 생성 (테스트용)
+        if (meetingId == null) {
+            meetingId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        }
+
+        // 2. 더미 userId 생성
+        UUID userId = getCurrentUserId();
+
+        // 3. 더미 participantId 생성
+        UUID participantId = UUID.randomUUID();
+
+        // 4. 요청으로부터 받은 availability 로그 찍기
+        if (request != null && request.selectedTimes() != null) {
+            request.selectedTimes().forEach(slot -> {
+                System.out.println("받은 시간 슬롯: " + slot.startAt() + " ~ " + slot.endAt());
+            });
+        }
+
+        // 5. 응답 반환
+        return new JoinMeetingResponse(meetingId, participantId);
+    }
+
 
 
     protected UUID getCurrentUserId() {
