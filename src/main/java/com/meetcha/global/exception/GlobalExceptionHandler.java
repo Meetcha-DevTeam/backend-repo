@@ -76,40 +76,10 @@ public class GlobalExceptionHandler {
         return error(e.getErrorCode());
     }
 
-    // 유효하지 않은 미팅 코드
-    @ExceptionHandler(InvalidMeetingCodeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidMeetingCode(InvalidMeetingCodeException e) {
-        return error(ErrorCode.INVALID_MEETING_CODE);
-    }
-
     // 미팅 참여 마감
     @ExceptionHandler(MeetingDeadlinePassedException.class)
     public ResponseEntity<ApiResponse<Void>> handleMeetingDeadlinePassed(MeetingDeadlinePassedException e) {
         return error(ErrorCode.MEETING_DEADLINE_PASSED);
-    }
-
-    // 미팅이 종료된 경우
-    @ExceptionHandler(MeetingClosedException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMeetingClosed(MeetingClosedException e) {
-        return error(ErrorCode.MEETING_CLOSED);
-    }
-
-    // 이미 참여한 미팅
-    @ExceptionHandler(AlreadyJoinedMeetingException.class)
-    public ResponseEntity<ApiResponse<Void>> handleAlreadyJoined(AlreadyJoinedMeetingException e) {
-        return error(ErrorCode.ALREADY_JOINED_MEETING);
-    }
-
-    // 중복된 참여자
-    @ExceptionHandler(DuplicateParticipantException.class)
-    public ResponseEntity<ApiResponse<Void>> handleDuplicateParticipant(DuplicateParticipantException e) {
-        return error(ErrorCode.DUPLICATE_PARTICIPANT);
-    }
-
-    // 시간 충돌
-    @ExceptionHandler(ScheduleConflictException.class)
-    public ResponseEntity<ApiResponse<Void>> handleScheduleConflict(ScheduleConflictException e) {
-        return error(ErrorCode.SCHEDULE_CONFLICT);
     }
 
 

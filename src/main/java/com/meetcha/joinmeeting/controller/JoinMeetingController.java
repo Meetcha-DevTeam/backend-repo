@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.controller;
 
+import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
@@ -19,26 +20,27 @@ public class JoinMeetingController {
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
-    public ResponseEntity<JoinMeetingResponse> joinMeeeting(
+    public ResponseEntity<ApiResponse<JoinMeetingResponse>> joinMeeeting(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request
     ) {
         JoinMeetingResponse response = joinMeetingService.join(meetingId, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 성공", response));
 
     }
 
     //미팅 코드 유효성 검사
     @GetMapping("/code/{code}")
-    public ResponseEntity<Void> validateMeetingCode(@PathVariable String code) {
+    public ResponseEntity<ApiResponse<Void>> validateMeetingCode(@PathVariable String code) {
         joinMeetingService.validateMeetingCode(code);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.success(200, "유효한 미팅 코드입니다."));
     }
 
     // 미팅 정보 조회
     @GetMapping("/id/{meetingId}")
-    public MeetingInfoResponse getMeetingInfo(@PathVariable UUID meetingId) {
-        return joinMeetingService.getMeetingInfo(meetingId);
+    public ResponseEntity<ApiResponse<MeetingInfoResponse>> getMeetingInfo(@PathVariable UUID meetingId) {
+        MeetingInfoResponse response = joinMeetingService.getMeetingInfo(meetingId);
+        return ResponseEntity.ok(ApiResponse.success(200, "미팅 정보 조회 성공", response));
     }
 
 }

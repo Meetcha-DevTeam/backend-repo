@@ -16,8 +16,6 @@ public enum ErrorCode {
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, 400, "미팅 참여마감시간이 지났습니다."),
     ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, 400, "이미 대안시간 투표를 제출하였습니다."),
     ALREADY_SUBMITTED_REFLECTION(HttpStatus.BAD_REQUEST,400, "이미 회고를 작성한 미팅입니다."),
-    INVALID_MEETING_CODE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 미팅 코드입니다."),
-    MEETING_CLOSED(HttpStatus.BAD_REQUEST, 400, "이미 마감된 미팅입니다."),
 
     //401 Unauthorized
     MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "인증 토큰이 필요합니다."),
@@ -32,11 +30,6 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
-
-    // 409 Conflict
-    ALREADY_JOINED_MEETING(HttpStatus.CONFLICT, 409, "이미 이 미팅에 참여한 사용자입니다."),
-    DUPLICATE_PARTICIPANT(HttpStatus.CONFLICT, 409, "이미 등록된 참여자입니다."),
-    SCHEDULE_CONFLICT(HttpStatus.CONFLICT, 409, "해당 시간에 이미 다른 일정이 존재합니다."),
 
     //500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "알 수 없는 서버 오류가 발생했습니다.");
