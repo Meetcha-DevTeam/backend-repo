@@ -1,14 +1,13 @@
 package com.meetcha.auth.service;
 
 import com.meetcha.auth.dto.TokenResponseDto;
-import com.meetcha.auth.entity.RefreshTokenEntity;
-import com.meetcha.auth.entity.UserEntity;
+import com.meetcha.auth.domain.RefreshTokenEntity;
+import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
-import com.meetcha.auth.repository.RefreshTokenRepository;
-import com.meetcha.auth.repository.UserRepository;
+import com.meetcha.auth.domain.RefreshTokenRepository;
+import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.RefreshTokenInvalidException;
-import com.nimbusds.oauth2.sdk.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
