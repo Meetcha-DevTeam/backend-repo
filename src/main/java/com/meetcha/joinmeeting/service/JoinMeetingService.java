@@ -11,6 +11,7 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -132,9 +133,11 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
-        // 임시용으로 항상 존재하는 UUID로 고정
-        meetingId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-
+        //  강제로 존재한다고 가정하고 우회
+        if (!meetingRepository.existsById(meetingId)) {
+            // 강제 생성
+            meetingId = insertDummyMeeting(meetingId);
+        }
         UUID userId = getCurrentUserId();
         UUID participantId = UUID.randomUUID();
 
@@ -143,7 +146,19 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participantId);
     }
 
+    private UUID insertDummyMeeting(UUID fixedId) {
+        MeetingEntity dummy = MeetingEntity.builder()
+                .meetingId(fixedId)
+                .title("테스트 미팅")
+                .description("자동 생성된 더미 미팅입니다.")
+                .deadline(LocalDateTime.now().plusDays(1))
+                .meetingStatus(MeetingStatus.ONGOING)
+                .durationMinutes(30)
+                .build();
 
+        meetingRepository.save(dummy);
+        return dummy.getMeetingId();
+    }
 
 
     protected UUID getCurrentUserId() {
