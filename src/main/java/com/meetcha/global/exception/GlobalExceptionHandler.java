@@ -17,17 +17,14 @@ public class GlobalExceptionHandler {
     // 유효하지 않은 구글 인증 코드 예외 처리
     @ExceptionHandler(InvalidGoogleCodeException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidGoogleCode(InvalidGoogleCodeException e) {
-        return ResponseEntity
-                .status(ErrorCode.INVALID_GOOGLE_CODE.getHttpStatus())
-                .body(ApiResponse.fail(ErrorCode.INVALID_GOOGLE_CODE.getCode(), ErrorCode.INVALID_GOOGLE_CODE.getMessage(), null));
+        return error(ErrorCode.INVALID_GOOGLE_CODE);
     }
+
 
     // 리프레시 토큰이 유효하지 않을 경우 예외 처리
     @ExceptionHandler(RefreshTokenInvalidException.class)
     public ResponseEntity<ApiResponse<Void>> handleRefreshTokenInvalid(RefreshTokenInvalidException e) {
-        return ResponseEntity
-                .status(ErrorCode.INVALID_REFRESH_TOKEN.getHttpStatus())
-                .body(ApiResponse.fail(ErrorCode.INVALID_REFRESH_TOKEN.getCode(), ErrorCode.INVALID_REFRESH_TOKEN.getMessage(), null));
+        return error(ErrorCode.INVALID_REFRESH_TOKEN);
     }
 
     // 약속 생성 요청이 잘못된 경우의 예외 처리
@@ -43,17 +40,13 @@ public class GlobalExceptionHandler {
     // 인증 정보가 없거나 유효하지 않은 경우의 예외 처리
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ApiResponse<Void>> handleUnauthorized(UnauthorizedException e) {
-        return ResponseEntity
-                .status(ErrorCode.MISSING_AUTH_TOKEN.getHttpStatus())
-                .body(ApiResponse.fail(ErrorCode.MISSING_AUTH_TOKEN.getCode(), ErrorCode.MISSING_AUTH_TOKEN.getMessage(), null));
+        return error(ErrorCode.MISSING_AUTH_TOKEN);
     }
 
     // JWT 토큰이 만료된 경우 예외 처리
     @ExceptionHandler(io.jsonwebtoken.ExpiredJwtException.class)
     public ResponseEntity<ApiResponse<Void>> handleJwtExpired(io.jsonwebtoken.ExpiredJwtException e) {
-        return ResponseEntity
-                .status(ErrorCode.EXPIRED_JWT.getHttpStatus())
-                .body(ApiResponse.fail(ErrorCode.EXPIRED_JWT.getCode(), ErrorCode.EXPIRED_JWT.getMessage(), null));
+        return error(ErrorCode.EXPIRED_JWT);
     }
 
     // 처리되지 않은 일반적인 예외를 처리
@@ -65,36 +58,40 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.INTERNAL_SERVER_ERROR.getCode(), ErrorCode.INTERNAL_SERVER_ERROR.getMessage(), null));
     }
 
-    // 약속 참가 요청이 잘못된 경우의 예외 처리
+    //  요청 바디 에러: 미팅 참가
     @ExceptionHandler(InvalidJoinMeetingRequestException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidJoinMeetingRequest(InvalidJoinMeetingRequestException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+        return error(e.getErrorCode());
     }
 
     // JWT 토큰 형식이 잘못된 경우 예외 처리///todo 해당 예외 발생안함
     @ExceptionHandler(io.jsonwebtoken.MalformedJwtException.class)
     public ResponseEntity<ApiResponse<Void>> handleMalformedJwt(io.jsonwebtoken.MalformedJwtException e) {
-        return ResponseEntity
-                .status(ErrorCode.MALFORMED_JWT.getHttpStatus())
-                .body(ApiResponse.fail(ErrorCode.MALFORMED_JWT.getCode(), ErrorCode.MALFORMED_JWT.getMessage(), null));
+        return error(ErrorCode.MALFORMED_JWT);
     }
 
     // 대안시간이 유효하지 않은 경우
     @ExceptionHandler(InvalidAlternativeTimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidAlternativeTime(InvalidAlternativeTimeException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+        return error(e.getErrorCode());
     }
+
+    // 미팅 참여 마감
+    @ExceptionHandler(MeetingDeadlinePassedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMeetingDeadlinePassed(MeetingDeadlinePassedException e) {
+        return error(ErrorCode.MEETING_DEADLINE_PASSED);
+    }
+
 
     // 커스텀 예외
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
         ErrorCode errorCode = e.getErrorCode();
+        return error(errorCode);
+    }
+
+    // 공통 응답 생성 메서드
+    private ResponseEntity<ApiResponse<Void>> error(ErrorCode errorCode) {
         return ResponseEntity
                 .status(errorCode.getHttpStatus())
                 .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));

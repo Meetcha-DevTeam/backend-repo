@@ -82,6 +82,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
                 .findByMeetingIdAndStartTime(meetingId, request.getAlternativeTime().toLocalDateTime())
                 .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));///CustomException 로 통합
 
+
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);
         if (alreadyVoted) {

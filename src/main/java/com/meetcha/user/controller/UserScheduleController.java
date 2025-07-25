@@ -1,9 +1,11 @@
 package com.meetcha.user.controller;
 
+import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.user.dto.BusyTimeResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,12 +20,13 @@ public class UserScheduleController {
 
     //유저 스케줄 조회
     @GetMapping("/user/schedule")
-    public List<BusyTimeResponse> getBusyTimes(
+    public ResponseEntity<ApiResponse<List<BusyTimeResponse>>> getBusyTimes(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         UUID userId = getCurrentUserId();
-        return userScheduleService.getBusyTimes(userId, from, to);
+        List<BusyTimeResponse> busyTimes = userScheduleService.getBusyTimes(userId, from, to);
+        return ResponseEntity.ok(ApiResponse.success(200, "유저 스케줄 조회 성공", busyTimes));
     }
 
     private UUID getCurrentUserId() {
