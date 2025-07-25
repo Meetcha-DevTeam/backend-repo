@@ -82,4 +82,22 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ErrorCode.MALFORMED_JWT.getCode(), ErrorCode.MALFORMED_JWT.getMessage(), null));
     }
 
+    // 대안시간이 유효하지 않은 경우
+    @ExceptionHandler(InvalidAlternativeTimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidAlternativeTime(InvalidAlternativeTimeException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+    }
+
+    // 커스텀 예외
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponse.fail(errorCode.getCode(), errorCode.getMessage(), null));
+    }
+
 }
