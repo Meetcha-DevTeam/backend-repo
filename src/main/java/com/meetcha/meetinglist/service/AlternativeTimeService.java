@@ -25,7 +25,6 @@ public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
 
-/*
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
         //대안시간 후보 조회 로직
         // 1. 사용자 식별
@@ -46,8 +45,9 @@ public class AlternativeTimeService {
 
         return AlternativeTimeListResponse.of(dtoList);
     }
-*/
 
+    //테스트용 더미 데이터
+/*
 public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
     // 테스트용 userId (실제 로그인 사용자 ID 필요 시 추후 SecurityContext에서 추출)
     UUID userId = getCurrentUserId();
@@ -66,9 +66,10 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
 
     return AlternativeTimeListResponse.of(dummyList);
 }
+*/
 
 
-    @Transactional
+/*    @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
         //대안 시간 투표 제출 로직
         // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
@@ -97,7 +98,20 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
         return AlternativeVoteResponse.builder()
                 .voteId(vote.getVoteId())
                 .build();
+    }*/
+
+    //테스트용
+    @Transactional
+    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
+        // 더미 유저 ID (SecurityContextHolder 구현 전 임시)
+        UUID userId = getCurrentUserId();
+
+        // 더미 voteId 생성 후 바로 응답
+        return AlternativeVoteResponse.builder()
+                .voteId(UUID.randomUUID())
+                .build();
     }
+
 
     protected UUID getCurrentUserId() {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
