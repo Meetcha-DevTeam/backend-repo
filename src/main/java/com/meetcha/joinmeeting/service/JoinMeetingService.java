@@ -89,7 +89,7 @@ public class JoinMeetingService {
         );
     }
 
-/*
+
     //미팅정보 수정 로직
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
@@ -129,7 +129,9 @@ public class JoinMeetingService {
         // 6. 응답 반환
         return new JoinMeetingResponse(meetingId, participantId);
     }
-*/
+
+/*
+    //테스트용
 @Transactional
 public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
     // 1. meetingId null 이면 고정값 설정 (테스트용)
@@ -142,9 +144,7 @@ public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingReques
     UUID participantId = UUID.randomUUID();
 
     // 3. 요청 값 확인 로그
-    System.out.println("=== [더미 테스트] 미팅 참여 수정 요청 수신 ===");
-    System.out.println("meetingId = " + meetingId);
-    System.out.println("userId = " + userId);
+
     if (request != null && request.selectedTimes() != null) {
         request.selectedTimes().forEach(slot -> {
             System.out.println("선택된 시간 슬롯: " + slot.startAt() + " ~ " + slot.endAt());
@@ -156,6 +156,7 @@ public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingReques
     // 4. DB 저장 없이 바로 응답 반환
     return new JoinMeetingResponse(meetingId, participantId);
 }
+*/
 
 
     protected UUID getCurrentUserId() {

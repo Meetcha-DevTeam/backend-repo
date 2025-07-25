@@ -71,7 +71,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
 */
 
 
-/*    @Transactional
+    @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
         //대안 시간 투표 제출 로직
         // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
@@ -100,9 +100,9 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
         return AlternativeVoteResponse.builder()
                 .voteId(vote.getVoteId())
                 .build();
-    }*/
+    }
 
-    //테스트용
+/*    //테스트용
     @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
         log.info(" 요청 들어옴: meetingId={}, alternativeTime={}", meetingId, request.getAlternativeTime());
@@ -113,7 +113,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
         return AlternativeVoteResponse.builder()
                 .voteId(UUID.randomUUID())
                 .build();
-    }
+    }*/
 
 
     protected UUID getCurrentUserId() {
