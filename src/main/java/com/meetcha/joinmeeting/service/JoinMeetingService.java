@@ -130,35 +130,32 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participantId);
     }
 */
-
-    @Transactional
-    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
-        //  강제로 존재한다고 가정하고 우회
-        if (!meetingRepository.existsById(meetingId)) {
-            // 강제 생성
-            meetingId = insertDummyMeeting(meetingId);
-        }
-        UUID userId = getCurrentUserId();
-        UUID participantId = UUID.randomUUID();
-
-        System.out.println("더미 요청됨: " + request);
-
-        return new JoinMeetingResponse(meetingId, participantId);
+@Transactional
+public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
+    // 1. meetingId null 이면 고정값 설정 (테스트용)
+    if (meetingId == null) {
+        meetingId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     }
 
-    private UUID insertDummyMeeting(UUID fixedId) {
-        MeetingEntity dummy = MeetingEntity.builder()
-                .meetingId(fixedId)
-                .title("테스트 미팅")
-                .description("자동 생성된 더미 미팅입니다.")
-                .deadline(LocalDateTime.now().plusDays(1))
-                .meetingStatus(MeetingStatus.ONGOING)
-                .durationMinutes(30)
-                .build();
+    // 2. 더미 사용자 ID
+    UUID userId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+    UUID participantId = UUID.randomUUID();
 
-        meetingRepository.save(dummy);
-        return dummy.getMeetingId();
+    // 3. 요청 값 확인 로그
+    System.out.println("=== [더미 테스트] 미팅 참여 수정 요청 수신 ===");
+    System.out.println("meetingId = " + meetingId);
+    System.out.println("userId = " + userId);
+    if (request != null && request.selectedTimes() != null) {
+        request.selectedTimes().forEach(slot -> {
+            System.out.println("선택된 시간 슬롯: " + slot.startAt() + " ~ " + slot.endAt());
+        });
+    } else {
+        System.out.println("선택된 시간이 없습니다.");
     }
+
+    // 4. DB 저장 없이 바로 응답 반환
+    return new JoinMeetingResponse(meetingId, participantId);
+}
 
 
     protected UUID getCurrentUserId() {
