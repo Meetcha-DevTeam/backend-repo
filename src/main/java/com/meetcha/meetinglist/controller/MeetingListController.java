@@ -44,7 +44,7 @@ public class MeetingListController {
 
 
     //대안 시간 후보 조회
-    @GetMapping("{meetingId}/alternative-times")
+    @GetMapping("/{meetingId}/alternative-times")
     public ResponseEntity<AlternativeTimeListResponse> getAlternativeTimeList(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
