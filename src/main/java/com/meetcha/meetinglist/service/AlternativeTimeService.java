@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
 
+/*
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
         //대안시간 후보 조회 로직
         // 1. 사용자 식별
@@ -44,6 +46,26 @@ public class AlternativeTimeService {
 
         return AlternativeTimeListResponse.of(dtoList);
     }
+*/
+
+public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
+    // 테스트용 userId (실제 로그인 사용자 ID 필요 시 추후 SecurityContext에서 추출)
+    UUID userId = getCurrentUserId();
+
+    // 테스트용 대안 시간 후보 목록 (UTC 기준)
+    List<AlternativeTimeDto> dummyList = List.of(
+            AlternativeTimeDto.builder()
+                    .startTime(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0))
+                    .checked(false)
+                    .build(),
+            AlternativeTimeDto.builder()
+                    .startTime(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0))
+                    .checked(true) // 이 시간은 userSelectedTime 으로 자동 세팅됨
+                    .build()
+    );
+
+    return AlternativeTimeListResponse.of(dummyList);
+}
 
 
     @Transactional

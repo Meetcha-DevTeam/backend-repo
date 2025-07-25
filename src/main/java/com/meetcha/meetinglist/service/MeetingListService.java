@@ -26,10 +26,10 @@ public class MeetingListService {
 
     public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
         // 미팅 상세 조회 로직
-//        MeetingEntity meeting = meetingRepository.findById(meetingId)
-//                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+        MeetingEntity meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-        //테스트용
+/*        //테스트용
         MeetingEntity meeting = MeetingEntity.builder()
                 .meetingId(meetingId)
                 .title("테스트 미팅")
@@ -42,9 +42,8 @@ public class MeetingListService {
 
         List<ParticipantDto> participantDtos = List.of(
                 new ParticipantDto(UUID.randomUUID(), "테스트유저", "https://example.com/profile.jpg")
-        );
+        );*/
 
-/*
 
         // 참여자 조회
         List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
@@ -57,8 +56,7 @@ public class MeetingListService {
                 ))
                 .toList();
 
-*/
-        return new MeetingDetailResponse(
+/*        return new MeetingDetailResponse(
                 UUID.randomUUID(),
                 "더미 제목",
                 "더미 설명",
@@ -67,9 +65,8 @@ public class MeetingListService {
                 60,
                 null,
                 List.of(new ParticipantDto(UUID.randomUUID(), "더미 유저", null))
-        );}}
+        );}}*/
 
-/*
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
@@ -81,7 +78,6 @@ public class MeetingListService {
                 participantDtos
         );
     }}
-*/
 
 /*    public ParticipantsResponse getParticipants(UUID meetingId, String authorizationHeader) {
         //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)
