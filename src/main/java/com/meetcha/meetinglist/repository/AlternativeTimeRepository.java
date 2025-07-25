@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AlternativeTimeRepository extends JpaRepository<AlternativeVoteEntity, UUID> {
+public interface AlternativeTimeRepository extends JpaRepository<AlternativeTimeEntity, UUID> {
     Optional<AlternativeTimeEntity> findByMeetingIdAndStartTime(UUID meetingId, LocalDateTime localDateTime);
 
     List<AlternativeTimeEntity> findByMeetingId(UUID meetingId);
