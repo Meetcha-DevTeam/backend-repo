@@ -7,11 +7,13 @@ import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/meeting-lists")
 @RequiredArgsConstructor
@@ -60,6 +62,8 @@ public class MeetingListController {
             @RequestBody AlternativeVoteRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
+        log.info("POST /meeting-lists/{}/alternative-vote 도달", meetingId);
+        log.info("request.getAlternativeTime(): {}", request.getAlternativeTime());
         return ResponseEntity.ok(alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader));
     }
 
