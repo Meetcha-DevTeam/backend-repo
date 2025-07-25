@@ -65,7 +65,7 @@ public class MeetingListController {
 
 
     // 미팅 참여 정보 수정
-    @PatchMapping("/{meetingId")
+    @PatchMapping("/{meetingId}")
     public ResponseEntity<JoinMeetingResponse> updateParticipation(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request
