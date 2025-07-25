@@ -40,8 +40,11 @@ public class MeetingListService {
                 .confirmedTime(null)
                 .build();
 
+        List<ParticipantDto> participantDtos = List.of(
+                new ParticipantDto(UUID.randomUUID(), "테스트유저", "https://example.com/profile.jpg")
+        );
 
-
+/*
 
         // 참여자 조회
         List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
@@ -54,6 +57,7 @@ public class MeetingListService {
                 ))
                 .toList();
 
+*/
 
 
         return new MeetingDetailResponse(
