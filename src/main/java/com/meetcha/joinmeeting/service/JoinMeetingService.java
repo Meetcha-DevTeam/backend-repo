@@ -132,27 +132,14 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
-        // 실제 DB 체크를 아예 생략하거나 try-catch로 감싸기
-        try {
-            MeetingEntity meeting = meetingRepository.findById(meetingId)
-                    .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
-        } catch (InvalidJoinMeetingRequestException e) {
-            //  무시하고 더미 미팅으로 대체
-            System.out.println(" 미팅 없음 - 더미 처리합니다: " + meetingId);
-        }
+        // 임시용으로 항상 존재하는 UUID로 고정
+        meetingId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
-        // 더미 userId 및 participantId 생성
         UUID userId = getCurrentUserId();
         UUID participantId = UUID.randomUUID();
 
-        // 로그 확인용
-        if (request != null && request.selectedTimes() != null) {
-            request.selectedTimes().forEach(slot -> {
-                System.out.println("받은 시간 슬롯: " + slot.startAt() + " ~ " + slot.endAt());
-            });
-        }
+        System.out.println("더미 요청됨: " + request);
 
-        // 응답 반환
         return new JoinMeetingResponse(meetingId, participantId);
     }
 
