@@ -51,7 +51,11 @@ public class GoogleCalendarClient {
         Map<String, String> start = (Map<String, String>) item.get("start");
         Map<String, String> end = (Map<String, String>) item.get("end");
 
+        String title = (String) item.getOrDefault("summary", "제목 없음"); // 제목이 없는 경우 대체 텍스트
+
+
         return new scheduleResponse(
+                title,
                 LocalDateTime.parse(start.get("dateTime")),
                 LocalDateTime.parse(end.get("dateTime"))
         );

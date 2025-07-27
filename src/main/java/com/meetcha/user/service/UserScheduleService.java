@@ -6,6 +6,7 @@ import com.meetcha.external.google.GoogleCalendarClient;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.domain.UnavailableTime;
+import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.domain.UnavailableTimeRepository;
 import com.meetcha.user.util.UnavailableTimeConverter;

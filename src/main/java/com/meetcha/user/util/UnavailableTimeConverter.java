@@ -31,7 +31,7 @@ public class UnavailableTimeConverter {
 
                     // 범위 체크
                     if (start.isBefore(to) && end.isAfter(from)) {
-                        busyTimes.add(new scheduleResponse(start, end));
+                        busyTimes.add(new scheduleResponse(null,start, end));
                     }
                 }
             }
