@@ -47,7 +47,6 @@ public class UserScheduleController {
         return UUID.fromString("11111111-1111-1111-1111-111111111111");
     }
 
-
     // 유저 개인 일정 수정
     @PutMapping("/schedule/update")
     public ApiResponse<Void> updateSchedule(
@@ -57,7 +56,6 @@ public class UserScheduleController {
         userScheduleService.updateSchedule(userId, request);
         return ApiResponse.success(200, "일정 수정 성공");
     }
-
 
     // 단일 상세 일정 조회
     @GetMapping("/schedule/detail")
