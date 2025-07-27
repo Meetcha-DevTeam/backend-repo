@@ -1,6 +1,7 @@
 package com.meetcha.user.controller;
 
 import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +15,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/user")
 public class UserScheduleController {
 
     private final UserScheduleService userScheduleService;
 
     //유저 스케줄 조회
-    @GetMapping("/user/schedule")
+    @GetMapping("/schedule")
     public ApiResponse<List<scheduleResponse>> getSchedule(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
