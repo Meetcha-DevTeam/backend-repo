@@ -3,6 +3,7 @@ package com.meetcha.user.service;
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.external.google.GoogleCalendarClient;
+import com.meetcha.external.google.RecurrenceUtils;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.dto.CreateScheduleRequest;
@@ -52,12 +53,15 @@ public class UserScheduleService {
             throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
         }
 
+        String rrule = RecurrenceUtils.buildGoogleRRule(request.recurrence(), request.startAt());
+
         // Google Calendar에 이벤트 생성 요청
         return googleCalendarClient.createEvent(
                 accessToken,
                 request.title(),
                 request.startAt(),
-                request.endAt()
+                request.endAt(),
+                rrule
         );
     }
 
