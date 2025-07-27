@@ -7,6 +7,7 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.domain.UnavailableTime;
 import com.meetcha.user.dto.CreateScheduleRequest;
+import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.domain.UnavailableTimeRepository;
 import com.meetcha.user.util.UnavailableTimeConverter;
@@ -24,7 +25,7 @@ public class UserScheduleService {
     private final UserRepository userRepository; // 유저의 access token 조회용
     private final GoogleCalendarClient googleCalendarClient; // 구글 캘린더 호출용
 
-    //유저 바쁜 스케줄 조회
+    //유저 일정 조회
     public List<scheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
         // 유저 조회
         UserEntity user = userRepository.findById(userId)
@@ -41,6 +42,7 @@ public class UserScheduleService {
     }
 
 
+    //유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
         // 유저 조회
         UserEntity user = userRepository.findById(userId)
@@ -60,6 +62,28 @@ public class UserScheduleService {
                 request.endAt()
         );
     }
+
+    //유저 일정 수정
+    public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
+        // 유저 조회 및 토큰 확인
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String accessToken = user.getGoogleToken();
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
+
+        // Google Calendar에 일정 수정 요청
+        googleCalendarClient.updateEvent(
+                accessToken,
+                request.eventId(),
+                request.title(),
+                request.startAt(),
+                request.endAt()
+        );
+    }
+
 
 }
 

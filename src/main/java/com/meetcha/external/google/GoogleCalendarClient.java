@@ -61,6 +61,7 @@ public class GoogleCalendarClient {
         );
     }
 
+    //
     public String createEvent(String accessToken, String title, LocalDateTime startAt, LocalDateTime endAt) {
 
         HttpHeaders headers = new HttpHeaders();
@@ -92,6 +93,36 @@ public class GoogleCalendarClient {
     }
 
 
+    public void updateEvent(String accessToken, String eventId, String title, LocalDateTime startAt, LocalDateTime endAt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("summary", title);
+
+        Map<String, String> start = Map.of(
+                "dateTime", startAt.toString(),
+                "timeZone", "Asia/Seoul"
+        );
+        Map<String, String> end = Map.of(
+                "dateTime", endAt.toString(),
+                "timeZone", "Asia/Seoul"
+        );
+
+        body.put("start", start);
+        body.put("end", end);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        // PATCH 요청으로 기존 이벤트 수정
+        restTemplate.exchange(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + eventId,
+                HttpMethod.PATCH,
+                request,
+                Void.class
+        );
+    }
 
 
 
