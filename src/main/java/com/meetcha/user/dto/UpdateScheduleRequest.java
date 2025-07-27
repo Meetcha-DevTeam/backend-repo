@@ -6,5 +6,6 @@ public record UpdateScheduleRequest(
         String eventId,
         String title,
         LocalDateTime startAt,
-        LocalDateTime endAt
+        LocalDateTime endAt,
+        String recurrence
 ) {}

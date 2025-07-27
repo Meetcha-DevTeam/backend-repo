@@ -55,17 +55,21 @@ public class GoogleCalendarClient {
         String title = (String) item.getOrDefault("summary", "제목 없음"); // 제목이 없는 경우 대체 텍스트
         String eventId = (String) item.get("id"); // 제목이 없는 경우 대체 텍스트
 
+        // recurrence 파싱
+        List<String> recurrenceList = (List<String>) item.get("recurrence");
+        String recurrence = RecurrenceUtils.parseRecurrenceToLabel(recurrenceList);
 
         return new scheduleResponse(
                 eventId,
                 title,
                 LocalDateTime.parse(start.get("dateTime")),
-                LocalDateTime.parse(end.get("dateTime"))
+                LocalDateTime.parse(end.get("dateTime")),
+                recurrence
         );
     }
 
     //일정 생성
-    public String createEvent(String accessToken, String title, LocalDateTime startAt, LocalDateTime endAt) {
+    public String createEvent(String accessToken, String title, LocalDateTime startAt, LocalDateTime endAt, String recurrenceRRule) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -80,6 +84,10 @@ public class GoogleCalendarClient {
 
         body.put("start", start);
         body.put("end", end);
+
+        if (recurrenceRRule != null) {
+            body.put("recurrence", List.of(recurrenceRRule));
+        }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
@@ -159,11 +167,16 @@ public class GoogleCalendarClient {
         Map<String, String> start = (Map<String, String>) body.get("start");
         Map<String, String> end = (Map<String, String>) body.get("end");
 
+        // recurrence 파싱
+        List<String> recurrenceList = (List<String>) body.get("recurrence");
+        String recurrence = RecurrenceUtils.parseRecurrenceToLabel(recurrenceList);
+
         return new ScheduleDetailResponse(
                 (String) body.get("id"),
                 (String) body.get("summary"),
                 LocalDateTime.parse(start.get("dateTime")),
-                LocalDateTime.parse(end.get("dateTime"))
+                LocalDateTime.parse(end.get("dateTime")),
+                recurrence
         );
     }
 

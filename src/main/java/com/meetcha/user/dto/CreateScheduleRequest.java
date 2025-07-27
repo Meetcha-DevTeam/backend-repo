@@ -5,5 +5,6 @@ import java.time.LocalDateTime;
 public record CreateScheduleRequest(
         String title,
         LocalDateTime startAt,
-        LocalDateTime endAt
+        LocalDateTime endAt,
+        String recurrence
 ) {}
