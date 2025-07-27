@@ -2,8 +2,10 @@ package com.meetcha.user.dto;
 
 import java.time.LocalDateTime;
 
-// 기존의 일정 조회 시 사용
-public record BusyTimeResponse(
+// 단일 상세 일정 조회 응답
+public record ScheduleDetailResponse(
+        String eventId,
+        String title,
         LocalDateTime startAt,
         LocalDateTime endAt
 ) {}
