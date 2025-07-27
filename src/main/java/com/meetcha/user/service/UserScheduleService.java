@@ -7,6 +7,7 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.domain.UnavailableTime;
 import com.meetcha.user.dto.CreateScheduleRequest;
+import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.domain.UnavailableTimeRepository;
@@ -83,6 +84,24 @@ public class UserScheduleService {
                 request.endAt()
         );
     }
+
+
+
+
+    // 단일 상세 일정 조회
+    public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String accessToken = user.getGoogleToken();
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
+
+        return googleCalendarClient.getEventById(accessToken, eventId);
+    }
+
+
 
 
 }

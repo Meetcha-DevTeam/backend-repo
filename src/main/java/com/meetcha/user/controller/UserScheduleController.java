@@ -2,6 +2,7 @@ package com.meetcha.user.controller;
 
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.user.dto.CreateScheduleRequest;
+import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
@@ -56,6 +57,15 @@ public class UserScheduleController {
         UUID userId = getCurrentUserId(); // todo JWT 기반 추출 예정
         userScheduleService.updateSchedule(userId, request);
         return ApiResponse.success(200, "일정 수정 성공");
+    }
+
+
+    // 단일 상세 일정 조회
+    @GetMapping("/schedule/detail")
+    public ApiResponse<ScheduleDetailResponse> getScheduleDetail(@RequestParam String eventId) {
+        UUID userId = getCurrentUserId(); // JWT 기반 추출 예정
+        ScheduleDetailResponse detail = userScheduleService.getScheduleDetail(userId, eventId);
+        return ApiResponse.success(200, "일정 상세 조회 성공", detail);
     }
 
 

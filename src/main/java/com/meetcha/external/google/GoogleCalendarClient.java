@@ -1,5 +1,6 @@
 package com.meetcha.external.google;
 
+import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.scheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -124,6 +125,32 @@ public class GoogleCalendarClient {
         );
     }
 
+
+
+    // 단일 상세 일정 조회
+    public ScheduleDetailResponse getEventById(String accessToken, String eventId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + eventId,
+                HttpMethod.GET,
+                request,
+                Map.class
+        );
+
+        Map<String, Object> body = response.getBody();
+        Map<String, String> start = (Map<String, String>) body.get("start");
+        Map<String, String> end = (Map<String, String>) body.get("end");
+
+        return new ScheduleDetailResponse(
+                (String) body.get("id"),
+                (String) body.get("summary"),
+                LocalDateTime.parse(start.get("dateTime")),
+                LocalDateTime.parse(end.get("dateTime"))
+        );
+    }
 
 
 }
