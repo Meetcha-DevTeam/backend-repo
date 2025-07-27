@@ -85,6 +85,18 @@ public class UserScheduleService {
         );
     }
 
+    //유저 일정 삭제
+    public void deleteSchedule(UUID userId, String eventId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String accessToken = user.getGoogleToken();
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
+
+        googleCalendarClient.deleteEvent(accessToken, eventId);
+    }
 
 
 

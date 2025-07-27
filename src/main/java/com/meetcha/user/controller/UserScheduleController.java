@@ -63,10 +63,19 @@ public class UserScheduleController {
     // 단일 상세 일정 조회
     @GetMapping("/schedule/detail")
     public ApiResponse<ScheduleDetailResponse> getScheduleDetail(@RequestParam String eventId) {
-        UUID userId = getCurrentUserId(); // JWT 기반 추출 예정
+        UUID userId = getCurrentUserId(); // todo JWT 기반 추출 예정
         ScheduleDetailResponse detail = userScheduleService.getScheduleDetail(userId, eventId);
         return ApiResponse.success(200, "일정 상세 조회 성공", detail);
     }
+
+    // 유저 개인 일정 삭제
+    @DeleteMapping("/schedule/delete")
+    public ApiResponse<Void> deleteSchedule(@RequestParam String eventId) {
+        UUID userId = getCurrentUserId(); // todo JWT 기반 추출 예정
+        userScheduleService.deleteSchedule(userId, eventId);
+        return ApiResponse.success(200, "일정 삭제 성공");
+    }
+
 
 
 }

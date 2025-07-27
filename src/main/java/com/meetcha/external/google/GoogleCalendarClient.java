@@ -62,7 +62,7 @@ public class GoogleCalendarClient {
         );
     }
 
-    //
+    //일정 생성
     public String createEvent(String accessToken, String title, LocalDateTime startAt, LocalDateTime endAt) {
 
         HttpHeaders headers = new HttpHeaders();
@@ -93,7 +93,7 @@ public class GoogleCalendarClient {
         return (String) response.getBody().get("id");
     }
 
-
+    //일정 수정
     public void updateEvent(String accessToken, String eventId, String title, LocalDateTime startAt, LocalDateTime endAt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -125,6 +125,19 @@ public class GoogleCalendarClient {
         );
     }
 
+    //일정 삭제
+    public void deleteEvent(String accessToken, String eventId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+
+        restTemplate.exchange(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + eventId,
+                HttpMethod.DELETE,
+                request,
+                Void.class
+        );
+    }
 
 
     // 단일 상세 일정 조회
