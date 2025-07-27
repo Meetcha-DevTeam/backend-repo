@@ -5,13 +5,10 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.external.google.GoogleCalendarClient;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.user.domain.UnavailableTime;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.scheduleResponse;
-import com.meetcha.user.domain.UnavailableTimeRepository;
-import com.meetcha.user.util.UnavailableTimeConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
