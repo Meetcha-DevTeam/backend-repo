@@ -1,7 +1,7 @@
 package com.meetcha.user.util;
 
 import com.meetcha.user.domain.UnavailableTime;
-import com.meetcha.user.dto.BusyTimeResponse;
+import com.meetcha.user.dto.scheduleResponse;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -11,12 +11,12 @@ import java.util.List;
 
 public class UnavailableTimeConverter {
     //LocalTime-> LocalDateTime 변환
-    public static List<BusyTimeResponse> convertToBusyTimes(
+    public static List<scheduleResponse> convertToBusyTimes(
             List<UnavailableTime> unavailableTimes,
             LocalDateTime from,
             LocalDateTime to
     ) {
-        List<BusyTimeResponse> busyTimes = new ArrayList<>();
+        List<scheduleResponse> busyTimes = new ArrayList<>();
 
         LocalDate cursor = from.toLocalDate();
         LocalDate endDate = to.toLocalDate();
@@ -31,7 +31,7 @@ public class UnavailableTimeConverter {
 
                     // 범위 체크
                     if (start.isBefore(to) && end.isAfter(from)) {
-                        busyTimes.add(new BusyTimeResponse(start, end));
+                        busyTimes.add(new scheduleResponse(start, end));
                     }
                 }
             }
