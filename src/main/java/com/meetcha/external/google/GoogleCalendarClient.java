@@ -56,4 +56,39 @@ public class GoogleCalendarClient {
                 LocalDateTime.parse(end.get("dateTime"))
         );
     }
+
+    public String createEvent(String accessToken, String title, LocalDateTime startAt, LocalDateTime endAt) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // 요청 바디 구성: Google Calendar API에 맞춘 이벤트 데이터
+        Map<String, Object> body = new HashMap<>();
+        body.put("summary", title);
+
+        Map<String, String> start = Map.of("dateTime", startAt.toString(), "timeZone", "Asia/Seoul");
+        Map<String, String> end = Map.of("dateTime", endAt.toString(), "timeZone", "Asia/Seoul");
+
+        body.put("start", start);
+        body.put("end", end);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+        // Google Calendar API에 POST 요청 → primary 캘린더에 이벤트 생성
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                HttpMethod.POST,
+                request,
+                Map.class
+        );
+
+        // 응답에서 Google Calendar의 eventId 추출하여 반환
+        return (String) response.getBody().get("id");
+    }
+
+
+
+
+
 }

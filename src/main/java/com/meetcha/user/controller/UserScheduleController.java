@@ -29,6 +29,16 @@ public class UserScheduleController {
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
 
+    // 유저 개인 일정 Google Calendar에 등록
+    @PostMapping("/schedule/create")
+    public ApiResponse<String> createSchedule(
+            @RequestBody CreateScheduleRequest request
+    ) {
+        UUID userId = getCurrentUserId();//todo
+        String eventId = userScheduleService.createSchedule(userId, request);
+        return ApiResponse.success(201, "일정 생성 성공", eventId);
+    }
+
     private UUID getCurrentUserId() {
         // todo 이후 연결하기(실제 로그인 상태에서 JWT를 파싱해 userId 추출)
         return UUID.fromString("11111111-1111-1111-1111-111111111111");

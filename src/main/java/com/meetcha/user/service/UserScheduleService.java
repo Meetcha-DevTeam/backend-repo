@@ -38,5 +38,27 @@ public class UserScheduleService {
         // Google Calendar API로 일정 조회
         return googleCalendarClient.getEvents(accessToken, from, to);
     }
+
+
+    public String createSchedule(UUID userId, CreateScheduleRequest request) {
+        // 유저 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 토큰 확인
+        String accessToken = user.getGoogleToken();
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
+
+        // Google Calendar에 이벤트 생성 요청
+        return googleCalendarClient.createEvent(
+                accessToken,
+                request.title(),
+                request.startAt(),
+                request.endAt()
+        );
     }
+
+}
 
