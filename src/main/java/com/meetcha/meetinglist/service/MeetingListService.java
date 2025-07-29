@@ -8,6 +8,7 @@ import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meetinglist.domain.ParticipantEntity;
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
+import com.meetcha.meetinglist.dto.MeetingListResponse;
 import com.meetcha.meetinglist.dto.ParticipantDto;
 import com.meetcha.meetinglist.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
@@ -77,7 +78,28 @@ public class MeetingListService {
                 meeting.getConfirmedTime(),
                 participantDtos
         );
-    }}
+    }
+
+
+    public List<MeetingListResponse> getMyMeetings(UUID userId) {
+        List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
+
+        return participations.stream()
+                .map(ParticipantEntity::getMeeting)
+                .map(meeting -> new MeetingListResponse(
+                        meeting.getMeetingId(),
+                        meeting.getTitle(),
+                        meeting.getDeadline(),
+                        meeting.getConfirmedTime(),
+                        meeting.getDurationMinutes(),
+                        meeting.getMeetingStatus()
+                ))
+                .toList();
+    }
+
+
+
+}
 
 /*    public ParticipantsResponse getParticipants(UUID meetingId, String authorizationHeader) {
         //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)

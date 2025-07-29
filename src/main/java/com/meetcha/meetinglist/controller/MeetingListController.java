@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -23,6 +24,19 @@ public class MeetingListController {
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
     private final JoinMeetingService joinMeetingService;
+
+    // 미팅 목록 조회
+    @GetMapping("/")
+    public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        // todo 토큰에서 userId 추출해야 함
+        UUID userId = getCurrentUserId();  // 예시 함수
+
+        List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
+        return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
+    }
+
 
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
@@ -81,5 +95,9 @@ public class MeetingListController {
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
     }
 
+    protected UUID getCurrentUserId() {
+        // TODO: SecurityContextHolder구현 이후 실제 userId 추출
+        return UUID.randomUUID(); // 예시용
+    }
 
 }
