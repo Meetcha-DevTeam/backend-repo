@@ -26,7 +26,7 @@ public class MeetingListController {
     private final JoinMeetingService joinMeetingService;
 
     // 미팅 목록 조회
-    @GetMapping("/")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
