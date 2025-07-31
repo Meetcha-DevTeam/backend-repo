@@ -19,7 +19,7 @@ public class MeetingStatusUpdateScheduler {
 //사용자 입력 없이, 시스템이 시간 흐름을 따라 미팅 상태를 관리한다.
     private final MeetingRepository meetingRepository;
 
-    // 매 5분마다 실행
+    // 매 5분마다 실행 -30마다 실행해도 되나
     @Scheduled(fixedRate = 5 * 60 * 1000)
     public void updateMeetingStatuses() {
         LocalDateTime now = LocalDateTime.now();

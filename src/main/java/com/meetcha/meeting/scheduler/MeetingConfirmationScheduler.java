@@ -20,7 +20,7 @@ public class MeetingConfirmationScheduler {
     private final MeetingRepository meetingRepository;
     private final MeetingConfirmationService meetingConfirmationService;
 
-    //매 10분마다 참여 마감된 미팅을 확인하고 자동 확정
+    //매 10분마다 참여 마감된 미팅을 확인하고 자동 확정 - 1분마다 하는건 어때
 
     @Scheduled(fixedRate = 10 * 60 * 1000) // 10분 간격
     public void autoConfirmMeetings() {
