@@ -9,6 +9,8 @@ import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.service.algorithm.*;
+import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
+import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class MeetingConfirmationService {
     private final MeetingParticipantRepository participantRepository;
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingScheduleSyncService syncService;
+    private final AlternativeTimeRepository alternativeTimeRepository;
 
     /**
      * 미팅 확정 메서드
@@ -57,7 +60,7 @@ public class MeetingConfirmationService {
             if (!hasCandidate) {
                 meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
             } else {
-                // TODO: alterTimes를 AlternativeTimeEntity로 저장하는 로직 추가 가능
+                saveAlternativeTimeCandidates(meetingId, alterTimes);
                 meeting.setMeetingStatus(MeetingStatus.MATCHING);
             }
 
@@ -130,6 +133,24 @@ public class MeetingConfirmationService {
     private LocalDateTime convertToLocalDateTime(int totalMinutes) {
         LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
         return baseDate.atStartOfDay().plusMinutes(totalMinutes);
+    }
+
+
+    private void saveAlternativeTimeCandidates(UUID meetingId, Map<String, List<Integer>> alterTimes) {
+        List<Integer> allCandidates = new ArrayList<>();
+        allCandidates.addAll(alterTimes.get("duration"));
+        allCandidates.addAll(alterTimes.get("participant"));
+
+        for (Integer minutes : allCandidates) {
+            LocalDateTime startTime = convertToLocalDateTime(minutes);
+
+            AlternativeTimeEntity entity = AlternativeTimeEntity.builder()
+                    .meetingId(meetingId)
+                    .startTime(startTime)
+                    .build();
+
+            alternativeTimeRepository.save(entity);
+        }
     }
 
 
