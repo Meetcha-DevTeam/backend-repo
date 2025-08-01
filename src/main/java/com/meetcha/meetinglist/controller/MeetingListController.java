@@ -1,15 +1,19 @@
 package com.meetcha.meetinglist.controller;
 
+import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
+import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meetinglist.domain.ReflectionStatus;
 import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +28,7 @@ public class MeetingListController {
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
     private final JoinMeetingService joinMeetingService;
+    private final JwtProvider jwtProvider;
 
     // 미팅 목록 조회
     @GetMapping("")
@@ -98,6 +103,20 @@ public class MeetingListController {
     protected UUID getCurrentUserId() {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
         return UUID.randomUUID(); // 예시용
+    }
+
+    //선택적 미팅 조회
+    @GetMapping("/filtered")
+    public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(required = false) MeetingStatus status,
+            @RequestParam(required = false) ReflectionStatus reflectionStatus
+    ) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(token);
+
+        List<FilteredMeetingResponse> meetings = meetingListService.getFilteredMeetings(userId, status, reflectionStatus);
+        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
 }
