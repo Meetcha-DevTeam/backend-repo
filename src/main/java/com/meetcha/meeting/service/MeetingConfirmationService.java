@@ -8,10 +8,7 @@ import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
-import com.meetcha.meeting.service.algorithm.Meeting;
-import com.meetcha.meeting.service.algorithm.MeetingTimeCalculator;
-import com.meetcha.meeting.service.algorithm.Participant;
-import com.meetcha.meeting.service.algorithm.TimeRange;
+import com.meetcha.meeting.service.algorithm.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +47,22 @@ public class MeetingConfirmationService {
         // 변환 후 계산
         Meeting converted = MeetingConverter.toAlgorithmMeeting(meeting, allAvailability);
         Integer bestStartMinutes = MeetingTimeCalculator.calculateMeetingTime(converted);
+
+
         if (bestStartMinutes == null) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); // 후보 없음
+            // 대안 시간 후보 산출 시도
+            Map<String, List<Integer>> alterTimes = AlternativeTimeCalculator.getAlternativeTimes(converted);
+            boolean hasCandidate = !alterTimes.get("duration").isEmpty() || !alterTimes.get("participant").isEmpty();
+
+            if (!hasCandidate) {
+                meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            } else {
+                // TODO: alterTimes를 AlternativeTimeEntity로 저장하는 로직 추가 가능
+                meeting.setMeetingStatus(MeetingStatus.MATCHING);
+            }
+
+            meetingRepository.save(meeting);
+            return;
         }
 
         // 2. 알고리즘: 가장 많은 참여자가 가능한 시간대 추출
