@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "meetings")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
