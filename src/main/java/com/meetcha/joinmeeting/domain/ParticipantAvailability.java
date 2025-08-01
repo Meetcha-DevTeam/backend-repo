@@ -39,4 +39,5 @@ public class ParticipantAvailability {
         availability.endAt = endAt;
         return availability;
     }
+
 }
