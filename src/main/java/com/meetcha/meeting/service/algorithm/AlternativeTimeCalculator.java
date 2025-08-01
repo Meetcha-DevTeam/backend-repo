@@ -78,8 +78,11 @@ public class AlternativeTimeCalculator {
             }
         }
 
+        // 람다에서 사용하는 변수는 final 이어야 하므로 복사본 생성
+        final int fixedMaxParticipants = maxParticipants;
+
         // 최대 참여자 수 기준으로 재계산
-        Map<Integer, Integer> validSequence = getTimeSequence(meeting, PER, (cur, t) -> cur == maxParticipants);
+        Map<Integer, Integer> validSequence = getTimeSequence(meeting, PER, (cur, t) -> cur == fixedMaxParticipants);
         List<Integer> timeList = validSequence.keySet().stream()
                 .sorted(Comparator.comparingInt(validSequence::get))
                 .collect(Collectors.toList());
