@@ -123,6 +123,7 @@ public class MeetingListService {
                     return new FilteredMeetingResponse(
                             meeting.getMeetingId(),
                             meeting.getTitle(),
+                            meeting.getDescription(),
                             meeting.getDeadline(),
                             meeting.getConfirmedTime(),
                             meeting.getDurationMinutes(),

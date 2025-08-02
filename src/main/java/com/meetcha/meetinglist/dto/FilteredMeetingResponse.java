@@ -9,6 +9,7 @@ import java.util.UUID;
 public record FilteredMeetingResponse (
     UUID meetingId,
     String title,
+    String description,
     LocalDateTime deadline,
     LocalDateTime confirmedTime,
     int durationMinutes,
