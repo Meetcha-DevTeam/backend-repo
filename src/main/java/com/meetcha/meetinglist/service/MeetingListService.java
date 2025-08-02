@@ -104,17 +104,23 @@ public class MeetingListService {
     }
 
     //선택적 미팅 조회 메서드
-    public List<FilteredMeetingResponse> getFilteredMeetings(UUID userId, MeetingStatus status, ReflectionStatus reflectionStatus) {
-        // 1. 조건에 따라 참여한 미팅 조회
-        List<MeetingEntity> meetings = meetingRepository.findAllByParticipant(userId, status);
+    public List<FilteredMeetingResponse> getFilteredMeetings(
+            UUID userId,
+            MeetingStatus status,
+            ReflectionStatus reflectionStatus
+    ) {
+        List<MeetingEntity> meetings = meetingRepository.findAllWithUserParticipationOrCreation(userId, status);
 
-        // 2. 회고 여부 체크 후 필터링
         return meetings.stream()
                 .map(meeting -> {
-                    boolean isReflectionWritten = reflectionRepository.existsByMeeting_MeetingId(meeting.getMeetingId());
+                    boolean isReflectionWritten = reflectionRepository
+                            .existsByMeeting_MeetingIdAndUserId(meeting.getMeetingId(), userId);
 
-                    if (reflectionStatus == ReflectionStatus.WRITTEN && !isReflectionWritten) return null;
-                    if (reflectionStatus == ReflectionStatus.NOT_WRITTEN && isReflectionWritten) return null;
+                    // 회고 상태 필터링
+                    if (reflectionStatus != null) {
+                        if (reflectionStatus == ReflectionStatus.WRITTEN && !isReflectionWritten) return null;
+                        if (reflectionStatus == ReflectionStatus.NOT_WRITTEN && isReflectionWritten) return null;
+                    }
 
                     return new FilteredMeetingResponse(
                             meeting.getMeetingId(),
