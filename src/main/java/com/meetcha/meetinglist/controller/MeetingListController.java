@@ -42,6 +42,19 @@ public class MeetingListController {
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
     }
 
+    //선택적 미팅 조회
+    @GetMapping("/filtered")
+    public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(required = false) MeetingStatus status,
+            @RequestParam(required = false) ReflectionStatus reflectionStatus
+    ) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(token);
+
+        List<FilteredMeetingResponse> meetings = meetingListService.getFilteredMeetings(userId, status, reflectionStatus);
+        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
+    }
 
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
@@ -103,20 +116,6 @@ public class MeetingListController {
     protected UUID getCurrentUserId() {
         // TODO: SecurityContextHolder구현 이후 실제 userId 추출
         return UUID.randomUUID(); // 예시용
-    }
-
-    //선택적 미팅 조회
-    @GetMapping("/filtered")
-    public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestParam(required = false) MeetingStatus status,
-            @RequestParam(required = false) ReflectionStatus reflectionStatus
-    ) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        UUID userId = jwtProvider.getUserId(token);
-
-        List<FilteredMeetingResponse> meetings = meetingListService.getFilteredMeetings(userId, status, reflectionStatus);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
 }
