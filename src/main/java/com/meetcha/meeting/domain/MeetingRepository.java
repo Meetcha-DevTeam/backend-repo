@@ -15,7 +15,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     @Query("""
     SELECT DISTINCT m FROM MeetingEntity m
     LEFT JOIN MeetingReflectionEntity r 
-           ON r.meeting = m AND r.userId = :userId
+           ON r.meeting = m AND r.user.id = :userId
     WHERE (:status IS NULL OR m.meetingStatus = :status)
       AND (
         m.createdBy.id = :userId
@@ -24,13 +24,11 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
             WHERE p.meeting = m AND p.userId = :userId
         )
       )
-    """)
+""")
     List<MeetingEntity> findAllWithUserParticipationOrCreation(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
     );
-
-
 
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
 

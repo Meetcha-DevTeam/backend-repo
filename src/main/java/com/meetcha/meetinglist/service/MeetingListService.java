@@ -114,7 +114,7 @@ public class MeetingListService {
         return meetings.stream()
                 .map(meeting -> {
                     boolean isReflectionWritten = reflectionRepository
-                            .existsByMeeting_MeetingIdAndUserId(meeting.getMeetingId(), userId);
+                            .existsByMeeting_MeetingIdAndUser_Id(meeting.getMeetingId(), userId);
 
                     // 회고 상태 필터링
                     if (reflectionStatus != null) {
