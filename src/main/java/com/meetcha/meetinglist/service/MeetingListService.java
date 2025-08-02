@@ -109,18 +109,16 @@ public class MeetingListService {
             MeetingStatus status,
             ReflectionStatus reflectionStatus
     ) {
-        List<MeetingEntity> meetings = meetingRepository.findAllWithUserParticipationOrCreation(userId, status);
+        List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, status);
 
         return meetings.stream()
                 .map(meeting -> {
                     boolean isReflectionWritten = reflectionRepository
-                            .existsByMeeting_MeetingIdAndUser_Id(meeting.getMeetingId(), userId);
+                            .existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId);
 
-                    // 회고 상태 필터링
-                    if (reflectionStatus != null) {
-                        if (reflectionStatus == ReflectionStatus.WRITTEN && !isReflectionWritten) return null;
-                        if (reflectionStatus == ReflectionStatus.NOT_WRITTEN && isReflectionWritten) return null;
-                    }
+                    // 회고 상태에 따라 필터링
+                    if (reflectionStatus == ReflectionStatus.WRITTEN && !isReflectionWritten) return null;
+                    if (reflectionStatus == ReflectionStatus.NOT_WRITTEN && isReflectionWritten) return null;
 
                     return new FilteredMeetingResponse(
                             meeting.getMeetingId(),
@@ -135,7 +133,6 @@ public class MeetingListService {
                 .filter(Objects::nonNull)
                 .toList();
     }
-
 
 }
 

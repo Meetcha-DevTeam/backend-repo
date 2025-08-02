@@ -14,21 +14,20 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     //선택적 미팅 조회 api에서 사용하는 쿼리
     @Query("""
     SELECT DISTINCT m FROM MeetingEntity m
-    LEFT JOIN MeetingReflectionEntity r 
-           ON r.meeting = m AND r.user.userId = :userId
-    WHERE (:status IS NULL OR m.meetingStatus = :status)
+    WHERE m.meetingStatus = :status
       AND (
-        m.createdBy = :userId
-        OR EXISTS (
-            SELECT 1 FROM ParticipantEntity p
-            WHERE p.meeting = m AND p.userId = :userId
-        )
+          m.createdBy = :userId
+          OR EXISTS (
+              SELECT 1 FROM ParticipantEntity p
+              WHERE p.meeting = m AND p.userId = :userId
+          )
       )
 """)
-    List<MeetingEntity> findAllWithUserParticipationOrCreation(
+    List<MeetingEntity> findByUserIdAndStatus(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
     );
+
 
 
 
