@@ -57,8 +57,7 @@ public class MeetingReflectionService {
         reflectionRepository.save(reflection);
 
         return new CreateReflectionResponseDto(
-                reflection.getReflectionId(),
-                "/reflections/" + reflection.getReflectionId()
+                reflection.getReflectionId()
         );
     }
 }
