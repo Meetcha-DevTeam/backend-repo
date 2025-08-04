@@ -41,18 +41,6 @@ public class MeetingListController {
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
     }
 
-    //작성이 필요한 미팅 조회
-    @GetMapping("/need-reflection")
-    public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
-            @RequestHeader("Authorization") String authorizationHeader
-    ) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        UUID userId = jwtProvider.getUserId(token);
-
-        List<FilteredMeetingResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
-    }
-
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
     public ResponseEntity<ApiResponse<MeetingDetailResponse>> getMeetingDetail(
@@ -108,6 +96,18 @@ public class MeetingListController {
     ) {
         JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
+    }
+
+    //작성이 필요한 미팅 조회
+    @GetMapping("/need-reflection")
+    public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(token);
+
+        List<FilteredMeetingResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
+        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
     protected UUID getCurrentUserId() {
