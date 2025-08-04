@@ -12,6 +12,4 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
 
     //해당 미팅에 대한 회고가 존재하는지 확인
     boolean existsByMeeting_MeetingIdAndUser_UserId(UUID meetingId, UUID userId);
-
-    //Optional<GetReflectionResponse> findReflectionDetail(UUID meetingId, UUID userId);
 }

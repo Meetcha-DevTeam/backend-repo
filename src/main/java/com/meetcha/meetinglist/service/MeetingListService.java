@@ -7,21 +7,23 @@ import com.meetcha.meeting.domain.MeetingRepository;
 
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meetinglist.domain.ParticipantEntity;
-import com.meetcha.meetinglist.domain.ReflectionStatus;
 import com.meetcha.meetinglist.dto.FilteredMeetingResponse;
+
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.MeetingListResponse;
 import com.meetcha.meetinglist.dto.ParticipantDto;
 import com.meetcha.meetinglist.repository.ParticipantRepository;
-import com.meetcha.reflection.domain.MeetingReflectionEntity;
+import com.meetcha.project.domain.UserProjectAliasRepository;
+import com.meetcha.project.dto.ProjectSummaryDto;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class MeetingListService {
     private final MeetingRepository meetingRepository;
     private final ParticipantRepository participantRepository;
     private final MeetingReflectionRepository reflectionRepository;
+    private final UserProjectAliasRepository userProjectAliasRepository;
 
     public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
         // 미팅 상세 조회 로직
@@ -103,36 +106,37 @@ public class MeetingListService {
                 .toList();
     }
 
-    //선택적 미팅 조회 메서드
-    public List<FilteredMeetingResponse> getFilteredMeetings(
-            UUID userId,
-            MeetingStatus status,
-            ReflectionStatus reflectionStatus
-    ) {
-        List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, status);
+    //작성이 필요한 미팅 조회
+    public List<FilteredMeetingResponse> getMeetingsNeedingReflection(UUID userId) {
+        //DONE 상태 미팅들 조회
+        List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, MeetingStatus.DONE);
 
+        //사용자 프로젝트 목록 조회 (alias or 기본 이름 포함)
+        List<ProjectSummaryDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);
+
+        //Map<projectId, projectName>으로 변환
+        Map<UUID, String> projectNameMap = projectSummaries.stream()
+                .collect(Collectors.toMap(ProjectSummaryDto::getProjectId, ProjectSummaryDto::getProjectName));
+
+        //회고 미작성 미팅 필터링 + 응답 생성
         return meetings.stream()
+                .filter(meeting -> !reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId))
                 .map(meeting -> {
-                    boolean isReflectionWritten = reflectionRepository
-                            .existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId);
-
-                    // 회고 상태에 따라 필터링
-                    if (reflectionStatus == ReflectionStatus.WRITTEN && !isReflectionWritten) return null;
-                    if (reflectionStatus == ReflectionStatus.NOT_WRITTEN && isReflectionWritten) return null;
+                    UUID projectId = meeting.getProjectId();
+                    String projectName = projectId != null ? projectNameMap.get(projectId) : null;
 
                     return new FilteredMeetingResponse(
                             meeting.getMeetingId(),
                             meeting.getTitle(),
                             meeting.getDescription(),
-                            meeting.getProjectId(),
+                            projectId,
+                            projectName,
                             meeting.getDeadline(),
                             meeting.getConfirmedTime(),
                             meeting.getDurationMinutes(),
-                            meeting.getMeetingStatus().name(),
-                            isReflectionWritten
+                            meeting.getMeetingStatus().name()
                     );
                 })
-                .filter(Objects::nonNull)
                 .toList();
     }
 

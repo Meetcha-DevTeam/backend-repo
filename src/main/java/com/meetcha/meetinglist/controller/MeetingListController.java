@@ -6,7 +6,6 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
 import com.meetcha.meeting.domain.MeetingStatus;
-import com.meetcha.meetinglist.domain.ReflectionStatus;
 import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
@@ -42,17 +41,15 @@ public class MeetingListController {
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
     }
 
-    //선택적 미팅 조회
-    @GetMapping("/filtered")
+    //작성이 필요한 미팅 조회
+    @GetMapping("/need-reflection")
     public ResponseEntity<ApiResponse<List<FilteredMeetingResponse>>> getFilteredMeetings(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestParam(required = false) MeetingStatus status,
-            @RequestParam(required = false) ReflectionStatus reflectionStatus
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
         String token = authorizationHeader.replace("Bearer ", "");
         UUID userId = jwtProvider.getUserId(token);
 
-        List<FilteredMeetingResponse> meetings = meetingListService.getFilteredMeetings(userId, status, reflectionStatus);
+        List<FilteredMeetingResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 

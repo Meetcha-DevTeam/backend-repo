@@ -11,9 +11,9 @@ public record FilteredMeetingResponse (
     String title,
     String description, //nullable
     UUID projectId, //nullable
+    String projectName, //nullable
     LocalDateTime deadline,
     LocalDateTime confirmedTime,
     int durationMinutes,
-    String meetingStatus,
-    boolean reflectionWritten
+    String meetingStatus
 ){}
