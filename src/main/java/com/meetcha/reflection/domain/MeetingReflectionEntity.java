@@ -22,34 +22,34 @@ public class MeetingReflectionEntity {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Column(name = "reflection_id", nullable = false)
+    @Column(name = "reflection_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID reflectionId;
 
     @ManyToOne
-    @JoinColumn(name = "meeting_id", nullable = false)
+    @JoinColumn(name = "meeting_id", nullable = false, columnDefinition = "BINARY(16)")
     private MeetingEntity meeting;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BINARY(16)")
     private UserEntity user;
 
-    @Column(name = "project_id", nullable = true)
+    @Column(name = "project_id", columnDefinition = "BINARY(16)")
     private UUID projectId;
 
-    @Column(name = "contribution")
-    private String contribution;
+    @Column(name = "contribution", nullable = false)
+    private int contribution;
 
-    @Column(name = "role")
+    @Column(name = "thought", nullable = false, columnDefinition = "TEXT")
+    private String thought;
+
+    @Column(name = "role", nullable = false, columnDefinition = "TEXT")
     private String role;
 
-    @Column(name = "feedback")
-    private String feedback;
+    @Column(name = "completed_work", columnDefinition = "TEXT")
+    private String completedWork;
 
-    @Column(name = "tasks_done")
-    private String tasksDone;
-
-    @Column(name = "tasks_todo")
-    private String tasksTodo;
+    @Column(name = "planned_work", columnDefinition = "TEXT")
+    private String plannedWork;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

@@ -1,5 +1,6 @@
 package com.meetcha.reflection.domain;
 
+import com.meetcha.reflection.dto.GetReflectionResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -11,5 +12,4 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
 
     //해당 미팅에 대한 회고가 존재하는지 확인
     boolean existsByMeeting_MeetingIdAndUser_UserId(UUID meetingId, UUID userId);
-
 }
