@@ -124,6 +124,7 @@ public class MeetingListService {
                             meeting.getMeetingId(),
                             meeting.getTitle(),
                             meeting.getDescription(),
+                            meeting.getProjectId(),
                             meeting.getDeadline(),
                             meeting.getConfirmedTime(),
                             meeting.getDurationMinutes(),

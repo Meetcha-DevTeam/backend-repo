@@ -9,7 +9,8 @@ import java.util.UUID;
 public record FilteredMeetingResponse (
     UUID meetingId,
     String title,
-    String description,
+    String description, //nullable
+    UUID projectId, //nullable
     LocalDateTime deadline,
     LocalDateTime confirmedTime,
     int durationMinutes,
