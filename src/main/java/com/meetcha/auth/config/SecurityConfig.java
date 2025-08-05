@@ -33,6 +33,7 @@ public class SecurityConfig {
                         //.requestMatchers("/oauth/google").permitAll() //로그인은 누구나
                         //.anyRequest().authenticated()                //나머지는 인증 필요
                 )
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
