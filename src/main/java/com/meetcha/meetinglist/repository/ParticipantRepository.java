@@ -13,4 +13,6 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
     List<ParticipantEntity> findByMeeting_MeetingId(UUID meetingId);
 
     List<ParticipantEntity> findByUserId(UUID userId);
+
+    List<String> findNicknamesByMeetingId(UUID meetingId);
 }
