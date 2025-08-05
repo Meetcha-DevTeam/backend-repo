@@ -43,14 +43,21 @@ public class MeetingEntity {
     @Column(name = "confirmed_time")
     private LocalDateTime confirmedTime;
 
+    @Column(name = "meeting_code", nullable = false, unique = true)
+    private String meetingCode;
+
+/*    @Column(name = "code", nullable = false, unique = true)
+    private String code;*/
+
+    @Column(name = "alternative_deadline")
+    private LocalDateTime alternativeDeadline;
+
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
     @Column(name = "project_id", nullable = true)
     private UUID projectId;
 
-    @Column(name = "code", nullable = false, unique = true)
-    private String code;
     // todo 미팅 생성 시 디폴트 값 설정 -> Service에서 직접 UUID 생성 후 채워넣음
 
 
