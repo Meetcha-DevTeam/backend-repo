@@ -28,8 +28,15 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
             @Param("status") MeetingStatus status
     );
 
-
-
+    // 투표 마감 후 가장 많이 투표된 대안 시간을 확정 시 사용
+    @Query("""
+    SELECT m FROM MeetingEntity m
+    WHERE m.alternativeDeadline IS NOT NULL
+      AND m.confirmedTime IS NULL
+      AND m.alternativeDeadline < CURRENT_TIMESTAMP
+      AND m.meetingStatus = 'MATCHING'
+""")
+    List<MeetingEntity> findMeetingsToConfirmFromAlternative();
 
 
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
