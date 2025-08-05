@@ -1,6 +1,8 @@
 package com.meetcha.user.controller;
 
 import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
@@ -48,6 +50,9 @@ public class UserScheduleController {
     // SecurityContextHolder에서 현재 userId 추출
     private UUID getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+        }
         return (UUID) authentication.getPrincipal();
     }
 
