@@ -8,7 +8,6 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class GetWrittenReflectionResponse {
     private UUID meetingId;
     private UUID projectId;
@@ -17,4 +16,22 @@ public class GetWrittenReflectionResponse {
     private String confirmedTime;
     private String completedWork;
     private String plannedWork;
+
+    public GetWrittenReflectionResponse(
+            UUID meetingId,
+            UUID projectId,
+            String projectName,
+            String title,
+            String confirmedTime,
+            String completedWork,
+            String plannedWork
+    ) {
+        this.meetingId = meetingId;
+        this.projectId = projectId;
+        this.projectName = projectName;
+        this.title = title;
+        this.confirmedTime = confirmedTime;
+        this.completedWork = completedWork;
+        this.plannedWork = plannedWork;
+    }
 }
