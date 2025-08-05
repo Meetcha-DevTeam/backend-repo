@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
-public record FilteredMeetingResponse (
+public record NeedReflectionResponse(
     UUID meetingId,
     String title,
     String description, //nullable
