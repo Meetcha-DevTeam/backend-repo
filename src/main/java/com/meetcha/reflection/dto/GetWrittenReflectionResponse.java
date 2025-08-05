@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Getter
@@ -22,7 +24,7 @@ public class GetWrittenReflectionResponse {
             UUID projectId,
             String projectName,
             String title,
-            String confirmedTime,
+            LocalDateTime confirmedTime, // 여기 수정
             String completedWork,
             String plannedWork
     ) {
@@ -30,7 +32,7 @@ public class GetWrittenReflectionResponse {
         this.projectId = projectId;
         this.projectName = projectName;
         this.title = title;
-        this.confirmedTime = confirmedTime;
+        this.confirmedTime = confirmedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")); // 문자열로 포맷
         this.completedWork = completedWork;
         this.plannedWork = plannedWork;
     }

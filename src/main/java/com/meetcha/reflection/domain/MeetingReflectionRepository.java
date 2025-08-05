@@ -22,14 +22,14 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     //회고 작성 시점 기준으로 정렬
     @Query("""
     SELECT new com.meetcha.reflection.dto.GetWrittenReflectionResponse(
-        m.meetingId,
-        p.projectId,
-        COALESCE(a.customName, p.name),
-        m.title,
-        FUNCTION('DATE_FORMAT', m.confirmedTime, '%Y-%m-%d %H:%i:%s'), 
-        r.completedWork,
-        r.plannedWork
-    )
+         m.meetingId,
+         p.projectId,
+         COALESCE(a.customName, p.name),
+         m.title,
+         m.confirmedTime,
+         r.completedWork,
+         r.plannedWork
+     )
     FROM MeetingReflectionEntity r
     JOIN r.meeting m
     LEFT JOIN m.project p
