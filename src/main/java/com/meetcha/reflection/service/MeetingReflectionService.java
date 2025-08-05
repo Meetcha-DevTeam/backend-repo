@@ -9,11 +9,14 @@ import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import com.meetcha.reflection.dto.CreateReflectionRequestDto;
 import com.meetcha.reflection.dto.CreateReflectionResponseDto;
+import com.meetcha.reflection.dto.GetWrittenReflectionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -57,4 +60,11 @@ public class MeetingReflectionService {
 
         return new CreateReflectionResponseDto(reflection.getReflectionId());
     }
+
+    //
+    @Transactional(readOnly = true)
+    public List<GetWrittenReflectionResponse> getWrittenReflections(UUID userId) {
+        return reflectionRepository.findWrittenReflectionByUserId(userId);
+    }
+
 }

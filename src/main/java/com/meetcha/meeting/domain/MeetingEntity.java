@@ -1,6 +1,7 @@
 
 package com.meetcha.meeting.domain;
 
+import com.meetcha.project.domain.ProjectEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,13 +47,16 @@ public class MeetingEntity {
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
-    @Column(name = "project_id", nullable = true)
+    @Column(name = "project_id", nullable = true, insertable = false, updatable = false)
     private UUID projectId;
 
     @Column(name = "code", nullable = false, unique = true)
     private String code;
     // todo 미팅 생성 시 디폴트 값 설정 -> Service에서 직접 UUID 생성 후 채워넣음
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private ProjectEntity project;
 
     public boolean isDeadlinePassed() {
         return deadline != null && deadline.isBefore(LocalDateTime.now());

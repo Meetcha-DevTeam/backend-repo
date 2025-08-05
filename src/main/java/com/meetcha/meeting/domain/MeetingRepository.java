@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     Optional<MeetingEntity> findByCode(String code);
 
-    //선택적 미팅 조회 api에서 사용하는 쿼리
+    //작성이 필요한 미팅조회 api에서 사용하는 쿼리
     @Query("""
     SELECT DISTINCT m FROM MeetingEntity m
     WHERE m.meetingStatus = :status
@@ -27,9 +27,6 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
     );
-
-
-
 
 
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
