@@ -37,7 +37,7 @@ public class MeetingService {
                 .confirmedTime(null)
                 .createdBy(creatorId)
                 .projectId(request.projectId().orElse(null))
-                .code(UUID.randomUUID().toString().substring(0, 8))
+                .meetingCode(UUID.randomUUID().toString().substring(0, 8))
                 .build();
 
         meetingRepository.save(meeting);

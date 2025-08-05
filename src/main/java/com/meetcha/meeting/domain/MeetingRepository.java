@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
-    Optional<MeetingEntity> findByCode(String code);
+    Optional<MeetingEntity> findByMeetingCode(String code);
 
     //작성이 필요한 미팅조회 api에서 사용하는 쿼리
     @Query("""
@@ -29,6 +29,16 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     );
 
 
+    // 투표 마감 후 가장 많이 투표된 대안 시간을 확정 시 사용
+    @Query("""
+    SELECT m FROM MeetingEntity m
+    WHERE m.alternativeDeadline IS NOT NULL
+      AND m.confirmedTime IS NULL
+      AND m.alternativeDeadline < CURRENT_TIMESTAMP
+      AND m.meetingStatus = 'MATCHING'
+""")
+    List<MeetingEntity> findMeetingsToConfirmFromAlternative();
+           
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
 
     List<MeetingEntity> findByMeetingStatusAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);
