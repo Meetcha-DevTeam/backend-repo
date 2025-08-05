@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,11 +42,17 @@ public class AlternativeTimeService {
                 .map(entity -> {
                     int voteCnt = alternativeVoteRepository.countByAlternativeTimeIdAndCheckedTrue(entity.getAlternativeTimeId());
                     boolean checked = alternativeVoteRepository.existsByAlternativeTimeIdAndUserIdAndCheckedTrue(entity.getAlternativeTimeId(), userId);
-                    return AlternativeTimeDto.from(entity, voteCnt, checked);
+                    List<String> excludedNames = getExcludedNames(entity.getExcludedParticipants());
+                    return AlternativeTimeDto.from(entity, voteCnt, checked, excludedNames);
                 })
                 .toList();
 
         return AlternativeTimeListResponse.of(dtoList);
+    }
+
+    private List<String> getExcludedNames(String raw) {
+        if (raw == null || raw.isBlank()) return List.of();
+        return Arrays.asList(raw.split(",")); // 또는 JSON 파싱
     }
 
     //테스트용 더미 데이터
