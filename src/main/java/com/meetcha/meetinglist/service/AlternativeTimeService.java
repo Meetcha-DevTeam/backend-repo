@@ -11,12 +11,13 @@ import com.meetcha.meetinglist.dto.AlternativeVoteRequest;
 import com.meetcha.meetinglist.dto.AlternativeVoteResponse;
 import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
 import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
+import com.meetcha.meetinglist.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,7 @@ import java.util.UUID;
 public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
+    private final ParticipantRepository participantRepository ;
 
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
         //대안시간 후보 조회 로직
@@ -41,11 +43,28 @@ public class AlternativeTimeService {
                 .map(entity -> {
                     int voteCnt = alternativeVoteRepository.countByAlternativeTimeIdAndCheckedTrue(entity.getAlternativeTimeId());
                     boolean checked = alternativeVoteRepository.existsByAlternativeTimeIdAndUserIdAndCheckedTrue(entity.getAlternativeTimeId(), userId);
-                    return AlternativeTimeDto.from(entity, voteCnt, checked);
+                    List<String> excludedNames = getExcludedNames(entity.getExcludedParticipants());
+                    List<String> includedNames = getIncludedNames(meetingId, excludedNames);
+                    return AlternativeTimeDto.from(entity, voteCnt, checked, excludedNames);
                 })
                 .toList();
 
         return AlternativeTimeListResponse.of(dtoList);
+    }
+
+    private List<String> getExcludedNames(String raw) {
+        if (raw == null || raw.isBlank()) return List.of();
+        return Arrays.asList(raw.split(",")); // 또는 JSON 파싱
+    }
+
+    private List<String> getIncludedNames(UUID meetingId, List<String> excludedNames) {
+        // 전체 참여자 닉네임 리스트 조회
+        List<String> allParticipants = participantRepository.findNicknamesByMeetingId(meetingId);
+
+        // 제외자 제외한 결과 반환
+        return allParticipants.stream()
+                .filter(name -> !excludedNames.contains(name))
+                .toList();
     }
 
     //테스트용 더미 데이터
