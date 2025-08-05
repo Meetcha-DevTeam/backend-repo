@@ -15,6 +15,7 @@ public class AlternativeTimeDto {
     private LocalDateTime endTime;
     private Integer adjustedDurationMinutes;
     private List<String> excludedUserNames;
+    private List<String> includedUserNames;
     private boolean checked;
 
     public static AlternativeTimeDto from(AlternativeTimeEntity entity, int voteCount, boolean checked, List<String> excludedNames) {
