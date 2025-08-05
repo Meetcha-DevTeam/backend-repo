@@ -7,7 +7,7 @@ import com.meetcha.meeting.domain.MeetingRepository;
 
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meetinglist.domain.ParticipantEntity;
-import com.meetcha.meetinglist.dto.FilteredMeetingResponse;
+import com.meetcha.meetinglist.dto.NeedReflectionResponse;
 
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.MeetingListResponse;
@@ -107,7 +107,7 @@ public class MeetingListService {
     }
 
     //작성이 필요한 미팅 조회
-    public List<FilteredMeetingResponse> getMeetingsNeedingReflection(UUID userId) {
+    public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
         //DONE 상태 미팅들 조회
         List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, MeetingStatus.DONE);
 
@@ -125,7 +125,7 @@ public class MeetingListService {
                     UUID projectId = meeting.getProjectId();
                     String projectName = projectId != null ? projectNameMap.get(projectId) : null;
 
-                    return new FilteredMeetingResponse(
+                    return new NeedReflectionResponse(
                             meeting.getMeetingId(),
                             meeting.getTitle(),
                             meeting.getDescription(),
