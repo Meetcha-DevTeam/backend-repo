@@ -11,7 +11,7 @@ import java.util.UUID;
 public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     Optional<MeetingEntity> findByMeetingCode(String code);
 
-    //선택적 미팅 조회 api에서 사용하는 쿼리
+    //작성이 필요한 미팅조회 api에서 사용하는 쿼리
     @Query("""
     SELECT DISTINCT m FROM MeetingEntity m
     WHERE m.meetingStatus = :status
@@ -28,6 +28,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
             @Param("status") MeetingStatus status
     );
 
+
     // 투표 마감 후 가장 많이 투표된 대안 시간을 확정 시 사용
     @Query("""
     SELECT m FROM MeetingEntity m
@@ -37,8 +38,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
       AND m.meetingStatus = 'MATCHING'
 """)
     List<MeetingEntity> findMeetingsToConfirmFromAlternative();
-
-
+           
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
 
     List<MeetingEntity> findByMeetingStatusAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);

@@ -9,11 +9,9 @@ import java.util.UUID;
 public record NeedReflectionResponse(
     UUID meetingId,
     String title,
-    String description, //nullable
+    String description, // nullable
     UUID projectId, //nullable
     String projectName, //nullable
-    LocalDateTime deadline,
-    LocalDateTime confirmedTime,
-    int durationMinutes,
+    String confirmedTime,
     String meetingStatus
 ){}
