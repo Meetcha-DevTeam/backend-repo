@@ -18,12 +18,13 @@ public class AlternativeTimeDto {
     private List<String> includedUserNames;
     private boolean checked;
 
-    public static AlternativeTimeDto from(AlternativeTimeEntity entity, int voteCount, boolean checked, List<String> excludedNames) {
+    public static AlternativeTimeDto from(AlternativeTimeEntity entity, int voteCount, boolean checked, List<String> excludedNames, List<String> includedUserNames) {
         return AlternativeTimeDto.builder()
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())
                 .adjustedDurationMinutes(entity.getDurationAdjustedMinutes())
                 .excludedUserNames(excludedNames)
+                .includedUserNames(includedUserNames)
                 .checked(checked)
                 .build();
     }

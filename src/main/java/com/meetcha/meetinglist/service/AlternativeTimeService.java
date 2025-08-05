@@ -45,7 +45,7 @@ public class AlternativeTimeService {
                     boolean checked = alternativeVoteRepository.existsByAlternativeTimeIdAndUserIdAndCheckedTrue(entity.getAlternativeTimeId(), userId);
                     List<String> excludedNames = getExcludedNames(entity.getExcludedParticipants());
                     List<String> includedNames = getIncludedNames(meetingId, excludedNames);
-                    return AlternativeTimeDto.from(entity, voteCnt, checked, excludedNames);
+                    return AlternativeTimeDto.from(entity, voteCnt, checked, excludedNames, includedNames);
                 })
                 .toList();
 
