@@ -61,7 +61,7 @@ public class MeetingReflectionService {
         return new CreateReflectionResponseDto(reflection.getReflectionId());
     }
 
-    //
+    //작성한 회고 조회
     @Transactional(readOnly = true)
     public List<GetWrittenReflectionResponse> getWrittenReflections(UUID userId) {
         return reflectionRepository.findWrittenReflectionByUserId(userId);
