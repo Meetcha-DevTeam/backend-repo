@@ -8,6 +8,8 @@ import com.meetcha.user.dto.scheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -42,9 +44,11 @@ public class UserScheduleController {
         return ApiResponse.success(201, "일정 생성 성공", eventId);
     }
 
+
+    // SecurityContextHolder에서 현재 userId 추출
     private UUID getCurrentUserId() {
-        // todo 이후 연결하기(실제 로그인 상태에서 JWT를 파싱해 userId 추출)
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (UUID) authentication.getPrincipal();
     }
 
     // 유저 개인 일정 수정
