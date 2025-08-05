@@ -64,7 +64,7 @@ public class JoinMeetingService {
     }
 
     public void validateMeetingCode(String code) {
-        MeetingEntity meeting = meetingRepository.findByCode(code)
+        MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline().isBefore(LocalDateTime.now())) {

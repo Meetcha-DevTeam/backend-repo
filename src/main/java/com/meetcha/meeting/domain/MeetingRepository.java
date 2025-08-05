@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
-    Optional<MeetingEntity> findByCode(String code);
+    Optional<MeetingEntity> findByMeetingCode(String code);
 
     //선택적 미팅 조회 api에서 사용하는 쿼리
     @Query("""
