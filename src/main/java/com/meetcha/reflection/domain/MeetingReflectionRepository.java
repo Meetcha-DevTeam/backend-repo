@@ -17,7 +17,7 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     //해당 미팅에 대한 회고가 존재하는지 확인
     boolean existsByMeeting_MeetingIdAndUser_UserId(UUID meetingId, UUID userId);
 
-    //작성한 회고 목록 조회
+    //미팅 회고 목록 요약 조회
     //confirmedTime은 문자열 포맷으로 변환
     //회고 작성 시점 기준으로 정렬
     @Query("""
@@ -40,4 +40,29 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     """)
     List<GetWrittenReflectionResponse> findWrittenReflectionByUserId(@Param("userId") UUID userId);
 
+    //특정 회고 상세 조회
+    @Query("""
+        SELECT new com.meetcha.reflection.dto.GetReflectionResponse(
+            m.meetingId,
+            p.projectId,
+            COALESCE(a.customName, p.name),
+            m.title,
+            m.description,
+            m.confirmedTime,
+            r.contribution,
+            r.role,
+            r.thought,
+            r.completedWork,
+            r.plannedWork
+        )
+        FROM MeetingReflectionEntity r
+        JOIN r.meeting m
+        JOIN m.project p
+        LEFT JOIN UserProjectAliasEntity a ON a.project = p AND a.user = r.user
+        WHERE m.meetingId = :meetingId AND r.user.userId = :userId
+    """)
+    GetReflectionResponse findReflectionDetailByMeetingIdAndUserId(
+            @Param("meetingId") UUID meetingId,
+            @Param("userId") UUID userId
+    );
 }

@@ -6,6 +6,7 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.UnauthorizedException;
 import com.meetcha.reflection.dto.CreateReflectionRequestDto;
 import com.meetcha.reflection.dto.CreateReflectionResponseDto;
+import com.meetcha.reflection.dto.GetReflectionResponse;
 import com.meetcha.reflection.dto.GetWrittenReflectionResponse;
 import com.meetcha.reflection.service.MeetingReflectionService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,13 +40,25 @@ public class MeetingReflectionController {
                 .body(ApiResponse.success(201, "회고가 성공적으로 작성되었습니다.", response));
     }
 
-    //미팅 회고 목록 조회
+    //미팅 회고 목록 요약 조회
     @GetMapping("/reflections")
     public ResponseEntity<ApiResponse<List<GetWrittenReflectionResponse>>> getWrittenReflections(HttpServletRequest request) {
         UUID userId = extractUserIdFromToken(request);
         List<GetWrittenReflectionResponse> responses = reflectionService.getWrittenReflections(userId);
 
         return ResponseEntity.ok(ApiResponse.success(200, "회고 조회 성공", responses));
+    }
+
+    //특정 회고 조회
+    @GetMapping("/{meetingId}/reflection")
+    public ResponseEntity<ApiResponse<GetReflectionResponse>> getReflectionDetail(
+            @PathVariable UUID meetingId,
+            HttpServletRequest request
+    ) {
+        UUID userId = extractUserIdFromToken(request);
+        GetReflectionResponse response = reflectionService.getReflectionDetail(userId, meetingId);
+
+        return ResponseEntity.ok(ApiResponse.success(200, "회고 상세 조회에 성공했습니다.", response));
     }
 
      //JWT 토큰에서 userId 추출

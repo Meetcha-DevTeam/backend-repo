@@ -19,8 +19,8 @@ public class GetWrittenReflectionResponse {
     private String completedWork;
     private String plannedWork;
 
-    //JPQL에서 LocalDateTime을 매핑받아 생성자 내에서 문자열 포맷("yyyy-MM-dd HH:mm:ss")으로 변환하기 위함
-    //Hibernate가 LocalDateTime → String 변환을 자동으로 못해서 생성자 따로 안만들면 오류 발생
+    //JPQL로 LocalDateTime을 매핑받을 때 문자열 포맷("yyyy-MM-dd HH:mm:ss")으로 변환하기 위해 생성자에서 직접 처리
+    //Hibernate는 LocalDateTime → String 자동 변환이 불가능하므로 생성자 필수
     public GetWrittenReflectionResponse(
             UUID meetingId,
             UUID projectId,
