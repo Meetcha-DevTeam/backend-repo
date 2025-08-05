@@ -11,6 +11,7 @@ import com.meetcha.meetinglist.service.MeetingListService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,8 +33,7 @@ public class MeetingListController {
     public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        // todo 토큰에서 userId 추출해야 함
-        UUID userId = getCurrentUserId();  // 예시 함수
+        UUID userId = getCurrentUserId();
 
         List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
@@ -108,9 +108,8 @@ public class MeetingListController {
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
-    protected UUID getCurrentUserId() {
-        // TODO: SecurityContextHolder구현 이후 실제 userId 추출
-        return UUID.randomUUID(); // 예시용
+    public UUID getCurrentUserId() {
+        return (UUID) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }
