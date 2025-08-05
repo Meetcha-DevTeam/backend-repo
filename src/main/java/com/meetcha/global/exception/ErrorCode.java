@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     //401 Unauthorized
     MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "인증 토큰이 필요합니다."),
+    UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, 401, "인증되지 않은 사용자입니다."),
     EXPIRED_JWT(HttpStatus.UNAUTHORIZED, 401, "JWT 토큰이 만료되었습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유효하지 않은 refresh Token입니다."),
     EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "만료된 refresh Token입니다."),
