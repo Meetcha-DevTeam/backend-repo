@@ -9,6 +9,7 @@ import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import com.meetcha.reflection.dto.CreateReflectionRequestDto;
 import com.meetcha.reflection.dto.CreateReflectionResponseDto;
+import com.meetcha.reflection.dto.GetReflectionResponse;
 import com.meetcha.reflection.dto.GetWrittenReflectionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -61,10 +62,14 @@ public class MeetingReflectionService {
         return new CreateReflectionResponseDto(reflection.getReflectionId());
     }
 
-    //작성한 회고 조회
+    //미팅 회고 목록 요약 조회
     @Transactional(readOnly = true)
     public List<GetWrittenReflectionResponse> getWrittenReflections(UUID userId) {
         return reflectionRepository.findWrittenReflectionByUserId(userId);
     }
 
+    //특정 회고 상세 조회
+    public GetReflectionResponse getReflectionDetail(UUID userId, UUID meetingId) {
+        return reflectionRepository.findReflectionDetailByMeetingIdAndUserId(meetingId, userId);
+    }
 }

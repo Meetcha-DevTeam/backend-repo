@@ -2,6 +2,8 @@ package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.ParticipantEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,5 +16,6 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
     List<ParticipantEntity> findByUserId(UUID userId);
 
-    List<String> findNicknamesByMeetingId(UUID meetingId);
+    @Query("SELECT p.nickname FROM ParticipantEntity p WHERE p.meeting.meetingId = :meetingId")
+    List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
 }
