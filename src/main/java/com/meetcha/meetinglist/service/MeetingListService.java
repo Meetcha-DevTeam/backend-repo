@@ -20,6 +20,7 @@ import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -118,12 +119,17 @@ public class MeetingListService {
         Map<UUID, String> projectNameMap = projectSummaries.stream()
                 .collect(Collectors.toMap(ProjectSummaryDto::getProjectId, ProjectSummaryDto::getProjectName));
 
-        //회고 미작성 미팅 필터링 + 응답 생성
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         return meetings.stream()
                 .filter(meeting -> !reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId))
                 .map(meeting -> {
                     UUID projectId = meeting.getProjectId();
                     String projectName = projectId != null ? projectNameMap.get(projectId) : null;
+
+                    String formattedTime = meeting.getConfirmedTime() != null
+                            ? meeting.getConfirmedTime().format(formatter)
+                            : null;
 
                     return new NeedReflectionResponse(
                             meeting.getMeetingId(),
@@ -131,9 +137,7 @@ public class MeetingListService {
                             meeting.getDescription(),
                             projectId,
                             projectName,
-                            meeting.getDeadline(),
-                            meeting.getConfirmedTime(),
-                            meeting.getDurationMinutes(),
+                            formattedTime, //String으로 포맷팅
                             meeting.getMeetingStatus().name()
                     );
                 })

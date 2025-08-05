@@ -12,8 +12,6 @@ public record NeedReflectionResponse(
     String description, //nullable
     UUID projectId, //nullable
     String projectName, //nullable
-    LocalDateTime deadline,
-    LocalDateTime confirmedTime,
-    int durationMinutes,
+    String confirmedTime,
     String meetingStatus
 ){}

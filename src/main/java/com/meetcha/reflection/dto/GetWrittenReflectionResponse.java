@@ -24,7 +24,7 @@ public class GetWrittenReflectionResponse {
             UUID projectId,
             String projectName,
             String title,
-            LocalDateTime confirmedTime, // 여기 수정
+            LocalDateTime confirmedTime,
             String completedWork,
             String plannedWork
     ) {
