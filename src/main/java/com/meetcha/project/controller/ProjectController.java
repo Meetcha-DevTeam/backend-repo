@@ -17,7 +17,7 @@ public class ProjectController {
     private final ProjectService projectService;
 
     //프로젝트 생성(이름 == 프로젝트이름)
-    @PostMapping
+    @GetMapping("/create")
     public ResponseEntity<ApiResponse<CreateProjectResponse>> createProject(
             @Valid @RequestBody CreateProjectRequest request
     ) {
