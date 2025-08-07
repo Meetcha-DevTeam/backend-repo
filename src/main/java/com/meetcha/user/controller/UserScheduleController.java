@@ -6,7 +6,7 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
-import com.meetcha.user.dto.scheduleResponse;
+import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,12 +27,12 @@ public class UserScheduleController {
 
     //유저 스케줄 조회
     @GetMapping("/schedule")
-    public ApiResponse<List<scheduleResponse>> getSchedule(
+    public ApiResponse<List<ScheduleResponse>> getSchedule(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         UUID userId = getCurrentUserId();
-        List<scheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
+        List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
 

@@ -1,6 +1,6 @@
 package com.meetcha.project.domain;
 
-import com.meetcha.project.dto.ProjectSummaryDto;
+import com.meetcha.project.dto.GetProjectsDto;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +15,7 @@ public interface UserProjectAliasRepository extends Repository<UserProjectAliasE
     //프로젝트 생성일 기준 최신순 정렬
     //JPQL 사용
     @Query("""
-    SELECT new com.meetcha.project.dto.ProjectSummaryDto(
+    SELECT new com.meetcha.project.dto.GetProjectsDto(
         p.projectId,
         COALESCE(a.customName, p.name)
     )
@@ -25,5 +25,5 @@ public interface UserProjectAliasRepository extends Repository<UserProjectAliasE
     ORDER BY p.createdAt DESC
 """)
 
-    List<ProjectSummaryDto> findProjectsByUserId(@Param("userId") UUID userId);
+    List<GetProjectsDto> findProjectsByUserId(@Param("userId") UUID userId);
 }

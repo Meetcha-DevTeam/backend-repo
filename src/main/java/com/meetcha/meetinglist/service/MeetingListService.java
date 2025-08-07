@@ -14,7 +14,7 @@ import com.meetcha.meetinglist.dto.MeetingListResponse;
 import com.meetcha.meetinglist.dto.ParticipantDto;
 import com.meetcha.meetinglist.repository.ParticipantRepository;
 import com.meetcha.project.domain.UserProjectAliasRepository;
-import com.meetcha.project.dto.ProjectSummaryDto;
+import com.meetcha.project.dto.GetProjectsDto;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -113,11 +113,11 @@ public class MeetingListService {
         List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, MeetingStatus.DONE);
 
         //사용자 프로젝트 목록 조회 (alias or 기본 이름 포함)
-        List<ProjectSummaryDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);
+        List<GetProjectsDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);
 
         //Map<projectId, projectName>으로 변환
         Map<UUID, String> projectNameMap = projectSummaries.stream()
-                .collect(Collectors.toMap(ProjectSummaryDto::getProjectId, ProjectSummaryDto::getProjectName));
+                .collect(Collectors.toMap(GetProjectsDto::getProjectId, GetProjectsDto::getProjectName));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
