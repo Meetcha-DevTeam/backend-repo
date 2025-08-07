@@ -37,6 +37,7 @@ public class ProjectService {
 
         //저장
         ProjectEntity project = ProjectEntity.builder()
+                .projectId(UUID.randomUUID())
                 .name(request.getName())
                 .createdAt(LocalDateTime.now())
                 .build();
