@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,12 +15,15 @@ import java.util.UUID;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "projects")
 public class ProjectEntity {
     @Id
     @Column(name = "project_id", nullable = false)
     private UUID projectId;
 
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "created_at")

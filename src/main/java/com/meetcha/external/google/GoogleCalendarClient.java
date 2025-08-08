@@ -1,7 +1,7 @@
 package com.meetcha.external.google;
 
 import com.meetcha.user.dto.ScheduleDetailResponse;
-import com.meetcha.user.dto.scheduleResponse;
+import com.meetcha.user.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,7 @@ public class GoogleCalendarClient {
 
     private final RestTemplate restTemplate;
     // accessToken과 기간을 받아 유저의 Google Calendar 일정을 조회
-    public List<scheduleResponse> getEvents(String accessToken, LocalDateTime from, LocalDateTime to) {
+    public List<ScheduleResponse> getEvents(String accessToken, LocalDateTime from, LocalDateTime to) {
         // Authorization 헤더 설정
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -48,7 +48,7 @@ public class GoogleCalendarClient {
     }
 
     // 이벤트 데이터를 scheduleResponse로 변환
-    private scheduleResponse toScheduleResponse(Map<String, Object> item) {
+    private ScheduleResponse toScheduleResponse(Map<String, Object> item) {
         Map<String, String> start = (Map<String, String>) item.get("start");
         Map<String, String> end = (Map<String, String>) item.get("end");
 
@@ -59,7 +59,7 @@ public class GoogleCalendarClient {
         List<String> recurrenceList = (List<String>) item.get("recurrence");
         String recurrence = RecurrenceUtils.parseRecurrenceToLabel(recurrenceList);
 
-        return new scheduleResponse(
+        return new ScheduleResponse(
                 eventId,
                 title,
                 LocalDateTime.parse(start.get("dateTime")),
