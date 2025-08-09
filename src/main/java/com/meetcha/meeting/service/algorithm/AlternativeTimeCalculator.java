@@ -44,9 +44,8 @@ public class AlternativeTimeCalculator {
                 .orElse(0);
 
         // 2/3 이상 진행 시간 확보 안되면 대안 없음
-        if (maxHit < (2 * meeting.getDuration() / 3) / PER) {
-            return Collections.emptyList();
-        }
+        int requiredHit = (int) Math.ceil((2.0 * meeting.getDuration() / 3) / PER);
+        if (maxHit < requiredHit) return Collections.emptyList();
 
         List<Integer> timeList = timeSequence.keySet().stream()
                 .sorted(Comparator.comparingInt(timeSequence::get))
