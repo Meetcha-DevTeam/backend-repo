@@ -109,8 +109,8 @@ public class AlternativeTimeCalculator {
             }
         }
 
-        List<Integer> sorted = new ArrayList<>(sequenceMap.keySet());
-        Collections.sort(sorted);
+        List<Integer> sortedTimes = new ArrayList<>(sequenceMap.keySet());
+        Collections.sort(sortedTimes);
 
 
         /*
@@ -124,9 +124,9 @@ public class AlternativeTimeCalculator {
         * 초기: {09:00:1, 09:30:1, 10:00:1}
         * 누적 후: {09:00:3, 09:30:2, 10:00:1}
         * 의미: 09:00부터 3슬롯(=90분) 연속 가능, 09:30부터 2슬롯(=60분)*/
-        for (int i = sorted.size() - 2; i >= 0; i--) {
-            int cur = sorted.get(i);
-            int next = sorted.get(i + 1);
+        for (int i = sortedTimes.size() - 2; i >= 0; i--) {
+            int cur = sortedTimes.get(i);
+            int next = sortedTimes.get(i + 1);
             if (next - cur == per) {
                 sequenceMap.put(cur, sequenceMap.get(cur) + sequenceMap.get(next));
             }
