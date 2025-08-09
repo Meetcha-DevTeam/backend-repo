@@ -51,9 +51,9 @@ public class AlternativeTimeCalculator {
                 .sorted(Comparator.comparingInt(timeSequence::get))
                 .collect(Collectors.toList());
 
-        List<Integer> spare = SortUtils.sortBySpare(timeList, maxHit, PER);
-        List<Integer> early = SortUtils.sortByDay(spare);
-        return SortUtils.sortByTimePriority(early);
+        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList, maxHit, PER);
+        List<Integer> earlyCandidates = SortUtils.sortByDay(spareCandidates);
+        return SortUtils.sortByTimePriority(earlyCandidates);
     }
 
     /**
