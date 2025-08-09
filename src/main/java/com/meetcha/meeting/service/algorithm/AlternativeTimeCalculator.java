@@ -96,14 +96,14 @@ public class AlternativeTimeCalculator {
      */
     private static Map<Integer, Integer> getTimeSequence(Meeting meeting, int per, BiFunction<Integer, Integer, Boolean> condition) {
         //슬롯별 가능 인원 목록 만들기
-        Map<Integer, List<String>> timeMap = TimeUtils.flattenParticipantTimes(meeting, per);
+        Map<Integer, List<String>> timeBlockMap = TimeUtils.flattenParticipantTimes(meeting, per);
 
         Map<Integer, Integer> sequenceMap = new HashMap<>();
         int total = meeting.getParticipants().size();
 
         // 조건(참여자 수 기준)을 만족하는 슬롯만 1로 마킹
-        for (Integer time : timeMap.keySet()) {
-            int count = timeMap.get(time).size();
+        for (Integer time : timeBlockMap.keySet()) {
+            int count = timeBlockMap.get(time).size();
             if (condition.apply(count, total)) {
                 sequenceMap.put(time, 1);
             }
