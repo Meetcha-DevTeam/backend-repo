@@ -95,11 +95,13 @@ public class AlternativeTimeCalculator {
      * 공통 시퀀스 계산
      */
     private static Map<Integer, Integer> getTimeSequence(Meeting meeting, int per, BiFunction<Integer, Integer, Boolean> condition) {
+        //슬롯별 가능 인원 목록 만들기
         Map<Integer, List<String>> timeMap = TimeUtils.flattenParticipantTimes(meeting, per);
 
         Map<Integer, Integer> sequenceMap = new HashMap<>();
         int total = meeting.getParticipants().size();
 
+        // 조건(참여자 수 기준)을 만족하는 슬롯만 1로 마킹
         for (Integer time : timeMap.keySet()) {
             int count = timeMap.get(time).size();
             if (condition.apply(count, total)) {
@@ -110,6 +112,18 @@ public class AlternativeTimeCalculator {
         List<Integer> sorted = new ArrayList<>(sequenceMap.keySet());
         Collections.sort(sorted);
 
+
+        /*
+        * 인접한 두 슬롯이 정확히 per(30분) 차이면 연속으로 간주.
+        * 뒤에서 앞으로 가며 누적 길이 DP를 한다.
+        * 맨 끝 슬롯은 이미 1.
+        * 그 앞 슬롯이 바로 다음 슬롯과 연속이면, 현재 길이 = 1 + (다음 슬롯의 길이)로 덧붙여 길어짐
+
+        예시
+        * 조건 통과 슬롯: 09:00, 09:30, 10:00 → 모두 30분 간격
+        * 초기: {09:00:1, 09:30:1, 10:00:1}
+        * 누적 후: {09:00:3, 09:30:2, 10:00:1}
+        * 의미: 09:00부터 3슬롯(=90분) 연속 가능, 09:30부터 2슬롯(=60분)*/
         for (int i = sorted.size() - 2; i >= 0; i--) {
             int cur = sorted.get(i);
             int next = sorted.get(i + 1);
