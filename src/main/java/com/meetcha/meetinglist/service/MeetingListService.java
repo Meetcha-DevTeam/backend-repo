@@ -96,11 +96,8 @@ public class MeetingListService {
 
     @Transactional(readOnly = true)
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
-        log.info("🔍 토큰에서 꺼낸 userId = {}", userId);
-
         // 생성자 or 참가자인 미팅 전부 (중복 제거, 최신순)
         List<MeetingEntity> meetings = meetingRepository.findMyMeetings(userId);
-        log.info("✅ 조회된 미팅 개수: {}", meetings.size());
 
         return meetings.stream()
                 .map(m -> new MeetingListResponse(
