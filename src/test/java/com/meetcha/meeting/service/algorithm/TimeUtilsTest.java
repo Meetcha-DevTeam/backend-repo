@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * TimeUtil.flattenParticipantTimes 단위 테스트
@@ -41,10 +40,100 @@ class TimeUtilsTest {
         Map<Integer, List<String>> map = TimeUtils.flattenParticipantTimes(meeting, PER);
 
         //then
-        assertEquals(2,map.size()); //600, 630 두 슬롯
+        assertEquals(2, map.size()); //600, 630 두 슬롯
         assertEquals(Set.of("A"), new HashSet<>(map.get(600)));
         assertEquals(Set.of("A"), new HashSet<>(map.get(630)));
         assertFalse(map.containsKey(660)); //End 미포함 검증
     }
 
+    @Test
+    @DisplayName("두 참가자 - 겹치는 슬롯에 모든 ID가 포함된다.")
+    void flatten_twoParticipant_overlap() {
+        //given
+        Participant a = new Participant("A", List.of(new TimeRange(600, 660)));
+        Participant b = new Participant("B", List.of(new TimeRange(630, 690)));
+        Meeting meeting = meetingOf(List.of(a, b));
+
+        //when
+        Map<Integer, List<String>> map = TimeUtils.flattenParticipantTimes(meeting, PER);
+
+        //then
+        assertEquals(Set.of("A"), new HashSet<>(map.get(600)));
+        assertEquals(Set.of("A", "B"), new HashSet<>(map.get(630)));
+        assertEquals(Set.of("B"), new HashSet<>(map.get(660)));
+    }
+
+    @Test
+    @DisplayName("TimRange end가 per 경계가 아니면 start 슬롯만 생성한다. ")
+    void flatten_nonAlignedEnd_includesStartOnly() {
+        //given
+        Participant a = new Participant("A", List.of(new TimeRange(600, 615)));
+        Meeting meeting = meetingOf(List.of(a));
+
+        //when
+        Map<Integer, List<String>> map = TimeUtils.flattenParticipantTimes(meeting, PER);
+
+        //then
+        assertEquals(1, map.size());
+        assertEquals(Set.of("A"), new HashSet<>(map.get(600)));
+        assertFalse(map.containsKey(615));
+    }
+
+    @Test
+    @DisplayName("같은 참가자가 겹치는 TimeRange를 제출해도 슬롯에는 한번만 포함된다.")
+    void flatten_sameParticipant_overlappingRanges_shouldDeduplicateIds() {
+        //given
+        Participant a = new Participant("A", List.of(new TimeRange(600, 660), new TimeRange(630, 690)));
+        Meeting meeting =meetingOf(List.of(a));
+        //when
+        Map<Integer,List<String>> map =TimeUtils.flattenParticipantTimes(meeting,PER);
+        //then
+        assertEquals(Set.of("A"),new HashSet<>(map.get(600)));
+        assertEquals(Set.of("A"),new HashSet<>(map.get(630))); // 여기서 중복 있으면 안된
+        assertEquals(Set.of("A"),new HashSet<>(map.get(660)));
+    }
+
+    @Test
+    @DisplayName("참여자가 없는 경우 빈 맵을 반환한다.")
+    void flatten_emptyParticipants_returnsEmptyMap(){
+        //given
+        Meeting meeting=meetingOf(List.of());
+
+        //when
+        Map<Integer, List<String>> map =TimeUtils.flattenParticipantTimes(meeting,PER);
+
+        //then
+        assertTrue(map.isEmpty());
+    }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
