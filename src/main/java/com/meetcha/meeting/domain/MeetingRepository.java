@@ -43,4 +43,17 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
 
     List<MeetingEntity> findByMeetingStatusAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);
 
+    //미팅목록조회쿼리
+    @Query("""
+    SELECT DISTINCT m
+    FROM MeetingEntity m
+    WHERE m.createdBy = :userId
+       OR EXISTS (
+           SELECT 1 FROM ParticipantEntity p
+           WHERE p.meeting = m AND p.userId = :userId
+       )
+    ORDER BY m.createdAt DESC
+""")
+    List<MeetingEntity> findMyMeetings(@Param("userId") UUID userId);
+
 }

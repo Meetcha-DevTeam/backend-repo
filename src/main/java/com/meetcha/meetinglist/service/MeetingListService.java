@@ -19,8 +19,8 @@ import com.meetcha.reflection.domain.MeetingReflectionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -94,31 +94,26 @@ public class MeetingListService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
         log.info("🔍 토큰에서 꺼낸 userId = {}", userId);
 
-        List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
-        log.info("✅ 해당 userId로 찾은 참여 데이터 개수: {}", participations.size());
+        // 생성자 or 참가자인 미팅 전부 (중복 제거, 최신순)
+        List<MeetingEntity> meetings = meetingRepository.findMyMeetings(userId);
+        log.info("✅ 조회된 미팅 개수: {}", meetings.size());
 
-        // DB 전체 값과 비교
-        participantRepository.findAll().forEach(p -> {
-            boolean match = p.getUserId().equals(userId);
-            log.info("  - participant_id={}, user_id={}, meeting_id={}, match={}",
-                    p.getId(), p.getUserId(), p.getMeeting().getMeetingId(), match);
-        });
-
-        return participations.stream()
-                .map(ParticipantEntity::getMeeting)
-                .map(meeting -> new MeetingListResponse(
-                        meeting.getMeetingId(),
-                        meeting.getTitle(),
-                        meeting.getDeadline(),
-                        meeting.getConfirmedTime(),
-                        meeting.getDurationMinutes(),
-                        meeting.getMeetingStatus()
+        return meetings.stream()
+                .map(m -> new MeetingListResponse(
+                        m.getMeetingId(),
+                        m.getTitle(),
+                        m.getDeadline(),
+                        m.getConfirmedTime(),
+                        m.getDurationMinutes(),
+                        m.getMeetingStatus()
                 ))
                 .toList();
     }
+
 
 
     //작성이 필요한 미팅 조회
