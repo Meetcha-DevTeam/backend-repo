@@ -2,8 +2,7 @@ package com.meetcha.meetinglist.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.exception.CustomException;
-import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
@@ -13,7 +12,6 @@ import com.meetcha.meetinglist.service.MeetingListService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,7 +33,7 @@ public class MeetingListController {
     public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        UUID userId = getCurrentUserId();
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
@@ -103,19 +101,12 @@ public class MeetingListController {
     public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        UUID userId = jwtProvider.getUserId(token);
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         List<NeedReflectionResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
-    public UUID getCurrentUserId() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        }
-        return (UUID) authentication.getPrincipal();
-    }
+
 
 }
