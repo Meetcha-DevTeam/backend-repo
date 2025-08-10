@@ -18,6 +18,8 @@ import com.meetcha.project.dto.GetProjectsDto;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingListService {
@@ -94,6 +97,7 @@ public class MeetingListService {
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
         List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
 
+        log.info("참여 데이터 개수: {}", participations.size());
         return participations.stream()
                 .map(ParticipantEntity::getMeeting)
                 .map(meeting -> new MeetingListResponse(
