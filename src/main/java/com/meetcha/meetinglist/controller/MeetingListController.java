@@ -111,14 +111,10 @@ public class MeetingListController {
 
     // 공통 Bearer 파서
     private String extractBearerToken(String authorizationHeader) {
-        if (authorizationHeader == null) {
-            throw new com.meetcha.global.exception.CustomException(com.meetcha.global.exception.ErrorCode.UNAUTHORIZED_USER);
-        }
+        if (authorizationHeader == null) throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         String h = authorizationHeader.trim();
-        if (h.toLowerCase().startsWith("bearer ")) {
-            return h.substring(7).trim();
-        }
-        throw new com.meetcha.global.exception.CustomException(com.meetcha.global.exception.ErrorCode.UNAUTHORIZED_USER);
+        if (h.toLowerCase().startsWith("bearer ")) return h.substring(7).trim();
+        throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
     }
 
 }
