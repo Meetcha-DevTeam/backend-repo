@@ -35,8 +35,7 @@ public class MeetingListController {
     public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        String token = authorizationHeader.replace("Bearer ", "");// 파싱 좀 더 안전하게 바꿀 수 있는 여지 있음
-        UUID userId = jwtProvider.getUserId(token);
+        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
 
         List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
@@ -104,21 +103,22 @@ public class MeetingListController {
     public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        String token = authorizationHeader.replace("Bearer ", "");
-        UUID userId = jwtProvider.getUserId(token);
+        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
 
         List<NeedReflectionResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
-/*
-    public UUID getCurrentUserId() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getPrincipal() == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+    // 공통 Bearer 파서
+    private String extractBearerToken(String authorizationHeader) {
+        if (authorizationHeader == null) {
+            throw new com.meetcha.global.exception.CustomException(com.meetcha.global.exception.ErrorCode.UNAUTHORIZED_USER);
         }
-        return (UUID) authentication.getPrincipal();
+        String h = authorizationHeader.trim();
+        if (h.toLowerCase().startsWith("bearer ")) {
+            return h.substring(7).trim();
+        }
+        throw new com.meetcha.global.exception.CustomException(com.meetcha.global.exception.ErrorCode.UNAUTHORIZED_USER);
     }
-*/
 
 }
