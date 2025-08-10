@@ -2,8 +2,7 @@ package com.meetcha.user.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.exception.CustomException;
-import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
@@ -32,7 +31,7 @@ public class UserScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
-        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         List<scheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
@@ -43,7 +42,7 @@ public class UserScheduleController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CreateScheduleRequest request
     ) {
-        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         String eventId = userScheduleService.createSchedule(userId, request);
         return ApiResponse.success(201, "일정 생성 성공", eventId);
     }
@@ -55,7 +54,7 @@ public class UserScheduleController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody UpdateScheduleRequest request
     ) {
-        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.updateSchedule(userId, request);
         return ApiResponse.success(200, "일정 수정 성공");
     }
@@ -65,7 +64,7 @@ public class UserScheduleController {
     public ApiResponse<ScheduleDetailResponse> getScheduleDetail(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam String eventId) {
-        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         ScheduleDetailResponse detail = userScheduleService.getScheduleDetail(userId, eventId);
         return ApiResponse.success(200, "일정 상세 조회 성공", detail);
     }
@@ -75,17 +74,9 @@ public class UserScheduleController {
     public ApiResponse<Void> deleteSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam String eventId) {
-        UUID userId = jwtProvider.getUserId(extractBearerToken(authorizationHeader));
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.deleteSchedule(userId, eventId);
         return ApiResponse.success(200, "일정 삭제 성공");
-    }
-
-
-    private String extractBearerToken(String authorizationHeader) {
-        if (authorizationHeader == null) throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        String h = authorizationHeader.trim();
-        if (h.toLowerCase().startsWith("bearer ")) return h.substring(7).trim();
-        throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
     }
 
 }
