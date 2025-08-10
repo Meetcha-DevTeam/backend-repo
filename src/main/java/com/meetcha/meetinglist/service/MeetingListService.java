@@ -95,9 +95,18 @@ public class MeetingListService {
 
 
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
-        List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
+        log.info("🔍 토큰에서 꺼낸 userId = {}", userId);
 
-        log.info("참여 데이터 개수: {}", participations.size());
+        List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
+        log.info("✅ 해당 userId로 찾은 참여 데이터 개수: {}", participations.size());
+
+        // DB 전체 값과 비교
+        participantRepository.findAll().forEach(p -> {
+            boolean match = p.getUserId().equals(userId);
+            log.info("  - participant_id={}, user_id={}, meeting_id={}, match={}",
+                    p.getId(), p.getUserId(), p.getMeeting().getMeetingId(), match);
+        });
+
         return participations.stream()
                 .map(ParticipantEntity::getMeeting)
                 .map(meeting -> new MeetingListResponse(
@@ -110,6 +119,7 @@ public class MeetingListService {
                 ))
                 .toList();
     }
+
 
     //작성이 필요한 미팅 조회
     public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
