@@ -1,9 +1,6 @@
 package com.meetcha.meeting.service.algorithm;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * 가능한 시간 후보군을 우선순위에 따라 정렬하는 유틸리티 클래스
@@ -13,17 +10,35 @@ public class SortUtils {
 
     /**
      * 앞뒤로 여유시간이 많은 시간대를 우선 정렬
+     * @param timeList 연속 블록 길이 기준으로 최대값 후보의 "시작 시각"들(또는 전체 시작 시각들)
+     * @param seqMap   key: 시작 시각, value: 해당 시각부터의 연속 블록 수
+     * @param hit      회의 길이(블록 수)
+     * @param per      블록 단위(분)
+     *
      */
-    public static List<Integer> sortBySpare(List<Integer> timeList, int hit, int per) {
-        if (timeList.size() < hit) return new ArrayList<>();
+    public static List<Integer> sortBySpare(List<Integer> timeList, Map<Integer, Integer> seqMap, int hit, int per) {
+        if (timeList == null || timeList.isEmpty()) return new ArrayList<>();
 
-        List<Integer> result = new ArrayList<>();
-        int ref = timeList.get(timeList.size() - 1); // 가장 큰 값
-        int mid = (ref - hit) / 2;
-
-        for (int i = timeList.size() - 1; i >= 0 && timeList.get(i) == ref; i--) {
-            result.add(timeList.get(i) + mid * per);
+        // 가장 긴 연속 길이 계산(기존에는 '시간값'을 길이로 착각)
+        int maxLen = 0;
+        for (Integer t : timeList) {
+            Integer len = seqMap.get(t);
+            if (len != null) maxLen = Math.max(maxLen, len);
         }
+        if (maxLen < hit) return new ArrayList<>();
+
+        // 가운데로 당길 블록 수(mid) = (최대연속길이 - 회의길이)/2
+        int midBlocks = (maxLen - hit) / 2;
+
+        // 최대 연속 길이를 가진 구간들의 가운데 시작시각을 후보로 만든다.
+        List<Integer> result = new ArrayList<>();
+        for (Integer t : timeList) {
+            Integer len = seqMap.get(t);
+            if (len != null && len == maxLen) {
+                result.add(t + midBlocks * per);
+            }
+        }
+        // 정렬은 이후 단계에서 우선순위 정렬을 하므로 여기서는 원본 순서 유지 또는 간단 정렬만
         return result;
     }
 
