@@ -29,7 +29,7 @@ public class MeetingTimeCalculator {
                 .sorted(Comparator.comparingInt(timeSequence::get))
                 .collect(Collectors.toList());
 
-        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList, hit, PER);
+        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList,timeSequence, hit, PER);
         if (spareCandidates == null || spareCandidates.isEmpty()) return null;
 
         // 3. 우선순위 2: 가장 빠른 날짜
