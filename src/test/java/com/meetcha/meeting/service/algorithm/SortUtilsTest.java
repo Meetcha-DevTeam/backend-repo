@@ -13,12 +13,21 @@ class SortUtilsTest {
     @DisplayName("sortBySpare: 후보가 hit 개수보다 적으면 빈 리스트 반환")
     void sortBySpare_returnsEmpty_whenListSmallerThanHit() {
         //Given
-        List<Integer> timeList = Arrays.asList(1, 2, 3);
         int hit = 4;// 리스트 크기보다 큼
         int per = 30;
 
+        // timeSequence: 시작시간 -> 그 시점부터의 연속 슬롯 수
+        Map<Integer, Integer> timeSequence = new HashMap<>();
+        timeSequence.put(0, 1);
+        timeSequence.put(30, 2);
+        // 최대 연속 길이 = 2 < hit(4)
+
+        // timeList는 timeSequence 값을 기준으로 오름차 정렬된 "시작시간" 목록
+        List<Integer> timeList = new ArrayList<>(timeSequence.keySet());
+        timeList.sort(Comparator.comparingInt(timeSequence::get));
+
         //when
-        List<Integer> result = SortUtils.sortBySpare(timeList, hit, per);
+        List<Integer> result = SortUtils.sortBySpare(timeList, timeSequence, hit, per);
 
         //then
         assertNotNull(result);
@@ -29,20 +38,29 @@ class SortUtilsTest {
     @DisplayName("sortBySpare: 최대값 구간의 중앙값을 반환한다.")
     void sortBySpare_returnMidpointsForMaxBlock() {
         //given
-        List<Integer> timeList = Arrays.asList(1, 3, 5, 5);
         int hit = 2;
         int per = 30;
-        /**
-         * timeList : 각 숫자는 어떤 "시간 슬롯"의 연속 가능 시간 길이를 의미한다 → 즉, 5칸짜리 최대 연속 구간이 2개 있다
-         * hit = 2 : 미팅을 진행하려면 최소 2칸(슬롯)이 필요함.
-         * per = 30 : 한 칸(slot)은 30분을 의미.
-         */
+        // 두 개의 최대(=5칸) 연속 구간이 존재하는 케이스 구성
+        // 0에서 시작해 5칸(150분), 240에서 시작해 5칸(150분)
+        // 중앙 시작시간 = start + ((5 - 2) / 2)*per = start + 30
+        Map<Integer, Integer> timeSequence = new HashMap<>();
+        timeSequence.put(120, 1);
+        timeSequence.put(60, 3);
+        timeSequence.put(0, 5);
+        timeSequence.put(240, 5);
+
+        //  값(연속 길이) 오름차 → 길이가 같으면 시간 오름차 정렬
+        List<Integer> timeList = new ArrayList<>(timeSequence.keySet());
+        timeList.sort(
+                Comparator.comparingInt(timeSequence::get)
+                        .thenComparingInt(t -> (int) t)
+        );
 
         //when
-        List<Integer> result = SortUtils.sortBySpare(timeList, hit, per);
+        List<Integer> result = SortUtils.sortBySpare(timeList, timeSequence, hit, per);
 
         //then
-        assertEquals(Arrays.asList(35, 35), result);
+        assertEquals(Arrays.asList(30, 270), result);
     }
 
     @Test
