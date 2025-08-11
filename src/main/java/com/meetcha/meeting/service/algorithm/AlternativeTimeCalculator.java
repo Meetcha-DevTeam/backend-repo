@@ -50,8 +50,12 @@ public class AlternativeTimeCalculator {
         List<Integer> timeList = timeSequence.keySet().stream()
                 .sorted(Comparator.comparingInt(timeSequence::get))
                 .collect(Collectors.toList());
+        // ‘가운데로 당길 기준(hit)’은 실제 회의 길이(블록)과 maxHit 중 작은 값이어야 함
+        //       (기존 코드는 maxHit를 그대로 넘겨 가운데가 0으로 계산되는 문제가 있었음)
+        int hit = Math.min(meeting.getDuration() / PER, maxHit);
 
-        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList, maxHit, PER);
+        // SortUtils.sortBySpare 시그니처 변경에 맞춰 seqMap 전달
+        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList, timeSequence, hit, PER);
         List<Integer> earlyCandidates = SortUtils.sortByDay(spareCandidates);
         return SortUtils.sortByTimePriority(earlyCandidates);
     }
@@ -86,7 +90,8 @@ public class AlternativeTimeCalculator {
                 .sorted(Comparator.comparingInt(validSequence::get))
                 .collect(Collectors.toList());
 
-        List<Integer> spare = SortUtils.sortBySpare(timeList, meeting.getDuration() / PER, PER);
+        int hit = meeting.getDuration() / PER;
+        List<Integer> spare = SortUtils.sortBySpare(timeList, validSequence, hit, PER);
         List<Integer> early = SortUtils.sortByDay(spare);
         return SortUtils.sortByTimePriority(early);
     }
