@@ -67,4 +67,29 @@ public class MeetingTimeCalculatorTest {
         assertNotNull(result);
         assertEquals(m(0, 9, 30), result);
     }
+
+    @Test
+    @DisplayName("여러 날짜에 동일 조건의 후보가 있으면 더 이른 날짜를 선택한다.")
+    void pickEarlierDay_whenSameSpareAcrossDays() {
+        // given : day0과 day1 모두 14:00~18:00 (8블럭) 가능
+        Participant a = p("A",
+                tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 14, 0), m(1, 18, 0))
+        );
+        Participant b = p("B",
+                tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 14, 0), m(1, 18, 0))
+        );
+
+        // 60분(2블럭) 미팅 → 각 날짜의 이상적 시작은 15:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        // when
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        // then : 더 이른 날짜(day0) 15:30을 선택
+        assertNotNull(result);
+        assertEquals(m(0, 15, 30), result);
+    }
+
 }
