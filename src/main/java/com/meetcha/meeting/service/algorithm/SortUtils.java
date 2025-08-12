@@ -46,6 +46,7 @@ public class SortUtils {
      * 가장 빠른 날짜에 해당하는 시간들만 추출
      */
     public static List<Integer> sortByDay(List<Integer> timeList) {
+        if (timeList == null || timeList.isEmpty()) return Collections.emptyList();
         final int day = 24 * 60;
         List<Integer> sorted = new ArrayList<>(timeList);
         Collections.sort(sorted, Comparator.reverseOrder());
