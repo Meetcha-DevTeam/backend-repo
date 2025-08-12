@@ -2,13 +2,10 @@ package com.meetcha.meeting.service.algorithm;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.MockedStatic;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 public class MeetingTimeCalculatorTest {
 
@@ -67,6 +64,7 @@ public class MeetingTimeCalculatorTest {
         Integer result=MeetingTimeCalculator.calculateMeetingTime(meeting);
 
         //then
-        assertNull(result);
+        assertNotNull(result);
+        assertEquals(m(0, 9, 30), result);
     }
 }
