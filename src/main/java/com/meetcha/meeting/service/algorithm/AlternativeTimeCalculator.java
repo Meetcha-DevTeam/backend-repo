@@ -39,6 +39,8 @@ public class AlternativeTimeCalculator {
                 (cur, tot) -> cur == tot
         );
 
+        if (timeSequence.isEmpty()) return Collections.emptyList();
+
         int maxHit = timeSequence.values().stream()
                 .max(Integer::compareTo)
                 .orElse(0);
@@ -56,7 +58,11 @@ public class AlternativeTimeCalculator {
 
         // SortUtils.sortBySpare 시그니처 변경에 맞춰 seqMap 전달
         List<Integer> spareCandidates = SortUtils.sortBySpare(timeList, timeSequence, hit, PER);
+        if (spareCandidates.isEmpty()) return Collections.emptyList();
+
         List<Integer> earlyCandidates = SortUtils.sortByDay(spareCandidates);
+        if (earlyCandidates.isEmpty()) return Collections.emptyList();
+
         return SortUtils.sortByTimePriority(earlyCandidates);
     }
 
@@ -86,13 +92,19 @@ public class AlternativeTimeCalculator {
 
         // 최대 참여자 수 기준으로 재계산
         Map<Integer, Integer> validSequence = getTimeSequence(meeting, PER, (cur, t) -> cur == fixedMaxParticipants);
+        if (validSequence.isEmpty()) return Collections.emptyList();
+
         List<Integer> timeList = validSequence.keySet().stream()
                 .sorted(Comparator.comparingInt(validSequence::get))
                 .collect(Collectors.toList());
+        if (timeList.isEmpty()) return Collections.emptyList();
 
         int hit = meeting.getDuration() / PER;
         List<Integer> spare = SortUtils.sortBySpare(timeList, validSequence, hit, PER);
+        if (spare.isEmpty()) return Collections.emptyList();
+
         List<Integer> early = SortUtils.sortByDay(spare);
+        if (early.isEmpty()) return Collections.emptyList();
         return SortUtils.sortByTimePriority(early);
     }
 
