@@ -36,8 +36,7 @@ public class AlternativeTimeService {
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
         //대안시간 후보 조회 로직
         // 1. 사용자 식별
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-
+        UUID userId = extractUserId(authorizationHeader);
         // 2. 후보 시간 조회
         List<AlternativeTimeEntity> entities = alternativeTimeRepository.findByMeetingId(meetingId);
 
@@ -96,8 +95,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
     @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
         //대안 시간 투표 제출 로직
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-
+        UUID userId = extractUserId(authorizationHeader);
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
                 .findByMeetingIdAndStartTime(meetingId, request.getAlternativeTime().toLocalDateTime())
@@ -137,4 +135,11 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
                 .build();
     }*/
 
+    private UUID extractUserId(String authorizationHeader) {
+        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
+        if (!jwtProvider.validateToken(token)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+        }
+        return jwtProvider.getUserId(token);
+    }
 }
