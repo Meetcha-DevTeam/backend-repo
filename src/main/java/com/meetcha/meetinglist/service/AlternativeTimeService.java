@@ -1,8 +1,10 @@
 package com.meetcha.meetinglist.service;
 
+import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidAlternativeTimeException;
+import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import com.meetcha.meetinglist.dto.AlternativeTimeDto;
@@ -24,16 +26,17 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
-    private final ParticipantRepository participantRepository ;
+    private final ParticipantRepository participantRepository;
+    private final JwtProvider jwtProvider;
 
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
         //대안시간 후보 조회 로직
         // 1. 사용자 식별
-        // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
-        UUID userId = getCurrentUserId();
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         // 2. 후보 시간 조회
         List<AlternativeTimeEntity> entities = alternativeTimeRepository.findByMeetingId(meetingId);
@@ -93,8 +96,7 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
     @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
         //대안 시간 투표 제출 로직
-        // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
-        UUID userId = getCurrentUserId();
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
@@ -135,9 +137,4 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
                 .build();
     }*/
 
-
-    protected UUID getCurrentUserId() {
-        // TODO: SecurityContextHolder구현 이후 실제 userId 추출
-        return UUID.randomUUID(); // 예시용
-    }
 }
