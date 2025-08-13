@@ -70,6 +70,7 @@ public class MeetingReflectionService {
 
     //특정 회고 상세 조회
     public GetReflectionResponse getReflectionDetail(UUID userId, UUID meetingId) {
-        return reflectionRepository.findReflectionDetailByMeetingIdAndUserId(meetingId, userId);
+        return reflectionRepository.findReflectionDetailByMeetingIdAndUserId(meetingId, userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.REFLECTION_NOT_FOUND));
     }
 }

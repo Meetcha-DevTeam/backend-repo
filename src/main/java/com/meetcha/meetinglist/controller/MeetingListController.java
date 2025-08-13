@@ -90,9 +90,10 @@ public class MeetingListController {
     @PatchMapping("/{meetingId}")
     public ResponseEntity<ApiResponse<JoinMeetingResponse>> updateParticipation(
             @PathVariable UUID meetingId,
-            @RequestBody JoinMeetingRequest request
+            @RequestBody JoinMeetingRequest request,
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
-        JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request);
+        JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request, authorizationHeader);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
     }
 
