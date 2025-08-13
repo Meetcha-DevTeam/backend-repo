@@ -13,7 +13,6 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
-import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+        UUID userId = extractUserId(authorizationHeader);
 
         // 중복 참가 방지
         if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
@@ -103,7 +102,7 @@ public class JoinMeetingService {
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
 
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+        UUID userId = extractUserId(authorizationHeader);
 
 
         // 3. 기존 참여자 존재 확인
@@ -161,5 +160,12 @@ public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingReques
 */
 
 
+    private UUID extractUserId(String authorizationHeader) {
+        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
+        if (!jwtProvider.validateToken(token)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+        }
+        return jwtProvider.getUserId(token);
+    }
 }
 
