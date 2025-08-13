@@ -1,5 +1,7 @@
 package com.meetcha.meeting.domain;
 
+import com.meetcha.meetinglist.domain.ParticipantEntity;
+import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,22 +16,17 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     //작성이 필요한 미팅조회 api에서 사용하는 쿼리
     @Query("""
     SELECT DISTINCT m FROM MeetingEntity m
-    WHERE m.meetingStatus = :status
-      AND (
-          m.createdBy = :userId
-          OR EXISTS (
-              SELECT 1 FROM ParticipantEntity p
-              WHERE p.meeting = m AND p.userId = :userId
-          )
+    WHERE m.createdBy = :userId
+      OR EXISTS (
+          SELECT 1 FROM ParticipantEntity p
+          WHERE p.meeting = m AND p.userId = :userId
       )
       AND NOT EXISTS (
-                SELECT 1 FROM MeetingReflectionEntity r
-                WHERE r.meeting = m AND r.user.userId = :userId
-            )
+          SELECT 1 FROM MeetingReflectionEntity r
+          WHERE r.meeting = m AND r.user.userId = :userId
+      )
 """)
-    List<MeetingEntity> GetMeetingsNeedReflection(
-            @Param("userId") UUID userId
-    );
+    List<MeetingEntity> GetMeetingsNeedReflection(@Param("userId") UUID userId);
 
     //기여도할일조회api에서 사용하는 쿼리
     @Query("""
