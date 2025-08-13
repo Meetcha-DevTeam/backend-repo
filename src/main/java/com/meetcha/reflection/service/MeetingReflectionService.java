@@ -5,6 +5,8 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.*;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meeting.service.algorithm.Meeting;
 import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import com.meetcha.reflection.dto.*;
@@ -100,7 +102,7 @@ public class MeetingReflectionService {
                 .findFirst()
                 .orElse(null);
 
-        long unwrittenCount = meetingRepository.countMeetingsNeedReflection(userId);
+        long unwrittenCount = meetingRepository.countMeetingsNeedReflection(userId, MeetingStatus.DONE);
 
         int totalReflections = writtenCount + (int) unwrittenCount;
 
