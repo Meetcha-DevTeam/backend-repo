@@ -58,12 +58,14 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     FROM MeetingReflectionEntity r
     JOIN r.meeting m
     LEFT JOIN m.project p
-    LEFT JOIN UserProjectAliasEntity a ON a.project = p AND a.user = r.user
+    LEFT JOIN UserProjectAliasEntity a
+        ON a.project.projectId = p.projectId AND a.user.userId = r.user.userId
     WHERE m.meetingId = :meetingId AND r.user.userId = :userId
 """)
-    GetReflectionResponse findReflectionDetailByMeetingIdAndUserId(
+    Optional<GetReflectionResponse> findReflectionDetailByMeetingIdAndUserId(
             @Param("meetingId") UUID meetingId,
             @Param("userId") UUID userId
     );
+
 
 }
