@@ -1,10 +1,7 @@
 package com.meetcha.joinmeeting.service;
 
-<<<<<<< HEAD
 import com.meetcha.global.dto.ApiResponse;
-=======
 import com.meetcha.auth.jwt.JwtProvider;
->>>>>>> dcd3479acd056e971e60d347c7e67911020d0b2f
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
