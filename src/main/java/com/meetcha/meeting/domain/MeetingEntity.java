@@ -19,7 +19,7 @@ public class MeetingEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "meeting_id", nullable = false, updatable = false)
+    @Column(name = "meeting_id", columnDefinition = "BINARY(16)", nullable = false)
     private UUID meetingId;
 
     @Column(name = "title", nullable = false)
