@@ -22,9 +22,10 @@ public class JoinMeetingController {
     @PostMapping("/id/{meetingId}/join")
     public ResponseEntity<ApiResponse<JoinMeetingResponse>> joinMeeeting(
             @PathVariable UUID meetingId,
-            @RequestBody JoinMeetingRequest request
+            @RequestBody JoinMeetingRequest request,
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
-        JoinMeetingResponse response = joinMeetingService.join(meetingId, request);
+        JoinMeetingResponse response = joinMeetingService.join(meetingId, request,authorizationHeader);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 성공", response));
 
     }
