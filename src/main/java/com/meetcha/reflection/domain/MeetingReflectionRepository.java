@@ -67,5 +67,8 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
             @Param("userId") UUID userId
     );
 
+    //작성한 회고 조회
+    @Query("SELECT r FROM MeetingReflectionEntity r WHERE r.user.userId = :userId")
+    List<MeetingReflectionEntity> findAllByUserId(@Param("userId") UUID userId);
 
 }

@@ -116,7 +116,7 @@ public class MeetingListService {
     //작성이 필요한 미팅 조회
     public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
         //DONE 상태 미팅들 조회
-        List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, MeetingStatus.DONE);
+        List<MeetingEntity> meetings = meetingRepository.GetMeetingsNeedReflection(userId);
 
         //사용자 프로젝트 목록 조회 (alias or 기본 이름 포함)
         List<GetProjectsDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);

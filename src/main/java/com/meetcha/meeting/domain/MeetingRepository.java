@@ -22,12 +22,17 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
               WHERE p.meeting = m AND p.userId = :userId
           )
       )
+      AND NOT EXISTS (
+                SELECT 1 FROM MeetingReflectionEntity r
+                WHERE r.meeting = m AND r.user.userId = :userId
+            )
 """)
-    List<MeetingEntity> findByUserIdAndStatus(
-            @Param("userId") UUID userId,
-            @Param("status") MeetingStatus status
+    List<MeetingEntity> GetMeetingsNeedReflection(
+            @Param("userId") UUID userId
     );
-
+    long countMeetingsNeedReflection(
+            @Param("userId") UUID userId
+    );
 
     // 투표 마감 후 가장 많이 투표된 대안 시간을 확정 시 사용
     @Query("""
@@ -56,4 +61,5 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
 """)
     List<MeetingEntity> findMyMeetings(@Param("userId") UUID userId);
 
+    //미작
 }
