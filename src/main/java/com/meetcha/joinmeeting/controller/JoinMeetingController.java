@@ -3,6 +3,7 @@ package com.meetcha.joinmeeting.controller;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,12 @@ public class JoinMeetingController {
 
     //미팅 코드 유효성 검사
     @GetMapping("/code/{code}")
-    public ResponseEntity<ApiResponse<Void>> validateMeetingCode(@PathVariable String code) {
-        joinMeetingService.validateMeetingCode(code);
-        return ResponseEntity.ok(ApiResponse.success(200, "유효한 미팅 코드입니다."));
+    public ResponseEntity<ApiResponse<ValidateMeetingCodeResponse>> validateMeetingCode(
+            @PathVariable String code
+    ) {
+        return ResponseEntity.ok(joinMeetingService.validateMeetingCode(code));
     }
+
 
     // 미팅 정보 조회
     @GetMapping("/id/{meetingId}")

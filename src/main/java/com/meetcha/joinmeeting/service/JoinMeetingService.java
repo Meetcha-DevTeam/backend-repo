@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
@@ -9,6 +10,7 @@ import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,13 +67,28 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
-    public void validateMeetingCode(String code) {
+    //미팅코드 유효검사
+    public ApiResponse<ValidateMeetingCodeResponse> validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-        if (meeting.getDeadline().isBefore(LocalDateTime.now())) {
-            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);
-        }
+        boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
+
+        String deadlineUtc = meeting.getDeadline()
+                .atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toInstant()
+                .toString();
+
+        var body = new ValidateMeetingCodeResponse(
+                meeting.getMeetingId(),
+                meeting.getTitle(),
+                meeting.getDescription(),
+                deadlineUtc,
+                isClosed
+        );
+
+        return ApiResponse.success(200, "유효한 미팅입니다.", body);
     }
 
 
