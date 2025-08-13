@@ -71,7 +71,7 @@ public class AlternativeTimeCalculator {
      */
     private static List<Integer> getLessParticipantMeetingTimes(Meeting meeting) {
         int total = meeting.getParticipants().size();
-        int left = (2 * total) / 3;
+        int left = (int) Math.ceil((2.0 * total) / 3);
         int right = total;
         int maxParticipants = left;
 

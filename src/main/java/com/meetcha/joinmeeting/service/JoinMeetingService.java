@@ -1,8 +1,10 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
+import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
@@ -11,7 +13,6 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
-import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,11 +29,11 @@ public class JoinMeetingService {
     private final MeetingParticipantRepository participantRepository;
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingRepository meetingRepository;
+    private final JwtProvider jwtProvider;
 
     @Transactional
-    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request) {
-        // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
-        UUID userId = getCurrentUserId();
+    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
+        UUID userId = extractUserId(authorizationHeader);
 
         // 중복 참가 방지
         if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
@@ -92,7 +93,7 @@ public class JoinMeetingService {
 
     //미팅정보 수정 로직
     @Transactional
-    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request) {
+    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));/// CustomException으로 통합
@@ -101,8 +102,8 @@ public class JoinMeetingService {
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
 
-        // todo 아직 SecurityContextHolder에 사용자정보 저장이 안되어있음 추후 추가하기
-        UUID userId = getCurrentUserId();
+        UUID userId = extractUserId(authorizationHeader);
+
 
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
@@ -159,11 +160,12 @@ public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingReques
 */
 
 
-    protected UUID getCurrentUserId() {
-        // TODO: SecurityContextHolder구현 이후 실제 userId 추출
-        return UUID.randomUUID(); // 예시용
+    private UUID extractUserId(String authorizationHeader) {
+        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
+        if (!jwtProvider.validateToken(token)) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+        }
+        return jwtProvider.getUserId(token);
     }
-
-
 }
 
