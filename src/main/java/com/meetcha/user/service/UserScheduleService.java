@@ -12,6 +12,7 @@ import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,11 @@ public class UserScheduleService {
         }
 
         // Google Calendar API로 일정 조회
-        return googleCalendarClient.getEvents(accessToken, from, to);
+        try {
+            return googleCalendarClient.getEvents(accessToken, from, to);
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
     }
 
 
