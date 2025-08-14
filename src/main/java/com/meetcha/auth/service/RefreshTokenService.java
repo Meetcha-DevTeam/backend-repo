@@ -40,5 +40,4 @@ public class RefreshTokenService {
 
         return new TokenResponseDto(newAccessToken, newRefreshToken);
     }
-
 }
