@@ -8,6 +8,7 @@ import com.meetcha.auth.domain.RefreshTokenRepository;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.RefreshTokenInvalidException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
 
+    @Transactional
     public TokenResponseDto reissueAccessToken(String refreshToken) {
         RefreshTokenEntity entity = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new RefreshTokenInvalidException(ErrorCode.INVALID_REFRESH_TOKEN));
