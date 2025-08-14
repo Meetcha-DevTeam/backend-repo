@@ -33,6 +33,11 @@ public class UserScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
+        log.info("=== /user/schedule 요청 수신 ===");
+        log.info("Authorization 헤더: {}", authorizationHeader);
+        log.info("from 파라미터: {}", from);
+        log.info("to 파라미터: {}", to);
+
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         log.info("JWT userId = {}", userId);
         List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
