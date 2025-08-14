@@ -58,6 +58,7 @@ public class MeetingConfirmationService {
             boolean hasCandidate = alterTimes != null && !alterTimes.isEmpty();
 
             if (!hasCandidate) {
+                // 이때 가용 시간이 없는 경우 미팅 상태 실패로 지정
                 meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
             } else {
                 saveAlternativeTimeCandidates(alterTimes);

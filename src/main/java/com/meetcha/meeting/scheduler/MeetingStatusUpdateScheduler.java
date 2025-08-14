@@ -64,6 +64,7 @@ public class MeetingStatusUpdateScheduler {
             Optional<AlternativeTimeEntity> confirmed = alternativeTimeRepository
                     .findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(meeting.getMeetingId());
 
+        /// 투표 결과가 있으면 그 시간(confirmed.get().getStartTime())을 미팅 확정 시간으로 저장
             if (confirmed.isPresent()) {
                 meeting.setConfirmedTime(confirmed.get().getStartTime());
                 meeting.setMeetingStatus(MeetingStatus.BEFORE);
@@ -71,6 +72,7 @@ public class MeetingStatusUpdateScheduler {
 
                 syncService.syncMeetingToCalendars(meeting); // 구글 캘린더 연동
             } else {
+                /// 아무도 투표 안하고, 시간이 끝난 경우 실패
                 meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
                 meetingRepository.save(meeting);
             }
