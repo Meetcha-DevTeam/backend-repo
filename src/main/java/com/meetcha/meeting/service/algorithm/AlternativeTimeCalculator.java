@@ -1,5 +1,9 @@
 package com.meetcha.meeting.service.algorithm;
 
+import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -22,11 +26,75 @@ public class AlternativeTimeCalculator {
      * @param meeting 미팅 정보
      * @return Map<"duration", 후보들>, Map<"participant", 후보들>
      */
-    public static Map<String, List<Integer>> getAlternativeTimes(Meeting meeting) {
-        Map<String, List<Integer>> result = new HashMap<>();
-        result.put("duration", getLessDurationMeetingTimes(meeting));
-        result.put("participant", getLessParticipantMeetingTimes(meeting));
-        return result;
+    public static List<AlternativeTimeEntity> getAlternativeTimes(Meeting meeting, UUID meetingId) {
+        List<AlternativeTimeEntity> results = new ArrayList<>();
+
+        // 전략 1: 진행 시간 줄이기
+        Map<Integer, Integer> timeSequenceDuration = getTimeSequence(meeting, PER, (cur, tot) -> cur == tot);
+        if (!timeSequenceDuration.isEmpty()) {
+            int maxHit = timeSequenceDuration.values().stream().max(Integer::compareTo).orElse(0);
+            int adjustedDuration = maxHit * PER; // 줄어든 소요 시간
+
+            for (Integer minutes : getLessDurationMeetingTimes(meeting)) {
+                LocalDateTime start = toLocalDateTime(minutes);
+                results.add(AlternativeTimeEntity.builder()
+                        .alternativeTimeId(UUID.randomUUID())
+                        .meetingId(meetingId)
+                        .startTime(start)
+                        .endTime(start.plusMinutes(adjustedDuration))
+                        .durationAdjustedMinutes(adjustedDuration)
+                        .excludedParticipants(null) // 전략1은 제외 인원 없음
+                        .build());
+            }
+        }
+
+        // 전략 2: 참여자 줄이기
+        int total = meeting.getParticipants().size();
+        int left = (int) Math.ceil((2.0 * total) / 3);
+        int right = total;
+        int maxParticipants = left;
+
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (!getTimeSequence(meeting, PER, (cur, t) -> cur >= mid).isEmpty()) {
+                maxParticipants = Math.max(maxParticipants, mid);
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        final int fixedMaxParticipants = maxParticipants;
+
+        Map<Integer, List<String>> timeBlockMap = TimeUtils.flattenParticipantTimes(meeting, PER);
+        List<String> allParticipants = meeting.getParticipants().stream()
+                .map(Participant::getId)
+                .collect(Collectors.toList());
+
+        // 단순히 참가자 수로 제외된 인원 계산
+        List<String> excluded = allParticipants.size() > fixedMaxParticipants
+                ? allParticipants.subList(fixedMaxParticipants, allParticipants.size())
+                : Collections.emptyList();
+
+        int adjustedDuration2 = meeting.getDuration(); // 시간은 그대로, 인원만 줄임
+        for (Integer minutes : getLessParticipantMeetingTimes(meeting)) {
+            LocalDateTime start = toLocalDateTime(minutes);
+            results.add(AlternativeTimeEntity.builder()
+                    .alternativeTimeId(UUID.randomUUID())
+                    .meetingId(meetingId)
+                    .startTime(start)
+                    .endTime(start.plusMinutes(adjustedDuration2))
+                    .durationAdjustedMinutes(adjustedDuration2)
+                    .excludedParticipants(String.join(",", excluded))
+                    .build());
+        }
+
+        return results;
+    }
+
+    private static LocalDateTime toLocalDateTime(int totalMinutes) {
+        LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
+        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
     }
 
     /**
