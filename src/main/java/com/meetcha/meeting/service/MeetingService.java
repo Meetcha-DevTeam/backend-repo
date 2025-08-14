@@ -2,9 +2,7 @@ package com.meetcha.meeting.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidMeetingRequestException;
-import com.meetcha.meeting.domain.MeetingEntity;
-import com.meetcha.meeting.domain.MeetingRepository;
-import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +18,7 @@ import java.util.*;
 public class MeetingService {
 
     private final MeetingRepository meetingRepository;
+    private final MeetingCandidateDateRepository candidateDateRepository;
     private final Clock clock = Clock.systemDefaultZone();
 
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, UUID creatorId) {
@@ -41,6 +40,17 @@ public class MeetingService {
                 .build();
 
         meetingRepository.save(meeting);
+
+        //후보 날짜 저장
+        List<LocalDate> candidateDates = request.candidateDates();
+
+        if (candidateDates != null) {
+            for (LocalDate date : candidateDates) {
+                MeetingCandidateDateEntity candidate =
+                        new MeetingCandidateDateEntity(meeting, date);
+                candidateDateRepository.save(candidate);
+            }
+        }
 
         return new MeetingCreateResponse(meeting.getMeetingId(), meeting.getCreatedAt());
     }
