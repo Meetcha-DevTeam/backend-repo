@@ -4,9 +4,9 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.UUID;
 
+@Getter
 @Entity
 @Table(name = "meeting_candidate_dates")
-@Getter
 @NoArgsConstructor
 public class MeetingCandidateDateEntity {
     @Id

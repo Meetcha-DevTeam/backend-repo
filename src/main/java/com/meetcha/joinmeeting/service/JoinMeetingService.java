@@ -13,6 +13,8 @@ import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
+import com.meetcha.meeting.domain.MeetingCandidateDateEntity;
+import com.meetcha.meeting.domain.MeetingCandidateDateRepository;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -34,6 +37,7 @@ public class JoinMeetingService {
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingRepository meetingRepository;
     private final JwtProvider jwtProvider;
+    private final MeetingCandidateDateRepository meetingCandidateDateRepository;
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
@@ -98,14 +102,21 @@ public class JoinMeetingService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
+        //candidate 조회
+        List<LocalDate> candidateDates = meetingCandidateDateRepository
+                .findAllByMeeting_MeetingId(meetingId)
+                .stream()
+                .map(MeetingCandidateDateEntity::getCandidateDate)
+                .toList();
+
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
-                meeting.getMeetingStatus(),
-                meeting.getDeadline(),
                 meeting.getDurationMinutes(),
-                meeting.getConfirmedTime()
+                candidateDates,
+                meeting.getDeadline(),
+                meeting.getCreatedAt()
         );
     }
 
