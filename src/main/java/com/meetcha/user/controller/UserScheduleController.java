@@ -9,6 +9,7 @@ import com.meetcha.user.dto.UpdateScheduleRequest;
 import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -32,6 +34,7 @@ public class UserScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+        log.info("JWT userId = {}", userId);
         List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
