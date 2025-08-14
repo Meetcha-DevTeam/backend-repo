@@ -54,13 +54,14 @@ public class MeetingConfirmationService {
 
         if (bestStartMinutes == null) {
             // 대안 시간 후보 산출 시도
-            Map<String, List<Integer>> alterTimes = AlternativeTimeCalculator.getAlternativeTimes(converted);
-            boolean hasCandidate = !alterTimes.get("duration").isEmpty() || !alterTimes.get("participant").isEmpty();
+            List<AlternativeTimeEntity> alterTimes = AlternativeTimeCalculator.getAlternativeTimes(converted,meetingId);
+            boolean hasCandidate = alterTimes != null && !alterTimes.isEmpty();
 
             if (!hasCandidate) {
+                // 이때 가용 시간이 없는 경우 미팅 상태 실패로 지정
                 meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
             } else {
-                saveAlternativeTimeCandidates(meetingId, alterTimes);
+                saveAlternativeTimeCandidates(alterTimes);
                 updateAlternativeDeadlineFromCandidates(meeting);
                 meeting.setMeetingStatus(MeetingStatus.MATCHING);
             }
@@ -137,19 +138,8 @@ public class MeetingConfirmationService {
     }
 
 
-    private void saveAlternativeTimeCandidates(UUID meetingId, Map<String, List<Integer>> alterTimes) {
-        List<Integer> allCandidates = new ArrayList<>();
-        allCandidates.addAll(alterTimes.get("duration"));
-        allCandidates.addAll(alterTimes.get("participant"));
-
-        for (Integer minutes : allCandidates) {
-            LocalDateTime startTime = convertToLocalDateTime(minutes);
-
-            AlternativeTimeEntity entity = AlternativeTimeEntity.builder()
-                    .meetingId(meetingId)
-                    .startTime(startTime)
-                    .build();
-
+    private void saveAlternativeTimeCandidates(List<AlternativeTimeEntity> alterTimes) {
+        for (AlternativeTimeEntity entity : alterTimes) {
             alternativeTimeRepository.save(entity);
         }
     }
