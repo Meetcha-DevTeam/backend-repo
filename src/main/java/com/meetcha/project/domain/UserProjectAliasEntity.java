@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.util.UUID;
 
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class UserProjectAliasEntity {
     //프로젝트 별칭 엔티티
     @Id
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "alias_id", nullable = false)
     private UUID aliasId;
 

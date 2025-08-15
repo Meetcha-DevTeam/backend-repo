@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Table(name = "projects")
 public class ProjectEntity {
     @Id
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "project_id", nullable = false)
     private UUID projectId;
 

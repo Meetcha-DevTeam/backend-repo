@@ -3,6 +3,8 @@ package com.meetcha.auth.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,6 +19,7 @@ public class UserEntity {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
