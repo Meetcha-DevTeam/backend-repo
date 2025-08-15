@@ -10,69 +10,58 @@ import static org.junit.jupiter.api.Assertions.*;
 class DateTimeUtilsTest {
 
     @Test
-    @DisplayName("UTC Z 표기 문자열 → KST LocalDateTime 변환")
-    void testIsoZStringToLocalDateTime_KST() {
-        // UTC 시간
-        String utcZ = "2025-07-22T16:00:00Z";
-        LocalDateTime kstTime = DateTimeUtils.toLocalDateTime(utcZ);
+    @DisplayName("KST 문자열 → UTC LocalDateTime 변환")
+    void testKstStringToUtc() {
+        // given
+        String kstStr = "2025-05-26T09:00:00"; // KST 기준
 
-        // KST는 +9시간
-        assertEquals(LocalDateTime.of(2025, 7, 23, 1, 0), kstTime);
+        // when
+        LocalDateTime utcDateTime = DateTimeUtils.kstStringToUtc(kstStr);
+
+        // then
+        assertEquals(LocalDateTime.of(2025, 5, 26, 0, 0, 0), utcDateTime);
     }
 
     @Test
-    @DisplayName("ISO_LOCAL_DATE_TIME(T 구분) → LocalDateTime 변환")
-    void testIsoStringToLocalDateTime() {
-        String isoString = "2025-07-22T16:00:00";
-        LocalDateTime dateTime = DateTimeUtils.toLocalDateTime(isoString);
+    @DisplayName("UTC LocalDateTime → KST 문자열 변환")
+    void testUtcToKstString() {
+        // given
+        LocalDateTime utcDateTime = LocalDateTime.of(2025, 5, 26, 0, 0, 0); // UTC 기준
 
-        assertEquals(2025, dateTime.getYear());
-        assertEquals(7, dateTime.getMonthValue());
-        assertEquals(22, dateTime.getDayOfMonth());
-        assertEquals(16, dateTime.getHour());
-        assertEquals(0, dateTime.getMinute());
+        // when
+        String kstStr = DateTimeUtils.utcToKstString(utcDateTime);
+
+        // then
+        assertEquals("2025-05-26T09:00:00", kstStr);
     }
 
     @Test
-    @DisplayName("공백 구분 문자열 → LocalDateTime 변환")
-    void testSpaceSeparatedStringToLocalDateTime() {
-        String spaceString = "2025-07-22 16:00:00";
-        LocalDateTime dateTime = DateTimeUtils.toLocalDateTime(spaceString);
+    @DisplayName("KST ↔ UTC 변환 상호 검증")
+    void testKstUtcRoundTrip() {
+        // given
+        LocalDateTime originalKst = LocalDateTime.of(2025, 5, 26, 15, 30, 0);
 
-        assertEquals(LocalDateTime.of(2025, 7, 22, 16, 0), dateTime);
+        // when
+        LocalDateTime utc = DateTimeUtils.kstToUtc(originalKst);
+        LocalDateTime backToKst = DateTimeUtils.utcToKst(utc);
+
+        // then
+        assertEquals(originalKst, backToKst);
     }
 
     @Test
-    @DisplayName("LocalDateTime → 문자열 변환")
-    void testLocalDateTimeToString() {
-        LocalDateTime dateTime = LocalDateTime.of(2025, 7, 22, 16, 0);
-        String result = DateTimeUtils.toString(dateTime);
-
-        assertEquals("2025-07-22 16:00:00", result);
+    @DisplayName("null 입력 시 null 반환")
+    void testNullInputs() {
+        assertNull(DateTimeUtils.kstStringToUtc(null));
+        assertNull(DateTimeUtils.utcToKstString(null));
+        assertNull(DateTimeUtils.kstToUtc(null));
+        assertNull(DateTimeUtils.utcToKst(null));
     }
 
     @Test
-    @DisplayName("UTC → KST 변환")
-    void testUtcToKstConversion() {
-        LocalDateTime utcTime = LocalDateTime.of(2025, 7, 22, 7, 0); // UTC 07:00
-        LocalDateTime kstTime = DateTimeUtils.utcToKst(utcTime);
-
-        assertEquals(LocalDateTime.of(2025, 7, 22, 16, 0), kstTime);
-    }
-
-    @Test
-    @DisplayName("KST → UTC 변환")
-    void testKstToUtcConversion() {
-        LocalDateTime kstTime = LocalDateTime.of(2025, 7, 22, 16, 0); // KST 16:00
-        LocalDateTime utcTime = DateTimeUtils.kstToUtc(kstTime);
-
-        assertEquals(LocalDateTime.of(2025, 7, 22, 7, 0), utcTime);
-    }
-
-    @Test
-    @DisplayName("잘못된 날짜 형식 예외 처리")
-    void testInvalidDateFormat() {
-        String invalid = "2025/07/22 16:00:00"; // 슬래시 사용 → 지원 안 함
-        assertThrows(IllegalArgumentException.class, () -> DateTimeUtils.toLocalDateTime(invalid));
+    @DisplayName("잘못된 날짜 형식 예외 발생")
+    void testInvalidFormat() {
+        String invalidStr = "2025/05/26 09:00:00"; // 잘못된 형식
+        assertThrows(IllegalArgumentException.class, () -> DateTimeUtils.kstStringToUtc(invalidStr));
     }
 }
