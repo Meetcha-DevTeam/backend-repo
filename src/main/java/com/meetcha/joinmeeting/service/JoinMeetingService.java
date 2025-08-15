@@ -37,7 +37,7 @@ public class JoinMeetingService {
 
         // 중복 참가 방지
         if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
-            throw new RuntimeException("중복 참가");
+            throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
         }
 
         // 참가자 저장

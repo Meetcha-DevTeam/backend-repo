@@ -34,6 +34,7 @@ public enum ErrorCode {
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
 
     // 409 Conflict
+    ALREADY_JOINED_MEETING(HttpStatus.CONFLICT, 409, "이미 이 미팅에 참가했습니다."),
     NO_PARTICIPANT_AVAILABILITY(HttpStatus.CONFLICT, 409, "참여자 가용 시간이 없어 미팅을 확정할 수 없습니다."),
 
     //500 Internal Server Error
