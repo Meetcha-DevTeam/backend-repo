@@ -44,7 +44,7 @@ public class MeetingConfirmationService {
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
         if (allAvailability.isEmpty()) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); //todo 후보가 없는 경우 예외 처리
+            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
         }
 
         // 변환 후 계산
