@@ -2,7 +2,6 @@ package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
-import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 
@@ -23,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -61,9 +59,9 @@ public class MeetingListService {
                 meeting.getTitle(),
                 meeting.getDescription(),
                 meeting.getMeetingStatus(),
-                DateTimeUtils.utcToKst(meeting.getDeadline()),
+                meeting.getDeadline(),
                 meeting.getDurationMinutes(),
-                DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
+                meeting.getConfirmedTime(),
                 participantDtos
         );
     }
@@ -78,8 +76,8 @@ public class MeetingListService {
                 .map(m -> new MeetingListResponse(
                         m.getMeetingId(),
                         m.getTitle(),
-                        DateTimeUtils.utcToKst(m.getDeadline()),
-                        DateTimeUtils.utcToKst(m.getConfirmedTime()),
+                        m.getDeadline(),
+                        m.getConfirmedTime(),
                         m.getDurationMinutes(),
                         m.getMeetingStatus()
                 ))
@@ -111,7 +109,7 @@ public class MeetingListService {
                             meeting.getDescription(),
                             projectId,
                             projectName,
-                            DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
+                            meeting.getConfirmedTime(),
                             meeting.getMeetingStatus().name()
                     );
                 })
