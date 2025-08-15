@@ -98,7 +98,6 @@ public class LoginService {
                     .email(email)
                     .name(name)
                     .googleToken(googleAccessToken)
-                    .googleRefreshToken(googleRefreshToken)  //최초 로그인 시에만 값이 있을 수 있음
                     .profileImgSrc(picture)
                     .createdAt(LocalDateTime.now())
                     .build();
@@ -106,7 +105,7 @@ public class LoginService {
         });
 
         //항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
-        user.updateGoogleTokens(googleAccessToken, googleRefreshToken);
+        user.updateGoogleAccessToken(googleAccessToken);
         userRepository.save(user);
 
         String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());

@@ -26,11 +26,9 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    // 구글 액세스 토큰 저장
     @Column(name = "google_token", nullable = false)
     private String googleToken;
-
-    @Column(name = "google_refresh_token")
-    private String googleRefreshToken;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -38,10 +36,7 @@ public class UserEntity {
     @Column(name = "profile_img_src")
     private String profileImgSrc;
 
-    public void updateGoogleTokens(String accessToken, String maybeRefreshToken) {
+    public void updateGoogleAccessToken(String accessToken) {
         this.googleToken = accessToken;
-        if (maybeRefreshToken != null && !maybeRefreshToken.isBlank()) {
-            this.googleRefreshToken = maybeRefreshToken;
-        }
     }
 }
