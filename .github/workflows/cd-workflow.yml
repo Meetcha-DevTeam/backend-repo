@@ -58,11 +58,10 @@ jobs:
           script: |
             set -e
 
-            echo "✋🏻Stopping existing container (if exists)"
-            sudo docker stop meetcha || true
-            sudo docker rm meetcha || true
-            # sudo docker rm -f meetcha || true
-
+            echo "✋🏻Stopping and removing existing container (if exists)"
+            sudo docker rm -f meetcha || true   # 컨테이너가 있으면 강제로 삭제
+  
+  
             echo "🐳 Current docker containers:"
             sudo docker ps -a
 
