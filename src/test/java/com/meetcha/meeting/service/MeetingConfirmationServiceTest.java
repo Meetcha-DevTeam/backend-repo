@@ -216,7 +216,7 @@ class MeetingConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("가용 시간이 비어 있으면 INTERNAL_SERVER_ERROR 예외")
+    @DisplayName("가용 시간이 비어 있으면 NO_PARTICIPANT_AVAILABILITY 예외")
     void confirmMeeting_whenNoAvailability_throws() {
         // given
         UUID meetingId = UUID.randomUUID();
@@ -226,7 +226,7 @@ class MeetingConfirmationServiceTest {
         // when, then
         CustomException ex = assertThrows(CustomException.class,
                 () -> service.confirmMeeting(meetingId));
-        assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, ex.getErrorCode());
+        assertEquals(ErrorCode.NO_PARTICIPANT_AVAILABILITY, ex.getErrorCode());
 
         verify(syncService, never()).syncMeetingToCalendars(any());
         verify(alternativeTimeRepository, never()).saveAll(anyList());
