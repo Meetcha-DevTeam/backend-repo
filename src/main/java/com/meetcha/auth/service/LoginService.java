@@ -33,6 +33,7 @@ public class LoginService {
         String code = request.getCode();
         RestTemplate restTemplate = new RestTemplate();
 
+        //구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -62,10 +63,12 @@ public class LoginService {
             throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
-        String accessToken = (String) tokenResponse.getBody().get("access_token");
+        String googleAccessToken = (String) tokenResponse.getBody().get("access_token");
+        String googleRefreshToken = (String) tokenResponse.getBody().get("refresh_token"); // 최초 로그인시에만 내려올 수 있음
 
+        //구글 사용자 정보
         HttpHeaders userInfoHeaders = new HttpHeaders();
-        userInfoHeaders.setBearerAuth(accessToken);
+        userInfoHeaders.setBearerAuth(googleAccessToken);
         HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
 
         ResponseEntity<Map> userInfoResponse;
@@ -76,12 +79,11 @@ public class LoginService {
                     userInfoRequest,
                     Map.class
             );
-        } catch (Exception e) { //예외발생
+        } catch (Exception e) {
             throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
-        //응답왔는데 200번대아님
-        if (!userInfoResponse.getStatusCode().is2xxSuccessful()) {
+        if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
             throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
@@ -90,26 +92,36 @@ public class LoginService {
         String name = (String) userInfo.get("name");
         String picture = (String) userInfo.get("picture");
 
+        //기존 유저 조회 or 생성
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
                     .name(name)
-                    .googleToken(accessToken)
+                    .googleToken(googleAccessToken)
                     .profileImgSrc(picture)
                     .createdAt(LocalDateTime.now())
                     .build();
             return userRepository.save(newUser);
         });
 
+        //항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
+        user.updateGoogleAccessToken(googleAccessToken);
+        userRepository.save(user);
+
         String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
         String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
 
-        RefreshTokenEntity tokenEntity = new RefreshTokenEntity(
-                user.getUserId(),
-                jwtRefreshToken,
-                LocalDateTime.now().plusDays(14)
-        );
-        refreshTokenRepository.save(tokenEntity);
+        //RefreshToken 저장(있으면 갱신, 없으면 생성)
+        refreshTokenRepository.findByUserId(user.getUserId())
+                .ifPresentOrElse(
+                        existing -> {
+                            existing.update(jwtRefreshToken, LocalDateTime.now().plusDays(14));
+                            refreshTokenRepository.save(existing);
+                        },
+                        () -> refreshTokenRepository.save(
+                                new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14))
+                        )
+                );
 
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }

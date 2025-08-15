@@ -6,9 +6,10 @@ import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
-import com.meetcha.user.dto.scheduleResponse;
+import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.service.UserScheduleService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -26,13 +28,19 @@ public class UserScheduleController {
 
     //유저 스케줄 조회
     @GetMapping("/schedule")
-    public ApiResponse<List<scheduleResponse>> getSchedule(
+    public ApiResponse<List<ScheduleResponse>> getSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
+        log.info("=== /user/schedule 요청 수신 ===");
+        log.info("Authorization 헤더: {}", authorizationHeader);
+        log.info("from 파라미터: {}", from);
+        log.info("to 파라미터: {}", to);
+
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        List<scheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
+        log.info("JWT userId = {}", userId);
+        List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
 

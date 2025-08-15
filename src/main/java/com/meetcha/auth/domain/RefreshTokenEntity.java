@@ -21,11 +21,10 @@ public class RefreshTokenEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-
-    @Column(nullable = false)
+    @Column(name = "token", nullable = false, length = 512)
     private String token;
 
-    @Column(nullable = false)
+    @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
 
     public RefreshTokenEntity(UUID userId, String token, LocalDateTime expiryDate) {
@@ -43,4 +42,3 @@ public class RefreshTokenEntity {
         return expiryDate.isBefore(LocalDateTime.now());
     }
 }
-

@@ -14,11 +14,13 @@ import com.meetcha.meetinglist.dto.MeetingListResponse;
 import com.meetcha.meetinglist.dto.ParticipantDto;
 import com.meetcha.meetinglist.repository.ParticipantRepository;
 import com.meetcha.project.domain.UserProjectAliasRepository;
-import com.meetcha.project.dto.ProjectSummaryDto;
+import com.meetcha.project.dto.GetProjectsDto;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingListService {
@@ -91,33 +94,36 @@ public class MeetingListService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
-        List<ParticipantEntity> participations = participantRepository.findByUserId(userId);
+        // 생성자 or 참가자인 미팅 전부 (중복 제거, 최신순)
+        List<MeetingEntity> meetings = meetingRepository.findMyMeetings(userId);
 
-        return participations.stream()
-                .map(ParticipantEntity::getMeeting)
-                .map(meeting -> new MeetingListResponse(
-                        meeting.getMeetingId(),
-                        meeting.getTitle(),
-                        meeting.getDeadline(),
-                        meeting.getConfirmedTime(),
-                        meeting.getDurationMinutes(),
-                        meeting.getMeetingStatus()
+        return meetings.stream()
+                .map(m -> new MeetingListResponse(
+                        m.getMeetingId(),
+                        m.getTitle(),
+                        m.getDeadline(),
+                        m.getConfirmedTime(),
+                        m.getDurationMinutes(),
+                        m.getMeetingStatus()
                 ))
                 .toList();
     }
 
+
+
     //작성이 필요한 미팅 조회
     public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
         //DONE 상태 미팅들 조회
-        List<MeetingEntity> meetings = meetingRepository.findByUserIdAndStatus(userId, MeetingStatus.DONE);
+        List<MeetingEntity> meetings = meetingRepository.getMeetingsNeedReflection(userId, MeetingStatus.DONE);
 
         //사용자 프로젝트 목록 조회 (alias or 기본 이름 포함)
-        List<ProjectSummaryDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);
+        List<GetProjectsDto> projectSummaries = userProjectAliasRepository.findProjectsByUserId(userId);
 
         //Map<projectId, projectName>으로 변환
         Map<UUID, String> projectNameMap = projectSummaries.stream()
-                .collect(Collectors.toMap(ProjectSummaryDto::getProjectId, ProjectSummaryDto::getProjectName));
+                .collect(Collectors.toMap(GetProjectsDto::getProjectId, GetProjectsDto::getProjectName));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 

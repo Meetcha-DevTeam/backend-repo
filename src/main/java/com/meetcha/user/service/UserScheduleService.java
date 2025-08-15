@@ -9,9 +9,10 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
-import com.meetcha.user.dto.scheduleResponse;
+import com.meetcha.user.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +26,7 @@ public class UserScheduleService {
     private final GoogleCalendarClient googleCalendarClient; // 구글 캘린더 호출용
 
     //유저 일정 조회
-    public List<scheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
+    public List<ScheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
         // 유저 조회
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -37,7 +38,11 @@ public class UserScheduleService {
         }
 
         // Google Calendar API로 일정 조회
-        return googleCalendarClient.getEvents(accessToken, from, to);
+        try {
+            return googleCalendarClient.getEvents(accessToken, from, to);
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new CustomException(ErrorCode.MISSING_GOOGLE_ACCESS_TOKEN);
+        }
     }
 
 

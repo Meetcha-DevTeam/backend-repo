@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
@@ -11,6 +12,9 @@ import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
+import com.meetcha.meeting.domain.MeetingCandidateDateEntity;
+import com.meetcha.meeting.domain.MeetingCandidateDateRepository;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
@@ -18,7 +22,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +37,7 @@ public class JoinMeetingService {
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingRepository meetingRepository;
     private final JwtProvider jwtProvider;
+    private final MeetingCandidateDateRepository meetingCandidateDateRepository;
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
@@ -73,14 +81,28 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
-    //미팅 코드 유효선 검증 시 사용
-    public void validateMeetingCode(String code) {
+    //미팅코드 유효검사
+    public ApiResponse<ValidateMeetingCodeResponse> validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-        if (meeting.getDeadline().isBefore(LocalDateTime.now())) {
-            throw new InvalidJoinMeetingRequestException(ErrorCode.MEETING_DEADLINE_PASSED);
-        }
+        boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
+
+        String deadlineUtc = meeting.getDeadline()
+                .atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneOffset.UTC)
+                .toInstant()
+                .toString();
+
+        var body = new ValidateMeetingCodeResponse(
+                meeting.getMeetingId(),
+                meeting.getTitle(),
+                meeting.getDescription(),
+                deadlineUtc,
+                isClosed
+        );
+
+        return ApiResponse.success(200, "유효한 미팅입니다.", body);
     }
 
 
@@ -89,14 +111,21 @@ public class JoinMeetingService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
+        //candidate 조회
+        List<LocalDate> candidateDates = meetingCandidateDateRepository
+                .findAllByMeeting_MeetingId(meetingId)
+                .stream()
+                .map(MeetingCandidateDateEntity::getCandidateDate)
+                .toList();
+
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
-                meeting.getMeetingStatus(),
-                meeting.getDeadline(),
                 meeting.getDurationMinutes(),
-                meeting.getConfirmedTime()
+                candidateDates,
+                meeting.getDeadline(),
+                meeting.getCreatedAt()
         );
     }
 

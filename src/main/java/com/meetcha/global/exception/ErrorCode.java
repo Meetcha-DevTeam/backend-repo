@@ -14,8 +14,6 @@ public enum ErrorCode {
     INVALID_CANDIDATE_DATES(HttpStatus.BAD_REQUEST, 400, "후보 날짜는 최소 1개 이상, 최대 10개까지 가능합니다."),
     INVALID_CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, 400, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, 400, "미팅 참여마감시간이 지났습니다."),
-    ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, 400, "이미 대안시간 투표를 제출하였습니다."),
-    ALREADY_SUBMITTED_REFLECTION(HttpStatus.BAD_REQUEST,400, "이미 회고를 작성한 미팅입니다."),
 
     //401 Unauthorized
     MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "인증 토큰이 필요합니다."),
@@ -32,6 +30,14 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
+    REFLECTION_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
+    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "리소스를 찾을 수 없습니다."),
+
+    //409 Conflict
+    ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, 409, "이미 대안시간 투표를 제출하였습니다."),
+    ALREADY_SUBMITTED_REFLECTION(HttpStatus.BAD_REQUEST,409, "이미 회고를 작성한 미팅입니다."),
+
+    DUPLICATE_PROJECT_NAME(HttpStatus.CONFLICT, 409, "이미 존재하는 프로젝트 이름입니다."),
 
     // 409 Conflict
     ALREADY_JOINED_MEETING(HttpStatus.CONFLICT, 409, "이미 이 미팅에 참가했습니다."),

@@ -1,5 +1,7 @@
 package com.meetcha.meeting.domain;
 
+import com.meetcha.meetinglist.domain.ParticipantEntity;
+import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,8 +24,33 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
               WHERE p.meeting = m AND p.userId = :userId
           )
       )
+      AND NOT EXISTS (
+          SELECT 1 FROM MeetingReflectionEntity r
+          WHERE r.meeting = m AND r.user.userId = :userId
+      )
 """)
-    List<MeetingEntity> findByUserIdAndStatus(
+    List<MeetingEntity> getMeetingsNeedReflection(
+            @Param("userId") UUID userId,
+            @Param("status") MeetingStatus status
+    );
+
+    //기여도할일조회api에서 사용하는 쿼리
+    @Query("""
+    SELECT COUNT(m) FROM MeetingEntity m
+    WHERE m.meetingStatus = :status
+      AND (
+          m.createdBy = :userId
+          OR EXISTS (
+              SELECT 1 FROM ParticipantEntity p
+              WHERE p.meeting = m AND p.userId = :userId
+          )
+      )
+      AND NOT EXISTS (
+          SELECT 1 FROM MeetingReflectionEntity r
+          WHERE r.meeting = m AND r.user.userId = :userId
+      )
+""")
+    long countMeetingsNeedReflection(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
     );
@@ -42,5 +69,18 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     List<MeetingEntity> findByMeetingStatusAndConfirmedTimeBefore(MeetingStatus meetingStatus, LocalDateTime now);
 
     List<MeetingEntity> findByMeetingStatusAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);
+
+    //미팅목록조회쿼리
+    @Query("""
+    SELECT DISTINCT m
+    FROM MeetingEntity m
+    WHERE m.createdBy = :userId
+       OR EXISTS (
+           SELECT 1 FROM ParticipantEntity p
+           WHERE p.meeting = m AND p.userId = :userId
+       )
+    ORDER BY m.createdAt DESC
+""")
+    List<MeetingEntity> findMyMeetings(@Param("userId") UUID userId);
 
 }

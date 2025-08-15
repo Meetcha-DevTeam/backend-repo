@@ -42,27 +42,33 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
 
     //특정 회고 상세 조회
     @Query("""
-        SELECT new com.meetcha.reflection.dto.GetReflectionResponse(
-            m.meetingId,
-            p.projectId,
-            COALESCE(a.customName, p.name),
-            m.title,
-            m.description,
-            m.confirmedTime,
-            r.contribution,
-            r.role,
-            r.thought,
-            r.completedWork,
-            r.plannedWork
-        )
-        FROM MeetingReflectionEntity r
-        JOIN r.meeting m
-        JOIN m.project p
-        LEFT JOIN UserProjectAliasEntity a ON a.project = p AND a.user = r.user
-        WHERE m.meetingId = :meetingId AND r.user.userId = :userId
-    """)
-    GetReflectionResponse findReflectionDetailByMeetingIdAndUserId(
+    SELECT new com.meetcha.reflection.dto.GetReflectionResponse(
+        m.meetingId,
+        p.projectId,
+        COALESCE(a.customName, p.name),
+        m.title,
+        m.description,
+        m.confirmedTime,
+        r.contribution,
+        r.role,
+        r.thought,
+        r.completedWork,
+        r.plannedWork
+    )
+    FROM MeetingReflectionEntity r
+    JOIN r.meeting m
+    LEFT JOIN m.project p
+    LEFT JOIN UserProjectAliasEntity a
+        ON a.project.projectId = p.projectId AND a.user.userId = r.user.userId
+    WHERE m.meetingId = :meetingId AND r.user.userId = :userId
+""")
+    Optional<GetReflectionResponse> findReflectionDetailByMeetingIdAndUserId(
             @Param("meetingId") UUID meetingId,
             @Param("userId") UUID userId
     );
+
+    //작성한 회고 조회
+    @Query("SELECT r FROM MeetingReflectionEntity r WHERE r.user.userId = :userId")
+    List<MeetingReflectionEntity> findAllByUserId(@Param("userId") UUID userId);
+
 }

@@ -3,6 +3,8 @@ package com.meetcha.auth.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -17,6 +19,7 @@ public class UserEntity {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
@@ -26,6 +29,7 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    // 구글 액세스 토큰 저장(구글 api 호출용, jwt 액세스토큰은 저장 X)
     @Column(name = "google_token", nullable = false)
     private String googleToken;
 
@@ -34,4 +38,8 @@ public class UserEntity {
 
     @Column(name = "profile_img_src")
     private String profileImgSrc;
+
+    public void updateGoogleAccessToken(String accessToken) {
+        this.googleToken = accessToken;
+    }
 }

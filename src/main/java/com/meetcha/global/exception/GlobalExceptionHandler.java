@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.Map;
 
@@ -24,6 +25,12 @@ public class GlobalExceptionHandler {
     // 리프레시 토큰이 유효하지 않을 경우 예외 처리
     @ExceptionHandler(RefreshTokenInvalidException.class)
     public ResponseEntity<ApiResponse<Void>> handleRefreshTokenInvalid(RefreshTokenInvalidException e) {
+        return error(ErrorCode.INVALID_REFRESH_TOKEN);
+    }
+
+    // 리소스없을때
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResource(NoResourceFoundException e) {
         return error(ErrorCode.INVALID_REFRESH_TOKEN);
     }
 
