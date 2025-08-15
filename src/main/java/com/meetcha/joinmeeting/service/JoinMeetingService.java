@@ -35,6 +35,15 @@ public class JoinMeetingService {
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
         UUID userId = extractUserId(authorizationHeader);
 
+        // 미팅 조회
+        MeetingEntity meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+
+        // 마감 시간 확인
+        if (meeting.isDeadlinePassed()) {
+            throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
+        }
+
         // 중복 참가 방지
         if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
             throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
@@ -64,6 +73,7 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
+    //미팅 코드 유효선 검증 시 사용
     public void validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
