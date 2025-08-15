@@ -81,13 +81,8 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
-<<<<<<< HEAD
     //미팅코드 유효검사
     public ApiResponse<ValidateMeetingCodeResponse> validateMeetingCode(String code) {
-=======
-    //미팅 코드 유효선 검증 시 사용
-    public void validateMeetingCode(String code) {
->>>>>>> c02b2bc1256c3adbbe50df300704d20133cbb964
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
