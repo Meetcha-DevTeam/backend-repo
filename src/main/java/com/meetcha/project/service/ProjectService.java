@@ -5,6 +5,7 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.ConflictException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.NotFoundException;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import com.meetcha.project.domain.UserProjectAliasEntity;
@@ -34,7 +35,7 @@ public class ProjectService {
     private final UserRepository userRepository;
 
     //프로젝트 생성
-    public CreateProjectResponse createProject(CreateProjectRequest request, UUID userId){
+    public CreateProjectResponse createProject(CreateProjectRequest request, UUID userId) {
         //중복된 이름 확인
         if (projectRepository.findByName(request.getName()).isPresent()) {
             throw new ConflictException(ErrorCode.DUPLICATE_PROJECT_NAME);
@@ -65,7 +66,7 @@ public class ProjectService {
         return CreateProjectResponse.builder()
                 .projectId(savedProject.getProjectId())
                 .name(savedProject.getName())
-                .createdAt(savedProject.getCreatedAt())
+                .createdAt(DateTimeUtils.utcToKst(savedProject.getCreatedAt()))
                 .build();
     }
 }
