@@ -30,6 +30,9 @@ public enum ErrorCode {
     MISSING_GOOGLE_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED,401, "유저의 Google access token이 존재하지 않습니다."),
     MISSING_GOOGLE_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,401, "유저의 Google refresh token이 존재하지 않습니다."),
 
+    //403 FORBIDDEN
+    FORBIDDEN(HttpStatus.FORBIDDEN, 403, "접근 권한이 없습니다."),
+
     //404 Not Found
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),

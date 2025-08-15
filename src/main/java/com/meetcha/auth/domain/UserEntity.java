@@ -56,8 +56,4 @@ public class UserEntity {
         this.googleRefreshToken = refreshToken != null ? refreshToken : this.googleRefreshToken;
         this.googleTokenExpiresAt = expiresAt;
     }
-
-    public void updateGoogleAccessToken(String accessToken) {
-        this.googleToken = accessToken;
-    }
 }
