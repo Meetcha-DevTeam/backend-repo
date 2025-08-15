@@ -1,8 +1,11 @@
 package com.meetcha.meeting.service.algorithm;
 
+import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +35,12 @@ class AlternativeTimeCalculatorTest {
         );
     }
 
+    // 기존 int 비교 → LocalDateTime 비교용
+    private static LocalDateTime ldt(int totalMinutes) {
+        LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
+        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
+    }
+
     @Test
     @DisplayName("[전략1] 2/3 이상 공통 구간이 있으면 후보를 반환한다")
     void durationStrategy_returnsCandidates_whenTwoThirdsAvailable() {
@@ -44,17 +53,22 @@ class AlternativeTimeCalculatorTest {
         Meeting meeting = meetingOf(90, Arrays.asList(a, b));
 
         // when
-        Map<String, List<Integer>> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting);
+        List<AlternativeTimeEntity> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting, UUID.randomUUID());
 
         // then
         assertNotNull(alt);
-        assertTrue(alt.containsKey("duration"));
-        List<Integer> durationList = alt.get("duration");
+        List<AlternativeTimeEntity> durationList = alt.stream()
+                .filter(e -> e.getExcludedParticipants() == null)
+                .toList();
         assertNotNull(durationList);
         assertFalse(durationList.isEmpty(), "2/3 충족 시 대안 시간(진행 시간 단축)은 비어있지 않아야 함");
 
         // 이 시나리오에서는 전원 공통 2블럭이 09:00~09:30, 09:30~10:00 뿐이므로 시작점은 09:00 하나로 결정됨
-        assertEquals(List.of(m(0, 9, 0)), durationList);
+        // 시작점이 09:00 하나로 결정되는지 확인
+        List<LocalDateTime> starts = durationList.stream()
+                .map(AlternativeTimeEntity::getStartTime)
+                .toList();
+        assertEquals(List.of(ldt(m(0, 9, 0))), starts);
     }
 
     @Test
@@ -69,12 +83,14 @@ class AlternativeTimeCalculatorTest {
         Meeting meeting = meetingOf(90, Arrays.asList(a, b));
 
         // when
-        Map<String, List<Integer>> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting);
+        List<AlternativeTimeEntity> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting, UUID.randomUUID());
 
         // then
         assertNotNull(alt);
-        assertTrue(alt.containsKey("duration"));
-        assertTrue(alt.get("duration").isEmpty(), "2/3 미만이면 진행 시간 단축 후보는 없어야 함");
+        boolean hasDuration = alt.stream()
+                .anyMatch((e -> e.getExcludedParticipants() == null));
+        assertFalse(hasDuration, "2/3 미만이면 진행 시간 단축 후보는 없어야 함");
+
     }
 
     @Test
@@ -92,17 +108,21 @@ class AlternativeTimeCalculatorTest {
         Meeting meeting = meetingOf(60, Arrays.asList(a, b, c));
 
         // when
-        Map<String, List<Integer>> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting);
+        List<AlternativeTimeEntity> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting, UUID.randomUUID());
 
         // then
         assertNotNull(alt);
-        assertTrue(alt.containsKey("participant"));
-        List<Integer> plist = alt.get("participant");
-        assertNotNull(plist);
-        assertFalse(plist.isEmpty(), "2명 기준으로 가능한 시간이 있으므로 후보가 나와야 함");
+        // 전략2: excludedParticipants !=null  인 후보만 필터링
+        List<AlternativeTimeEntity> plist = alt.stream()
+                .filter(e -> e.getExcludedParticipants() != null)
+                .toList();
+        assertFalse(plist.isEmpty(), "2명 기준으로 가능한 시간이 있으므로 후보가 나와야함");
 
         // 가능한 시작점은 09:00 하나(09:30 시작은 연속 1블럭만 남으므로 60분 불가)
-        assertEquals(List.of(m(0, 9, 0)), plist);
+        List<LocalDateTime> starts = plist.stream()
+                .map(AlternativeTimeEntity::getStartTime)
+                .toList();
+        assertEquals(List.of(ldt(m(0, 9, 0))), starts);
     }
 
     @Test
@@ -118,12 +138,13 @@ class AlternativeTimeCalculatorTest {
         Meeting meeting = meetingOf(60, Arrays.asList(a, b, c));
 
         // when
-        Map<String, List<Integer>> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting);
+        List<AlternativeTimeEntity> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting, UUID.randomUUID());
 
         // then
         assertNotNull(alt);
-        assertTrue(alt.containsKey("participant"));
-        assertTrue(alt.get("participant").isEmpty(), "2명 기준으로도 공통이 없으므로 후보가 없어야 함");
+        boolean hasParticipant = alt.stream()
+                .anyMatch(e -> e.getExcludedParticipants() != null);
+        assertFalse(hasParticipant, "2명 기준으로도 공통이 없으므로 후보가 없어야 함");
     }
 
     @Test
@@ -135,13 +156,17 @@ class AlternativeTimeCalculatorTest {
         Meeting meeting = meetingOf(60, Arrays.asList(a, b));
 
         // when
-        Map<String, List<Integer>> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting);
+        List<AlternativeTimeEntity> alt = AlternativeTimeCalculator.getAlternativeTimes(meeting, UUID.randomUUID());
 
         // then
         assertNotNull(alt);
-        assertTrue(alt.containsKey("duration"));
-        assertTrue(alt.containsKey("participant"));
-        assertNotNull(alt.get("duration"));
-        assertNotNull(alt.get("participant"));
+        //구조 변경(Map ->List)에 따라 엔티티 기본 필드 유효성으로 대체 검증
+        for(AlternativeTimeEntity e:alt){
+            assertNotNull(e.getMeetingId());
+            assertNotNull(e.getStartTime());
+            assertNotNull(e.getEndTime());
+            assertTrue(e.getDurationAdjustedMinutes()>0);
+            assertTrue(e.getEndTime().isAfter(e.getStartTime()));
+        }
     }
 }
