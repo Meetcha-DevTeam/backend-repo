@@ -7,7 +7,7 @@ import java.time.format.DateTimeParseException;
 /**
  *  LocalDateTime <-> String 변환 및 타임존 변환을 위한 유틸 클래스
  */
-public class DateTimeUtil {
+public class DateTimeUtils {
 
     private static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DEFAULT_PATTERN);

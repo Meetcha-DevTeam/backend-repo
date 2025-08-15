@@ -6,7 +6,7 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.global.util.AuthHeaderUtils;
-import com.meetcha.global.util.DateTimeUtil;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
@@ -71,8 +71,8 @@ public class JoinMeetingService {
                 .map(slot -> ParticipantAvailability.create(
                         participant.getParticipantId(),
                         meetingId,
-                        DateTimeUtil.toLocalDateTime(slot.startAt().toString()),
-                        DateTimeUtil.toLocalDateTime(slot.endAt().toString())
+                        DateTimeUtils.toLocalDateTime(slot.startAt().toString()),
+                        DateTimeUtils.toLocalDateTime(slot.endAt().toString())
                 ))
                 .toList();
 
@@ -89,8 +89,8 @@ public class JoinMeetingService {
 
         boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
 
-        String deadlineUtc = DateTimeUtil.toString(
-                DateTimeUtil.kstToUtc(meeting.getDeadline())
+        String deadlineUtc = DateTimeUtils.toString(
+                DateTimeUtils.kstToUtc(meeting.getDeadline())
         );
 
 
@@ -124,8 +124,8 @@ public class JoinMeetingService {
                 meeting.getDescription(),
                 meeting.getDurationMinutes(),
                 candidateDates,
-                DateTimeUtil.toString(meeting.getDeadline()),
-                DateTimeUtil.toString(meeting.getCreatedAt())
+                DateTimeUtils.toString(meeting.getDeadline()),
+                DateTimeUtils.toString(meeting.getCreatedAt())
         );
     }
 
@@ -159,8 +159,8 @@ public class JoinMeetingService {
                 .map(slot -> ParticipantAvailability.create(
                         participantId,
                         meetingId,
-                        DateTimeUtil.toLocalDateTime(slot.startAt().toString()),
-                        DateTimeUtil.toLocalDateTime(slot.endAt().toString())
+                        DateTimeUtils.toLocalDateTime(slot.startAt().toString()),
+                        DateTimeUtils.toLocalDateTime(slot.endAt().toString())
                 ))
                 .toList();
 
