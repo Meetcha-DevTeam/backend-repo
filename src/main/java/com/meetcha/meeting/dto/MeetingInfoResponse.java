@@ -1,7 +1,5 @@
 package com.meetcha.meeting.dto;
 
-import com.meetcha.meeting.domain.MeetingStatus;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,6 +12,6 @@ public record MeetingInfoResponse(
         String description,
         Integer durationMinutes,
         List<LocalDate> candidateDates,
-        String deadline,
-        String createdAt
+        LocalDateTime deadline,
+        LocalDateTime createdAt
 ) {}

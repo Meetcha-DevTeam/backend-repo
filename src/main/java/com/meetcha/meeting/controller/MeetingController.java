@@ -2,8 +2,6 @@ package com.meetcha.meeting.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.UnauthorizedException;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;

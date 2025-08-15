@@ -8,7 +8,6 @@ public record JoinMeetingRequest(
         List<TimeSlot> selectedTimes
 ) {
     public record TimeSlot(
-            //todo time 관리 방식 의논 요
             LocalDateTime startAt,
             LocalDateTime endAt
     ) {}

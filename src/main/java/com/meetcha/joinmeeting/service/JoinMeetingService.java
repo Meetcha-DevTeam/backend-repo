@@ -25,8 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +39,7 @@ public class JoinMeetingService {
     private final MeetingCandidateDateRepository meetingCandidateDateRepository;
 
     @Transactional
-    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request,  String authorizationHeader) {
+    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
         UUID userId = extractUserId(authorizationHeader);
 
         // 미팅 조회
@@ -71,8 +69,8 @@ public class JoinMeetingService {
                 .map(slot -> ParticipantAvailability.create(
                         participant.getParticipantId(),
                         meetingId,
-                        DateTimeUtils.toLocalDateTime(slot.startAt().toString()),
-                        DateTimeUtils.toLocalDateTime(slot.endAt().toString())
+                        DateTimeUtils.kstStringToUtc(slot.startAt().toString()),
+                        DateTimeUtils.kstStringToUtc(slot.endAt().toString())
                 ))
                 .toList();
 
@@ -89,16 +87,13 @@ public class JoinMeetingService {
 
         boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
 
-        String deadlineUtc = DateTimeUtils.toString(
-                DateTimeUtils.kstToUtc(meeting.getDeadline())
-        );
 
 
         var body = new ValidateMeetingCodeResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
-                deadlineUtc,
+                DateTimeUtils.utcToKst(meeting.getDeadline()),
                 isClosed
         );
 
@@ -124,8 +119,8 @@ public class JoinMeetingService {
                 meeting.getDescription(),
                 meeting.getDurationMinutes(),
                 candidateDates,
-                DateTimeUtils.toString(meeting.getDeadline()),
-                DateTimeUtils.toString(meeting.getCreatedAt())
+                DateTimeUtils.utcToKst(meeting.getDeadline()),
+                DateTimeUtils.utcToKst(meeting.getCreatedAt())
         );
     }
 
@@ -159,8 +154,8 @@ public class JoinMeetingService {
                 .map(slot -> ParticipantAvailability.create(
                         participantId,
                         meetingId,
-                        DateTimeUtils.toLocalDateTime(slot.startAt().toString()),
-                        DateTimeUtils.toLocalDateTime(slot.endAt().toString())
+                        DateTimeUtils.kstStringToUtc(slot.startAt().toString()),
+                        DateTimeUtils.kstStringToUtc(slot.endAt().toString())
                 ))
                 .toList();
 
