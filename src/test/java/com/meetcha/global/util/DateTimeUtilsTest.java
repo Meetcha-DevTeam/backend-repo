@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DateTimeUtilTest {
+class DateTimeUtilsTest {
 
     @Test
     @DisplayName("UTC Z 표기 문자열 → KST LocalDateTime 변환")
     void testIsoZStringToLocalDateTime_KST() {
         // UTC 시간
         String utcZ = "2025-07-22T16:00:00Z";
-        LocalDateTime kstTime = DateTimeUtil.toLocalDateTime(utcZ);
+        LocalDateTime kstTime = DateTimeUtils.toLocalDateTime(utcZ);
 
         // KST는 +9시간
         assertEquals(LocalDateTime.of(2025, 7, 23, 1, 0), kstTime);
@@ -24,7 +24,7 @@ class DateTimeUtilTest {
     @DisplayName("ISO_LOCAL_DATE_TIME(T 구분) → LocalDateTime 변환")
     void testIsoStringToLocalDateTime() {
         String isoString = "2025-07-22T16:00:00";
-        LocalDateTime dateTime = DateTimeUtil.toLocalDateTime(isoString);
+        LocalDateTime dateTime = DateTimeUtils.toLocalDateTime(isoString);
 
         assertEquals(2025, dateTime.getYear());
         assertEquals(7, dateTime.getMonthValue());
@@ -37,7 +37,7 @@ class DateTimeUtilTest {
     @DisplayName("공백 구분 문자열 → LocalDateTime 변환")
     void testSpaceSeparatedStringToLocalDateTime() {
         String spaceString = "2025-07-22 16:00:00";
-        LocalDateTime dateTime = DateTimeUtil.toLocalDateTime(spaceString);
+        LocalDateTime dateTime = DateTimeUtils.toLocalDateTime(spaceString);
 
         assertEquals(LocalDateTime.of(2025, 7, 22, 16, 0), dateTime);
     }
@@ -46,7 +46,7 @@ class DateTimeUtilTest {
     @DisplayName("LocalDateTime → 문자열 변환")
     void testLocalDateTimeToString() {
         LocalDateTime dateTime = LocalDateTime.of(2025, 7, 22, 16, 0);
-        String result = DateTimeUtil.toString(dateTime);
+        String result = DateTimeUtils.toString(dateTime);
 
         assertEquals("2025-07-22 16:00:00", result);
     }
@@ -55,7 +55,7 @@ class DateTimeUtilTest {
     @DisplayName("UTC → KST 변환")
     void testUtcToKstConversion() {
         LocalDateTime utcTime = LocalDateTime.of(2025, 7, 22, 7, 0); // UTC 07:00
-        LocalDateTime kstTime = DateTimeUtil.utcToKst(utcTime);
+        LocalDateTime kstTime = DateTimeUtils.utcToKst(utcTime);
 
         assertEquals(LocalDateTime.of(2025, 7, 22, 16, 0), kstTime);
     }
@@ -64,7 +64,7 @@ class DateTimeUtilTest {
     @DisplayName("KST → UTC 변환")
     void testKstToUtcConversion() {
         LocalDateTime kstTime = LocalDateTime.of(2025, 7, 22, 16, 0); // KST 16:00
-        LocalDateTime utcTime = DateTimeUtil.kstToUtc(kstTime);
+        LocalDateTime utcTime = DateTimeUtils.kstToUtc(kstTime);
 
         assertEquals(LocalDateTime.of(2025, 7, 22, 7, 0), utcTime);
     }
@@ -73,6 +73,6 @@ class DateTimeUtilTest {
     @DisplayName("잘못된 날짜 형식 예외 처리")
     void testInvalidDateFormat() {
         String invalid = "2025/07/22 16:00:00"; // 슬래시 사용 → 지원 안 함
-        assertThrows(IllegalArgumentException.class, () -> DateTimeUtil.toLocalDateTime(invalid));
+        assertThrows(IllegalArgumentException.class, () -> DateTimeUtils.toLocalDateTime(invalid));
     }
 }
