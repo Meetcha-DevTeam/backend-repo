@@ -62,7 +62,8 @@ public class MeetingConfirmationService {
                 meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
             } else {
                 saveAlternativeTimeCandidates(alterTimes);
-                updateAlternativeDeadlineFromCandidates(meeting);
+//                updateAlternativeDeadlineFromCandidates(meeting);
+                updateAlternativeDeadlineFromCandidates(meeting, alterTimes);
                 meeting.setMeetingStatus(MeetingStatus.MATCHING);
             }
 
@@ -86,7 +87,22 @@ public class MeetingConfirmationService {
         alternativeTimeRepository.saveAll(alterTimes);
     }
 
-    private void updateAlternativeDeadlineFromCandidates(MeetingEntity meeting) {
+    // 기존 candidates 바로 갖다 쓰기
+    private void updateAlternativeDeadlineFromCandidates(MeetingEntity meeting,
+                                                         List<AlternativeTimeEntity> candidates) {
+        if (candidates == null || candidates.isEmpty()) return;
+
+        LocalDate earliestDate = candidates.stream()
+                .map(a -> a.getStartTime().toLocalDate())
+                .min(LocalDate::compareTo)
+                .orElseThrow();
+
+        LocalDateTime alternativeDeadline = earliestDate.minusDays(1).atTime(23, 59);
+        meeting.setAlternativeDeadline(alternativeDeadline);
+    }
+
+    // DB 재조회 버전
+ /*   private void updateAlternativeDeadlineFromCandidates(MeetingEntity meeting) {
         List<AlternativeTimeEntity> candidates = alternativeTimeRepository.findByMeetingId(meeting.getMeetingId());
 
         if (candidates.isEmpty()) return;
@@ -99,5 +115,5 @@ public class MeetingConfirmationService {
 
         LocalDateTime alternativeDeadline = earliestDate.minusDays(1).atTime(23, 59);
         meeting.setAlternativeDeadline(alternativeDeadline); // MeetingEntity에 필드 존재해야 함
-    }
+    }*/
 }
