@@ -60,11 +60,9 @@ jobs:
           script: |
             set -e
 
-            echo "✋🏻Stopping and removing existing container (if exists)"
-            if sudo docker ps -a --format '{{.Names}}' | grep -q '^meetcha$'; then
-              sudo docker rm -f meetcha
-            fi
-  
+            echo "✋🏻 Stopping and removing existing container (if exists)"
+            sudo docker rm -f meetcha || true
+
             echo "🐳 Current docker containers:"
             sudo docker ps -a
 
@@ -72,7 +70,8 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
             echo "🌱 Running new container with ENV"
-            sudo docker run -d -p 8000:8080 --name meetcha \
+            sudo docker run -d --name meetcha \
+              -p 8000:8080 \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               -e SPRING_DATASOURCE_URL="${{ secrets.RDS_URL }}" \
               -e SPRING_DATASOURCE_USERNAME="${{ secrets.RDS_USERNAME }}" \
@@ -87,6 +86,7 @@ jobs:
 
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
+      
 
 
 
