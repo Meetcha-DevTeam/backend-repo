@@ -1,7 +1,5 @@
 package com.meetcha.meeting.dto;
 
-import com.meetcha.meeting.domain.MeetingStatus;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;

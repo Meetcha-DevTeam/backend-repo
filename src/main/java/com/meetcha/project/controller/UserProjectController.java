@@ -2,8 +2,7 @@ package com.meetcha.project.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.UnauthorizedException;
+import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.project.dto.CreateProjectRequest;
 import com.meetcha.project.dto.CreateProjectResponse;
 import com.meetcha.project.dto.GetProjectsDto;
@@ -28,10 +27,10 @@ public class UserProjectController {
     //프로젝트 조회
     //alias랑 관련된 내용은 /user로 매핑
     @GetMapping("/user/projects")
-    public ApiResponse<List<GetProjectsDto>> getUserProjects(HttpServletRequest request)
-    {
-        String token = extractToken(request);
-        UUID userId = jwtProvider.getUserId(token); // 직접 userId 추출
+    public ApiResponse<List<GetProjectsDto>> getUserProjects(HttpServletRequest request,
+                                                             @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         List<GetProjectsDto> projects = userProjectService.getUserProjects(userId);
         return ApiResponse.success(200, "프로젝트 목록 조회 성공", projects);
@@ -40,10 +39,10 @@ public class UserProjectController {
     //프로젝트 생성(이름 == 프로젝트이름)
     @PostMapping("/projects/create")
     public ResponseEntity<ApiResponse<CreateProjectResponse>> createProject(
-            @Valid @RequestBody CreateProjectRequest request,   HttpServletRequest httpServletRequest
+            @Valid @RequestBody CreateProjectRequest request, HttpServletRequest httpServletRequest,
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
-        String token = extractToken(httpServletRequest);
-        UUID userId = jwtProvider.getUserId(token); // 직접 userId 추출
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         CreateProjectResponse response = projectService.createProject(request, userId);
 
@@ -52,11 +51,4 @@ public class UserProjectController {
                 .body(ApiResponse.success(201, "프로젝트가 성공적으로 생성되었습니다.", response));
     }
 
-    private String extractToken(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        throw new UnauthorizedException(ErrorCode.MISSING_AUTH_TOKEN);
-    }
 }

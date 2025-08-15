@@ -49,9 +49,6 @@ public class MeetingEntity {
     @Column(name = "meeting_code", nullable = false, unique = true)
     private String meetingCode;
 
-/*    @Column(name = "code", nullable = false, unique = true)
-    private String code;*/
-
     @Column(name = "alternative_deadline")
     private LocalDateTime alternativeDeadline;
 

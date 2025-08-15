@@ -1,33 +1,49 @@
 package com.meetcha.meetinglist.dto;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.meetcha.global.util.DateTimeUtils;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AlternativeTimeListResponse {
 
-    private List<ZonedDateTime> alternativeTimes;
-    private ZonedDateTime userSelectedTime;
+    @JsonIgnore
+    private List<LocalDateTime> alternativeTimes; // UTC
+
+    @JsonIgnore
+    private LocalDateTime userSelectedTime; // UTC
+
+    @JsonProperty("alternativeTimes")
+    public List<String> getAlternativeTimesKst() {
+        return alternativeTimes.stream()
+                .map(DateTimeUtils::utcToKstString)
+                .toList();
+    }
+
+    @JsonProperty("userSelectedTime")
+    public String getUserSelectedTimeKst() {
+        return DateTimeUtils.utcToKstString(this.userSelectedTime);
+    }
 
     public static AlternativeTimeListResponse of(List<AlternativeTimeDto> dtoList) {
-        List<ZonedDateTime> times = dtoList.stream()
-                .map(dto -> dto.getStartTime().atZone(java.time.ZoneId.of("UTC")))  // ISO 8601 포맷 보장
+        List<LocalDateTime> times = dtoList.stream()
+                .map(AlternativeTimeDto::getStartTime)
                 .toList();
 
-        ZonedDateTime selected = dtoList.stream()
+        LocalDateTime selected = dtoList.stream()
                 .filter(AlternativeTimeDto::isChecked)
-                .map(dto -> dto.getStartTime().atZone(java.time.ZoneId.of("UTC")))
+                .map(AlternativeTimeDto::getStartTime)
                 .findFirst()
                 .orElse(null);
 
-        return AlternativeTimeListResponse.builder()
-                .alternativeTimes(times)
-                .userSelectedTime(selected)
-                .build();
+        return new AlternativeTimeListResponse(times, selected);
     }
 }

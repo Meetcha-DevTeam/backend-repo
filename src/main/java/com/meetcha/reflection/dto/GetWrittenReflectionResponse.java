@@ -1,5 +1,8 @@
 package com.meetcha.reflection.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.meetcha.global.util.DateTimeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +18,8 @@ public class GetWrittenReflectionResponse {
     private UUID projectId;
     private String projectName;
     private String title;
-    private String confirmedTime;
+    @JsonIgnore
+    private LocalDateTime confirmedTime;
     private String completedWork;
     private String plannedWork;
 
@@ -34,8 +38,16 @@ public class GetWrittenReflectionResponse {
         this.projectId = projectId;
         this.projectName = projectName;
         this.title = title;
-        this.confirmedTime = confirmedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.confirmedTime = confirmedTime;
         this.completedWork = completedWork;
         this.plannedWork = plannedWork;
     }
+    /**
+     * 프론트 응답 시 KST 문자열 반환
+     */
+    @JsonProperty("confirmedTime") // 프론트 응답에 이 메서드 값 사용
+    public String getConfirmedTimeKst() {
+        return DateTimeUtils.utcToKstString(this.confirmedTime);
+    }
+
 }
