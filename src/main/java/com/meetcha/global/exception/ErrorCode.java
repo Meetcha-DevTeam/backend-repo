@@ -33,6 +33,9 @@ public enum ErrorCode {
     MEETING_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
 
+    // 409 Conflict
+    NO_PARTICIPANT_AVAILABILITY(HttpStatus.CONFLICT, 409, "참여자 가용 시간이 없어 미팅을 확정할 수 없습니다."),
+
     //500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "알 수 없는 서버 오류가 발생했습니다.");
 
