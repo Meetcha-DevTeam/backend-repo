@@ -59,8 +59,9 @@ jobs:
             set -e
 
             echo "✋🏻Stopping and removing existing container (if exists)"
-            sudo docker rm -f meetcha || true   # 컨테이너가 있으면 강제로 삭제
-  
+            if sudo docker ps -a --format '{{.Names}}' | grep -q '^meetcha$'; then
+              sudo docker rm -f meetcha
+            fi
   
             echo "🐳 Current docker containers:"
             sudo docker ps -a
