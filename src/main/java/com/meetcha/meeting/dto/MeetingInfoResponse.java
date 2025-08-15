@@ -14,6 +14,6 @@ public record MeetingInfoResponse(
         String description,
         Integer durationMinutes,
         List<LocalDate> candidateDates,
-        LocalDateTime deadline,
-        LocalDateTime createdAt
+        String deadline,
+        String createdAt
 ) {}
