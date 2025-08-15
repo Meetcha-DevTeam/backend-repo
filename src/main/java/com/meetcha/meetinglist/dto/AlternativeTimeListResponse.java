@@ -1,8 +1,9 @@
 package com.meetcha.meetinglist.dto;
 
+import com.meetcha.global.util.DateTimeUtils;
 import lombok.*;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -11,17 +12,18 @@ import java.util.List;
 @Builder
 public class AlternativeTimeListResponse {
 
-    private List<ZonedDateTime> alternativeTimes;
-    private ZonedDateTime userSelectedTime;
+    private List<LocalDateTime> alternativeTimes;
+    private LocalDateTime userSelectedTime;
 
     public static AlternativeTimeListResponse of(List<AlternativeTimeDto> dtoList) {
-        List<ZonedDateTime> times = dtoList.stream()
-                .map(dto -> dto.getStartTime().atZone(java.time.ZoneId.of("UTC")))  // ISO 8601 포맷 보장
+        // DB(LocalDateTime, UTC) → KST LocalDateTime 변환
+        List<LocalDateTime> times = dtoList.stream()
+                .map(dto -> DateTimeUtils.utcToKst(dto.getStartTime()))
                 .toList();
 
-        ZonedDateTime selected = dtoList.stream()
+        LocalDateTime selected = dtoList.stream()
                 .filter(AlternativeTimeDto::isChecked)
-                .map(dto -> dto.getStartTime().atZone(java.time.ZoneId.of("UTC")))
+                .map(dto -> DateTimeUtils.utcToKst(dto.getStartTime()))
                 .findFirst()
                 .orElse(null);
 

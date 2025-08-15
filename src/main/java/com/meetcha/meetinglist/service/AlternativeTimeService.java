@@ -5,6 +5,7 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidAlternativeTimeException;
 import com.meetcha.global.util.AuthHeaderUtils;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import com.meetcha.meetinglist.dto.AlternativeTimeDto;
@@ -69,28 +70,6 @@ public class AlternativeTimeService {
                 .toList();
     }
 
-    //테스트용 더미 데이터
-/*
-public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
-    // 테스트용 userId (실제 로그인 사용자 ID 필요 시 추후 SecurityContext에서 추출)
-    UUID userId = getCurrentUserId();
-
-    // 테스트용 대안 시간 후보 목록 (UTC 기준)
-    List<AlternativeTimeDto> dummyList = List.of(
-            AlternativeTimeDto.builder()
-                    .startTime(LocalDateTime.now().plusDays(1).withHour(14).withMinute(0))
-                    .checked(false)
-                    .build(),
-            AlternativeTimeDto.builder()
-                    .startTime(LocalDateTime.now().plusDays(1).withHour(15).withMinute(0))
-                    .checked(true) // 이 시간은 userSelectedTime 으로 자동 세팅됨
-                    .build()
-    );
-
-    return AlternativeTimeListResponse.of(dummyList);
-}
-*/
-
 
     @Transactional
     public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
@@ -98,14 +77,14 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
         UUID userId = extractUserId(authorizationHeader);
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
-                .findByMeetingIdAndStartTime(meetingId, request.getAlternativeTime().toLocalDateTime())
-                .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));///CustomException 로 통합
+                .findByMeetingIdAndStartTime(meetingId, DateTimeUtils.kstToUtc(request.getAlternativeTime()))
+                .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));
 
 
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);
         if (alreadyVoted) {
-            throw new CustomException(ErrorCode.ALREADY_VOTED_ALTERNATIVE);///
+            throw new CustomException(ErrorCode.ALREADY_VOTED_ALTERNATIVE);
         }
 
         // 3. 대안시간 투표 저장
@@ -121,19 +100,6 @@ public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String
                 .voteId(vote.getVoteId())
                 .build();
     }
-
-/*    //테스트용
-    @Transactional
-    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
-        log.info(" 요청 들어옴: meetingId={}, alternativeTime={}", meetingId, request.getAlternativeTime());
-        // 더미 유저 ID (SecurityContextHolder 구현 전 임시)
-        UUID userId = getCurrentUserId();
-
-        // 더미 voteId 생성 후 바로 응답
-        return AlternativeVoteResponse.builder()
-                .voteId(UUID.randomUUID())
-                .build();
-    }*/
 
     private UUID extractUserId(String authorizationHeader) {
         String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);

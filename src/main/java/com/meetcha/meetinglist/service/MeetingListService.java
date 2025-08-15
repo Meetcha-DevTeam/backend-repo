@@ -2,6 +2,7 @@ package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 
@@ -43,21 +44,6 @@ public class MeetingListService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-/*        //테스트용
-        MeetingEntity meeting = MeetingEntity.builder()
-                .meetingId(meetingId)
-                .title("테스트 미팅")
-                .description("설명 없음")
-                .meetingStatus(MeetingStatus.ONGOING)
-                .deadline(LocalDateTime.now().plusDays(1))
-                .durationMinutes(60)
-                .confirmedTime(null)
-                .build();
-
-        List<ParticipantDto> participantDtos = List.of(
-                new ParticipantDto(UUID.randomUUID(), "테스트유저", "https://example.com/profile.jpg")
-        );*/
-
 
         // 참여자 조회
         List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
@@ -70,25 +56,14 @@ public class MeetingListService {
                 ))
                 .toList();
 
-/*        return new MeetingDetailResponse(
-                UUID.randomUUID(),
-                "더미 제목",
-                "더미 설명",
-                MeetingStatus.ONGOING,
-                LocalDateTime.now().plusDays(1),
-                60,
-                null,
-                List.of(new ParticipantDto(UUID.randomUUID(), "더미 유저", null))
-        );}}*/
-
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
                 meeting.getMeetingStatus(),
-                meeting.getDeadline(),
+                DateTimeUtils.utcToKst(meeting.getDeadline()),
                 meeting.getDurationMinutes(),
-                meeting.getConfirmedTime(),
+                DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
                 participantDtos
         );
     }
@@ -103,14 +78,13 @@ public class MeetingListService {
                 .map(m -> new MeetingListResponse(
                         m.getMeetingId(),
                         m.getTitle(),
-                        m.getDeadline(),
-                        m.getConfirmedTime(),
+                        DateTimeUtils.utcToKst(m.getDeadline()),
+                        DateTimeUtils.utcToKst(m.getConfirmedTime()),
                         m.getDurationMinutes(),
                         m.getMeetingStatus()
                 ))
                 .toList();
     }
-
 
 
     //작성이 필요한 미팅 조회
@@ -125,17 +99,11 @@ public class MeetingListService {
         Map<UUID, String> projectNameMap = projectSummaries.stream()
                 .collect(Collectors.toMap(GetProjectsDto::getProjectId, GetProjectsDto::getProjectName));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
         return meetings.stream()
                 .filter(meeting -> !reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId))
                 .map(meeting -> {
                     UUID projectId = meeting.getProjectId();
                     String projectName = projectId != null ? projectNameMap.get(projectId) : null;
-
-                    String formattedTime = meeting.getConfirmedTime() != null
-                            ? meeting.getConfirmedTime().format(formatter)
-                            : null;
 
                     return new NeedReflectionResponse(
                             meeting.getMeetingId(),
@@ -143,17 +111,10 @@ public class MeetingListService {
                             meeting.getDescription(),
                             projectId,
                             projectName,
-                            formattedTime, //String으로 포맷팅
+                            DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
                             meeting.getMeetingStatus().name()
                     );
                 })
                 .toList();
     }
-
 }
-
-/*    public ParticipantsResponse getParticipants(UUID meetingId, String authorizationHeader) {
-        //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)
-        return null;
-    }
-//}*/
