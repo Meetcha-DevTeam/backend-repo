@@ -26,7 +26,7 @@ public class UserEntity {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    // 구글 액세스 토큰 저장
+    // 구글 액세스 토큰 저장(구글 api 호출용, jwt 액세스토큰은 저장 X)
     @Column(name = "google_token", nullable = false)
     private String googleToken;
 
