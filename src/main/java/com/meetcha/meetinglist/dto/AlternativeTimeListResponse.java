@@ -1,35 +1,49 @@
 package com.meetcha.meetinglist.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.meetcha.global.util.DateTimeUtils;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AlternativeTimeListResponse {
 
-    private List<LocalDateTime> alternativeTimes;
-    private LocalDateTime userSelectedTime;
+    @JsonIgnore
+    private List<LocalDateTime> alternativeTimes; // UTC
+
+    @JsonIgnore
+    private LocalDateTime userSelectedTime; // UTC
+
+    @JsonProperty("alternativeTimes")
+    public List<String> getAlternativeTimesKst() {
+        return alternativeTimes.stream()
+                .map(DateTimeUtils::utcToKstString)
+                .toList();
+    }
+
+    @JsonProperty("userSelectedTime")
+    public String getUserSelectedTimeKst() {
+        return DateTimeUtils.utcToKstString(this.userSelectedTime);
+    }
 
     public static AlternativeTimeListResponse of(List<AlternativeTimeDto> dtoList) {
-        // DB(LocalDateTime, UTC) → KST LocalDateTime 변환
         List<LocalDateTime> times = dtoList.stream()
-                .map(dto -> DateTimeUtils.utcToKst(dto.getStartTime()))
+                .map(AlternativeTimeDto::getStartTime)
                 .toList();
 
         LocalDateTime selected = dtoList.stream()
                 .filter(AlternativeTimeDto::isChecked)
-                .map(dto -> DateTimeUtils.utcToKst(dto.getStartTime()))
+                .map(AlternativeTimeDto::getStartTime)
                 .findFirst()
                 .orElse(null);
 
-        return AlternativeTimeListResponse.builder()
-                .alternativeTimes(times)
-                .userSelectedTime(selected)
-                .build();
+        return new AlternativeTimeListResponse(times, selected);
     }
 }
