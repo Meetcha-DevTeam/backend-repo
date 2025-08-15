@@ -55,7 +55,7 @@ public class MeetingConfirmationService {
         if (bestStartMinutes == null) {
             // 대안 시간 후보 산출 시도
             List<AlternativeTimeEntity> alterTimes = AlternativeTimeCalculator.getAlternativeTimes(converted,meetingId);
-            boolean hasCandidate = alterTimes != null && !alterTimes.isEmpty();
+            boolean hasCandidate = !alterTimes.isEmpty();
 
             if (!hasCandidate) {
                 // 이때 가용 시간이 없는 경우 미팅 상태 실패로 지정
@@ -71,7 +71,7 @@ public class MeetingConfirmationService {
         }
 
         // 2. 알고리즘: 가장 많은 참여자가 가능한 시간대 추출
-        LocalDateTime bestSlot = extractBestTime(allAvailability, meeting.getDurationMinutes());
+        LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes);
 
         // 3. 확정 시간/상태 저장
         meeting.setConfirmedTime(bestSlot);
@@ -82,66 +82,8 @@ public class MeetingConfirmationService {
         syncService.syncMeetingToCalendars(meeting);
     }
 
-    private LocalDateTime extractBestTime(List<ParticipantAvailability> times, int durationMinutes) {
-        // 1. 참여자별로 가능한 시간대 목록을 모음
-        Map<UUID, List<TimeRange>> timeMap = new HashMap<>();
-        for (ParticipantAvailability availability : times) {
-            UUID userId = availability.getParticipantId();
-            int start = toMinutes(availability.getStartAt());
-            int end = toMinutes(availability.getEndAt());
-
-            timeMap.computeIfAbsent(userId, k -> new ArrayList<>())
-                    .add(new TimeRange(start, end));
-        }
-
-        // 2. Participant 리스트 생성
-        List<Participant> participants = timeMap.entrySet().stream()
-                .map(entry -> new Participant(entry.getKey().toString(), entry.getValue()))
-                .collect(Collectors.toList());
-
-        // 3. 후보 날짜 추출 (DayOfYear 기준)
-        List<Integer> candidateDays = times.stream()
-                .map(a -> a.getStartAt().getDayOfYear())
-                .distinct()
-                .collect(Collectors.toList());
-
-        // 4. Meeting 객체 생성
-        Meeting meeting = new Meeting(
-                UUID.randomUUID().toString(), // 임시 ID
-                participants,
-                0, // deadline은 현재 사용하지 않음
-                durationMinutes,
-                null,
-                null,
-                new ArrayList<>(),
-                0,
-                candidateDays
-        );
-
-        // 5. 알고리즘 실행
-        Integer bestTimeMinutes = MeetingTimeCalculator.calculateMeetingTime(meeting);
-        if (bestTimeMinutes == null) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); // 후보 없음
-        }
-
-        // 6. 분 단위 시간 → LocalDateTime 변환
-        return convertToLocalDateTime(bestTimeMinutes);
-    }
-
-    private int toMinutes(LocalDateTime dateTime) {
-        return dateTime.getDayOfYear() * 24 * 60 + dateTime.getHour() * 60 + dateTime.getMinute();
-    }
-
-    private LocalDateTime convertToLocalDateTime(int totalMinutes) {
-        LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
-    }
-
-
     private void saveAlternativeTimeCandidates(List<AlternativeTimeEntity> alterTimes) {
-        for (AlternativeTimeEntity entity : alterTimes) {
-            alternativeTimeRepository.save(entity);
-        }
+        alternativeTimeRepository.saveAll(alterTimes);
     }
 
     private void updateAlternativeDeadlineFromCandidates(MeetingEntity meeting) {
@@ -158,7 +100,4 @@ public class MeetingConfirmationService {
         LocalDateTime alternativeDeadline = earliestDate.minusDays(1).atTime(23, 59);
         meeting.setAlternativeDeadline(alternativeDeadline); // MeetingEntity에 필드 존재해야 함
     }
-
-
-
 }
