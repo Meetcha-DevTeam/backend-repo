@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_DURATION(HttpStatus.BAD_REQUEST, 400, "1분 이상 719분 이하로 설정해주세요."),
     INVALID_CANDIDATE_DATES(HttpStatus.BAD_REQUEST, 400, "후보 날짜는 최소 1개 이상, 최대 10개까지 가능합니다."),
     INVALID_CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, 400, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, 400, "날짜 형식이 잘못되었거나 범위가 유효하지 않습니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, 400, "미팅 참여마감시간이 지났습니다."),
 
     //401 Unauthorized
@@ -24,7 +25,10 @@ public enum ErrorCode {
     GOOGLE_TOKEN_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 토큰 요청 실패"),
     GOOGLE_USERINFO_REQUEST_FAILED(HttpStatus.UNAUTHORIZED, 401, "구글 유저 정보 요청 실패"),
     MALFORMED_JWT(HttpStatus.UNAUTHORIZED, 401, "형식이 잘못된 JWT 토큰입니다."),
-    MISSING_GOOGLE_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, 401, "유저의 Google access token이 존재하지 않습니다."),
+    GOOGLE_SCOPE_INSUFFICIENT(HttpStatus.UNAUTHORIZED,401, "Google Calendar 권한 동의가 필요합니다."),
+    GOOGLE_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED,401, "Google access token이 만료되었습니다."),
+    MISSING_GOOGLE_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED,401, "유저의 Google access token이 존재하지 않습니다."),
+    MISSING_GOOGLE_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,401, "유저의 Google refresh token이 존재하지 않습니다."),
 
     //404 Not Found
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
