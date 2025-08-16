@@ -33,7 +33,7 @@ public class GoogleCalendarClient {
         headers.setBearerAuth(accessToken);
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        // 로컬 -> UTC(RFC3339)로 변환
+        /*// 로컬 -> UTC(RFC3339)로 변환
         Instant fromUtc = from.atZone(ZoneId.systemDefault()).toInstant();
         Instant toUtc   = to.atZone(ZoneId.systemDefault()).toInstant();
 
@@ -51,6 +51,48 @@ public class GoogleCalendarClient {
 
                 String url = b.build(true).toUriString();
 
+                ResponseEntity<Map> res = restTemplate.exchange(url, HttpMethod.GET, request, Map.class);
+                Map body = res.getBody();
+                if (body == null) break;
+
+                List<Map<String, Object>> items = (List<Map<String, Object>>) body.getOrDefault("items", List.of());
+                allItems.addAll(items);
+
+                pageToken = (String) body.get("nextPageToken");
+            } while (pageToken != null);
+
+        } catch (HttpClientErrorException.Forbidden e) {
+            String msg = e.getResponseBodyAsString();
+            if (msg != null && msg.contains("insufficientPermissions")) {
+                throw new CustomException(ErrorCode.GOOGLE_SCOPE_INSUFFICIENT);
+            }
+            throw e;
+        } catch (HttpClientErrorException.Unauthorized e) {
+            throw new CustomException(ErrorCode.GOOGLE_TOKEN_EXPIRED);
+        }
+
+        return allItems.stream().map(this::toScheduleResponse).collect(Collectors.toList());*/
+        // LocalDateTime(Asia/Seoul) -> UTC OffsetDateTime (RFC3339)
+        OffsetDateTime fromUtc = from.atZone(Z_SEOUL)
+                .toOffsetDateTime()
+                .withOffsetSameInstant(ZoneOffset.UTC);
+        OffsetDateTime toUtc   = to.atZone(Z_SEOUL)
+                .toOffsetDateTime()
+                .withOffsetSameInstant(ZoneOffset.UTC);
+
+        String pageToken = null;
+        List<Map<String, Object>> allItems = new ArrayList<>();
+
+        try {
+            do {
+                UriComponentsBuilder b = UriComponentsBuilder.fromHttpUrl(BASE)
+                        .queryParam("timeMin", fromUtc.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                        .queryParam("timeMax", toUtc.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+                        .queryParam("singleEvents", "true")
+                        .queryParam("orderBy", "startTime");
+                if (pageToken != null) b.queryParam("pageToken", pageToken);
+
+                String url = b.build(true).toUriString();
                 ResponseEntity<Map> res = restTemplate.exchange(url, HttpMethod.GET, request, Map.class);
                 Map body = res.getBody();
                 if (body == null) break;
