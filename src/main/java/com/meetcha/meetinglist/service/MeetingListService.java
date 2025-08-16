@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,21 +42,6 @@ public class MeetingListService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-/*        //테스트용
-        MeetingEntity meeting = MeetingEntity.builder()
-                .meetingId(meetingId)
-                .title("테스트 미팅")
-                .description("설명 없음")
-                .meetingStatus(MeetingStatus.ONGOING)
-                .deadline(LocalDateTime.now().plusDays(1))
-                .durationMinutes(60)
-                .confirmedTime(null)
-                .build();
-
-        List<ParticipantDto> participantDtos = List.of(
-                new ParticipantDto(UUID.randomUUID(), "테스트유저", "https://example.com/profile.jpg")
-        );*/
-
 
         // 참여자 조회
         List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
@@ -69,17 +53,6 @@ public class MeetingListService {
                         p.getProfileImageUrl()
                 ))
                 .toList();
-
-/*        return new MeetingDetailResponse(
-                UUID.randomUUID(),
-                "더미 제목",
-                "더미 설명",
-                MeetingStatus.ONGOING,
-                LocalDateTime.now().plusDays(1),
-                60,
-                null,
-                List.of(new ParticipantDto(UUID.randomUUID(), "더미 유저", null))
-        );}}*/
 
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
@@ -112,7 +85,6 @@ public class MeetingListService {
     }
 
 
-
     //작성이 필요한 미팅 조회
     public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
         //DONE 상태 미팅들 조회
@@ -125,17 +97,11 @@ public class MeetingListService {
         Map<UUID, String> projectNameMap = projectSummaries.stream()
                 .collect(Collectors.toMap(GetProjectsDto::getProjectId, GetProjectsDto::getProjectName));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
         return meetings.stream()
                 .filter(meeting -> !reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meeting.getMeetingId(), userId))
                 .map(meeting -> {
                     UUID projectId = meeting.getProjectId();
                     String projectName = projectId != null ? projectNameMap.get(projectId) : null;
-
-                    String formattedTime = meeting.getConfirmedTime() != null
-                            ? meeting.getConfirmedTime().format(formatter)
-                            : null;
 
                     return new NeedReflectionResponse(
                             meeting.getMeetingId(),
@@ -143,17 +109,10 @@ public class MeetingListService {
                             meeting.getDescription(),
                             projectId,
                             projectName,
-                            formattedTime, //String으로 포맷팅
+                            meeting.getConfirmedTime(),
                             meeting.getMeetingStatus().name()
                     );
                 })
                 .toList();
     }
-
 }
-
-/*    public ParticipantsResponse getParticipants(UUID meetingId, String authorizationHeader) {
-        //미팅 참가자 목록 조회 로직 (이거 안해도 될수도)
-        return null;
-    }
-//}*/

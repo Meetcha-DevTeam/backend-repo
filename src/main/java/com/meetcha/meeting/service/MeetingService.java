@@ -2,6 +2,7 @@ package com.meetcha.meeting.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidMeetingRequestException;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
@@ -26,11 +27,13 @@ public class MeetingService {
 
         LocalDateTime now = LocalDateTime.now(clock);
 
+        LocalDateTime deadline = DateTimeUtils.kstToUtc(request.deadline());
+
         MeetingEntity meeting = MeetingEntity.builder()
                 .title(request.title())
                 .description(request.description())
                 .durationMinutes(request.durationMinutes())
-                .deadline(request.deadline())
+                .deadline(deadline)
                 .createdAt(now)
                 .meetingStatus(MeetingStatus.BEFORE)
                 .confirmedTime(null)
@@ -52,7 +55,7 @@ public class MeetingService {
             }
         }
 
-        return new MeetingCreateResponse(meeting.getMeetingId(), meeting.getCreatedAt());
+        return new MeetingCreateResponse(meeting.getMeetingId(), DateTimeUtils.utcToKst(meeting.getCreatedAt()));
     }
 
     private void validateRequest(MeetingCreateRequest request) {
@@ -74,8 +77,8 @@ public class MeetingService {
             }
 
             LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
-            if (earliestCandidate != null &&
-                    request.deadline().toLocalDate().isAfter(earliestCandidate)) {
+            LocalDateTime deadline = request.deadline();
+            if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
                 errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
             }
         }

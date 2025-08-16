@@ -5,10 +5,12 @@ on:
     branches:
       - 'dev'
       - 'main'
+      - 'dev2' 
   pull_request:
     branches:
       - 'dev'
       - 'main'
+      - 'dev2' 
 
 permissions:
   contents: read
@@ -85,5 +87,6 @@ jobs:
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
       
+
 
 
