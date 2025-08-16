@@ -72,8 +72,8 @@ public class JoinMeetingService {
                 .map(slot -> ParticipantAvailability.create(
                         participant.getParticipantId(),
                         meetingId,
-                        DateTimeUtils.kstStringToUtc(slot.startAt().toString()),
-                        DateTimeUtils.kstStringToUtc(slot.endAt().toString())
+                        DateTimeUtils.kstToUtc(slot.startAt()),
+                        DateTimeUtils.kstToUtc(slot.endAt())
                 ))
                 .toList();
 
