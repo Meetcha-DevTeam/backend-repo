@@ -61,9 +61,11 @@ jobs:
             set -e
 
             echo "✋🏻 Stopping and removing existing container (if exists)"
-            sudo docker rm -f meetcha || true
+            sudo docker stop meetcha || true
+            sudo docker rm meetcha || true
+  
 
-            echo "🐳 Current docker containers:"
+  echo "🐳 Current docker containers:"
             sudo docker ps -a
 
             echo "🥳 Pulling new image"
