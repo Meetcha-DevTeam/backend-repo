@@ -62,6 +62,7 @@ public class MeetingListService {
                 meeting.getDeadline(),
                 meeting.getDurationMinutes(),
                 meeting.getConfirmedTime(),
+                meeting.getMeetingCode(),
                 participantDtos
         );
     }

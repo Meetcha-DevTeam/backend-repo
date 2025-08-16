@@ -18,5 +18,6 @@ public class MeetingDetailResponse {
     private LocalDateTime deadline;
     private Integer durationMinutes;
     private LocalDateTime confirmedTime;
+    private String meetingCode;
     private List<ParticipantDto> participants;
 }
