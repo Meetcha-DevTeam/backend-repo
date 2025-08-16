@@ -65,7 +65,7 @@ jobs:
             sudo docker rm meetcha || true
   
 
-  echo "🐳 Current docker containers:"
+            echo "🐳 Current docker containers:"
             sudo docker ps -a
 
             echo "🥳 Pulling new image"
