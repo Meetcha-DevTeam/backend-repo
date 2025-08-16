@@ -20,6 +20,7 @@ import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JoinMeetingService {
@@ -42,6 +44,7 @@ public class JoinMeetingService {
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
         UUID userId = extractUserId(authorizationHeader);
 
+        log.debug("join 메서드 진입");
         // 미팅 조회
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
