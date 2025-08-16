@@ -15,18 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 public class AlternativeTimeListResponse {
 
-    @JsonIgnore
-    private List<LocalDateTime> alternativeTimes; // UTC
+    private List<AlternativeTimeDto> alternativeTimes;
 
     @JsonIgnore
     private LocalDateTime userSelectedTime; // UTC
-
-    @JsonProperty("alternativeTimes")
-    public List<String> getAlternativeTimesKst() {
-        return alternativeTimes.stream()
-                .map(DateTimeUtils::utcToKstString)
-                .toList();
-    }
 
     @JsonProperty("userSelectedTime")
     public String getUserSelectedTimeKst() {
@@ -34,16 +26,14 @@ public class AlternativeTimeListResponse {
     }
 
     public static AlternativeTimeListResponse of(List<AlternativeTimeDto> dtoList) {
-        List<LocalDateTime> times = dtoList.stream()
-                .map(AlternativeTimeDto::getStartTime)
-                .toList();
-
+        // 체크된 시간(선택된 시간)을 찾아냄
         LocalDateTime selected = dtoList.stream()
                 .filter(AlternativeTimeDto::isChecked)
                 .map(AlternativeTimeDto::getStartTime)
                 .findFirst()
                 .orElse(null);
 
-        return new AlternativeTimeListResponse(times, selected);
+        // alternativeTimes는 그대로 dtoList를 사용
+        return new AlternativeTimeListResponse(dtoList, selected);
     }
 }
