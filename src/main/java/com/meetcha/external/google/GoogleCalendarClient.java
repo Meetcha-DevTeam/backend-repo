@@ -153,7 +153,7 @@ public class GoogleCalendarClient {
     }
 
     // 일정 수정
-    public void updateEvent(String accessToken, String eventId, String title, LocalDateTime startAt, LocalDateTime endAt) {
+    public void updateEvent(String accessToken, String eventId, String title, LocalDateTime startAt, LocalDateTime endAt, String recurrenceOption) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -166,6 +166,19 @@ public class GoogleCalendarClient {
 
         body.put("start", Map.of("dateTime", startStr, "timeZone", Z_SEOUL.getId()));
         body.put("end",   Map.of("dateTime", endStr,   "timeZone", Z_SEOUL.getId()));
+
+        if (!"NONE".equalsIgnoreCase(recurrenceOption)) {
+            List<String> recurrence = switch (recurrenceOption.toUpperCase()) {
+                case "DAILY"    -> List.of("RRULE:FREQ=DAILY");
+                case "WEEKLY"   -> List.of("RRULE:FREQ=WEEKLY");
+                case "BIWEEKLY" -> List.of("RRULE:FREQ=WEEKLY;INTERVAL=2");
+                case "MONTHLY"  -> List.of("RRULE:FREQ=MONTHLY");
+                default -> null;
+            };
+            if (recurrence != null) {
+                body.put("recurrence", recurrence);
+            }
+        }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
