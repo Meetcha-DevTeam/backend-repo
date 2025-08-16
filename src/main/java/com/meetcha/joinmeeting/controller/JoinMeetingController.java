@@ -6,12 +6,14 @@ import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/meeting")
 @RequiredArgsConstructor
@@ -21,12 +23,13 @@ public class JoinMeetingController {
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
-    public ResponseEntity<ApiResponse<JoinMeetingResponse>> joinMeeeting(
+    public ResponseEntity<ApiResponse<JoinMeetingResponse>> joinMeeting(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        JoinMeetingResponse response = joinMeetingService.join(meetingId, request,authorizationHeader);
+        log.debug("joinMeeting 메서드 진입");
+        JoinMeetingResponse response = joinMeetingService.join(meetingId, request, authorizationHeader);
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 성공", response));
 
     }
