@@ -33,16 +33,12 @@ public class UserScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
-        log.info("=== /user/schedule 요청 수신 ===");
-// 기존: log.info("Authorization 헤더: {}", authorizationHeader);
         String bearer = AuthHeaderUtils.extractBearerToken(authorizationHeader);
         String masked = (bearer != null && bearer.length() > 16)
                 ? bearer.substring(0, 10) + "..." + bearer.substring(bearer.length()-6)
                 : "null";
-        log.info("Authorization 헤더(Bearer 마스킹): {}", masked);
 
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        log.info("JWT userId = {}", userId);
         List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
         return ApiResponse.success(200, "유저 스케줄 조회 성공", schedules);
     }
