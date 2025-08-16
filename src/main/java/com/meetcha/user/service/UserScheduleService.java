@@ -181,7 +181,8 @@ public class UserScheduleService {
                 request.eventId(),
                 request.title(),
                 request.startAt(),
-                request.endAt()
+                request.endAt(),
+                request.recurrence()
         );
     }
 
