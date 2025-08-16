@@ -170,7 +170,7 @@ public class GoogleCalendarClient {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
         try {
-            restTemplate.exchange(BASE + "/" + eventId, HttpMethod.PATCH, request, Void.class);
+            restTemplate.exchange(BASE + "/" + eventId, HttpMethod.PUT, request, Void.class);
         } catch (HttpClientErrorException.Forbidden e) {
             String msg = e.getResponseBodyAsString();
             if (msg != null && msg.contains("insufficientPermissions")) {
