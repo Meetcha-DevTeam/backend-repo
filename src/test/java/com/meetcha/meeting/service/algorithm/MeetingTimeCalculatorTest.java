@@ -133,6 +133,26 @@ public class MeetingTimeCalculatorTest {
         assertEquals(m(1, 16, 30), result); // 더 늦은 날짜라도 최장 구간이 이김
     }
 
+    @Test
+    @DisplayName("같은 날에 동일 길이 블록이 여러 개면 TimePriority로 12–16대가 선택된다")
+    void pick_timePriorityWithinSameDay_whenMultipleEqualBlocks() {
+        // day0: 08–12, 12–16, 16–20 (모두 4h)
+        Participant a = p("A",
+                tr(m(0,8,0), m(0,12,0)), tr(m(0,12,0), m(0,16,0)), tr(m(0,16,0), m(0,20,0))
+        );
+        Participant b = p("B",
+                tr(m(0,8,0), m(0,12,0)), tr(m(0,12,0), m(0,16,0)), tr(m(0,16,0), m(0,20,0))
+        );
+
+        // 60분(2블록) → 중앙 후보: 09:30, 13:30, 17:30
+        // TimePriority: 12–16(최상) → 13:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 13, 30), result);
+    }
 
 
 
