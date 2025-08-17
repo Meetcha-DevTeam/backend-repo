@@ -190,5 +190,20 @@ public class MeetingTimeCalculatorTest {
         assertNull(result);
     }
 
+    @Test
+    @DisplayName("여러 날짜에 공통이 있어도 모두 연속 부족이면 null")
+    void returnsNull_whenAllDaysHaveOnlyShortContiguous() {
+        Participant a = p("A",
+                tr(m(0,10,0), m(0,10,30)), // day0: 30분
+                tr(m(1,14,0), m(1,14,30))  // day1: 30분
+        );
+        Participant b = p("B",
+                tr(m(0,10,0), m(0,10,30)),
+                tr(m(1,14,0), m(1,14,30))
+        );
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
 
 }
