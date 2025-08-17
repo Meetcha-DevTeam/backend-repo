@@ -92,4 +92,28 @@ public class MeetingTimeCalculatorTest {
         assertEquals(m(0, 15, 30), result);
     }
 
+    @Test
+    @DisplayName("여러 겹침(동일 최장 구간이 여러 개, 여러 날짜): Spare→Day→TimePriority가 순서대로 적용된다")
+    void pick_respectsAllThreePriorities_withManyOverlaps() {
+        // day0: 08–12, 14–18 / day1: 08–12, 14–18  (모두 동일 길이 4시간)
+        Participant a = p("A",
+                tr(m(0, 8, 0), m(0, 12, 0)), tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 8, 0), m(1, 12, 0)), tr(m(1, 14, 0), m(1, 18, 0))
+        );
+        Participant b = p("B",
+                tr(m(0, 8, 0), m(0, 12, 0)), tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 8, 0), m(1, 12, 0)), tr(m(1, 14, 0), m(1, 18, 0))
+        );
+
+        // 60분(2블록) 미팅 → 각 4시간 블록의 중앙 시작: 09:30, 15:30
+        // 1) Spare: 4시간 블록(최장)들의 중앙들이 후보 → (day0 09:30, 15:30 / day1 09:30, 15:30)
+        // 2) Day: 더 이른 날짜(day0)만 남김 → (09:30, 15:30)
+        // 3) TimePriority: 12–16(최상위)인 15:30 선택
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 15, 30), result);
+    }
 }
