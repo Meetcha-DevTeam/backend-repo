@@ -71,4 +71,29 @@ class MeetingStatusUpdateSchedulerTest {
         verify(syncService).syncMeetingToCalendars(meeting);
     }
 
+    @Test
+    @DisplayName("대안 시간이 없으면 MATCH_FAILED 상태로 저장된다")
+    void confirmFromAlternativeTimes_whenNoAlternative_setsMatchFailed() {
+        // given
+        UUID meetingId = UUID.randomUUID();
+        MeetingEntity meeting = mock(MeetingEntity.class);
+        when(meeting.getMeetingId()).thenReturn(meetingId);
+
+        when(meetingRepository.findMeetingsToConfirmFromAlternative())
+                .thenReturn(List.of(meeting));
+        when(alternativeTimeRepository.findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(meetingId))
+                .thenReturn(Optional.empty()); ///투표 결과 없는 경우
+
+        // when
+        scheduler.confirmFromAlternativeTimes();
+
+        // then
+        ArgumentCaptor<MeetingStatus> statusCap = ArgumentCaptor.forClass(MeetingStatus.class);
+        verify(meeting).setMeetingStatus(statusCap.capture());
+        assertEquals(MeetingStatus.MATCH_FAILED, statusCap.getValue());
+
+        verify(meetingRepository).save(meeting);
+        verify(syncService, never()).syncMeetingToCalendars(any());
+    }
+
 }
