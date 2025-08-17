@@ -170,6 +170,15 @@ public class MeetingTimeCalculatorTest {
         assertEquals(m(0, 9, 0), result);
     }
 
+    @Test
+    @DisplayName("공통 슬롯은 있으나 회의 길이만큼 연속이 안 되면 null")
+    void returnsNull_whenCommonButTooShortForDuration() {
+        Participant a = p("A", tr(m(0,10,0), m(0,10,30))); // 10:00~10:30
+        Participant b = p("B", tr(m(0,10,0), m(0,10,30))); // 10:00~10:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b)); // 60분 회의(2블록 필요)
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
 
 
 }
