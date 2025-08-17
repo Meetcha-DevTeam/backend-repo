@@ -154,6 +154,22 @@ public class MeetingTimeCalculatorTest {
         assertEquals(m(0, 13, 30), result);
     }
 
+    @Test
+    @DisplayName("회의 길이가 90분처럼 홀수 블록일 때 중앙 내림(floor) 처리 확인")
+    void pick_centerFloor_whenHitIsOddBlocks() {
+        // day0: 08–12 (4h=8블록)
+        Participant a = p("A", tr(m(0,8,0), m(0,12,0)));
+        Participant b = p("B", tr(m(0,8,0), m(0,12,0)));
+
+        // 90분(3블록) → 중앙 = start + ((8-3)//2)*30 = 08:00 + 60 = 09:00
+        Meeting meeting = meetingOf(90, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 9, 0), result);
+    }
+
 
 
 }
