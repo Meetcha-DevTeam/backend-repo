@@ -96,4 +96,24 @@ class MeetingStatusUpdateSchedulerTest {
         verify(syncService, never()).syncMeetingToCalendars(any());
     }
 
+    @Test
+    @DisplayName("확정 대상 미팅이 없으면 아무 일도 일어나지 않는다")
+    //투표 마감 시점이 지났거나 확정해야 할 미팅이 없는 경우 에러 로그를 띄우면 안됨
+    // ( 모든 미팅이 이미 BEFORE/ONGOING/DONE 상태이거나,
+    // 아직 MATCHING 상태인데 마감 시간이 지나지 않은 경우)
+    void confirmFromAlternativeTimes_whenNoTargetMeetings_doesNothing() {
+
+        // given
+        when(meetingRepository.findMeetingsToConfirmFromAlternative())
+                .thenReturn(Collections.emptyList());
+
+        // when
+        scheduler.confirmFromAlternativeTimes();
+
+        // then
+        verify(meetingRepository, never()).save(any());
+        verify(alternativeTimeRepository, never()).findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(any());
+        verify(syncService, never()).syncMeetingToCalendars(any());
+    }
+
 }
