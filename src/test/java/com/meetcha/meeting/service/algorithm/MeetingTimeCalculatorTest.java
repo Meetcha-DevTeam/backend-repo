@@ -116,6 +116,7 @@ public class MeetingTimeCalculatorTest {
         assertNotNull(result);
         assertEquals(m(0, 15, 30), result);
     }
+
     @Test
     @DisplayName("Spare(최장 구간)가 Day/Time보다 우선한다: 더 늦은 날짜라도 최장 구간의 중앙을 선택")
     void pick_longerBlockOnLaterDay_winsOverEarlierDayAndTimePriority() {
@@ -131,4 +132,8 @@ public class MeetingTimeCalculatorTest {
         assertNotNull(result);
         assertEquals(m(1, 16, 30), result); // 더 늦은 날짜라도 최장 구간이 이김
     }
+
+
+
+
 }
