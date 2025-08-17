@@ -180,5 +180,15 @@ public class MeetingTimeCalculatorTest {
         assertNull(result);
     }
 
+    @Test
+    @DisplayName("겹침이 60분인데 회의가 90분이면 null")
+    void returnsNull_whenHitExceedsContiguousCommon() {
+        Participant a = p("A", tr(m(0,10,0), m(0,11,0))); // 10:00~11:00 (60분)
+        Participant b = p("B", tr(m(0,10,0), m(0,11,0)));
+        Meeting meeting = meetingOf(90, Arrays.asList(a, b)); // 90분(3블록) 필요
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
+
 
 }
