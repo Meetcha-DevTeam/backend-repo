@@ -116,4 +116,19 @@ public class MeetingTimeCalculatorTest {
         assertNotNull(result);
         assertEquals(m(0, 15, 30), result);
     }
+    @Test
+    @DisplayName("Spare(최장 구간)가 Day/Time보다 우선한다: 더 늦은 날짜라도 최장 구간의 중앙을 선택")
+    void pick_longerBlockOnLaterDay_winsOverEarlierDayAndTimePriority() {
+        // day0: 14–18 (4h) / day1: 12–22 (10h)
+        Participant a = p("A", tr(m(0,14,0), m(0,18,0)), tr(m(1,12,0), m(1,22,0)));
+        Participant b = p("B", tr(m(0,14,0), m(0,18,0)), tr(m(1,12,0), m(1,22,0)));
+
+        // 60분(2블록) → day1 12–22(10h=20블록)의 중앙 시작 = 12:00 + ((20-2)/2)*30 = 16:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(1, 16, 30), result); // 더 늦은 날짜라도 최장 구간이 이김
+    }
 }
