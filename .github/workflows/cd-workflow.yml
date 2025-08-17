@@ -57,6 +57,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
           envs: GITHUB_SHA
+          command_timeout: 30m 
           script: |
             set -e
 
@@ -89,6 +90,7 @@ jobs:
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
       
+
 
 
 
