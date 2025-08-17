@@ -3,14 +3,14 @@ name: CD with Gradle and Docker
 on:
   push:
     branches:
-      - 'dev'
+      # - 'dev'
       - 'main'
-      - 'dev2' 
+      # - 'dev2' 
   pull_request:
     branches:
-      - 'dev'
+      # - 'dev'
       - 'main'
-      - 'dev2' 
+      # - 'dev2' 
 
 permissions:
   contents: read
@@ -89,6 +89,7 @@ jobs:
             echo "🚮 Cleaning up old images"
             sudo docker image prune -f
       
+
 
 
 
