@@ -64,16 +64,28 @@ jobs:
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
             
             echo "✋🏻 Remove any container that occupies the name"
-            # 1) 같은 이름(정확 일치)인 컨테이너 모두 제거
-            sudo docker rm -f $(sudo docker ps -aq -f "name=^${APP_NAME}$") 2>/dev/null || true
-            # 2) 같은 라벨(app=<APP_NAME>) 붙은 예전 컨테이너도 제거
-            sudo docker rm -f $(sudo docker ps -aq -f "label=app=${APP_NAME}") 2>/dev/null || true
-            # 3) 이름 잠금 해제 대기 (간헐적 충돌 방지)
-            sleep 1
+
+            # 0) 이름으로 바로 식별 가능하면 제거
+            if sudo docker inspect "$APP_NAME" >/dev/null 2>&1; then
+            sudo docker rm -f "$APP_NAME" || true
+            fi
+            
+            # 1) 정확히 같은 이름(도커 내부는 /이 붙음) 전부 제거
+            IDS_BY_NAME=$(sudo docker ps -aq -f "name=^/${APP_NAME}$" || true)
+            [ -n "$IDS_BY_NAME" ] && sudo docker rm -f $IDS_BY_NAME || true
+            
+            # 2) 동일 라벨 달린 이전 컨테이너도 제거(혹시 모를 잔재)
+            IDS_BY_LABEL=$(sudo docker ps -aq -f "label=app=${APP_NAME}" || true)
+            [ -n "$IDS_BY_LABEL" ] && sudo docker rm -f $IDS_BY_LABEL || true
+            
+            # 3) dead/exited 잔재 정리 + 이름 락 해제 대기
+            sudo docker container prune -f || true
+            sleep 2
+            
             
             
             echo "🐳 Current docker containers:"
-                      sudo docker ps -a
+            sudo docker ps -a
 
             echo "🥳 Pulling new image"
             sudo docker pull "$IMAGE"
