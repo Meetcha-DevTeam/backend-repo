@@ -9,10 +9,7 @@ import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/oauth")
@@ -28,6 +25,21 @@ public class UserController {
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
     }
+
+    @GetMapping("/google")
+    public ResponseEntity<ApiResponse<TokenResponseDto>> googleRedirect(
+            @RequestParam("code") String code) {
+        // 바로 LoginService 호출해서 code → 토큰 교환
+        LoginRequestDto dto = new LoginRequestDto();
+        dto.setCode(code);
+        TokenResponseDto response = loginService.googleLogin(dto);
+
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+    }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
