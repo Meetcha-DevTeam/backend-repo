@@ -42,6 +42,6 @@ public class UserProjectController {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         CreateProjectResponse response = projectService.createProject(request, userId);
 
-        return ApiResponse.success(201, "프로젝트 목록 조회 성공", response);}
+        return ApiResponse.success(201, "프로젝트 생성 성공", response);}
 
 }
