@@ -26,21 +26,6 @@ public class UserController {
                 .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
     }
 
-    @GetMapping("/google")
-    public ResponseEntity<ApiResponse<TokenResponseDto>> googleRedirect(
-            @RequestParam("code") String code) {
-        // 바로 LoginService 호출해서 code → 토큰 교환
-        LoginRequestDto dto = new LoginRequestDto();
-        dto.setCode(code);
-        TokenResponseDto response = loginService.googleLogin(dto);
-
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
-    }
-
-
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
         TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
