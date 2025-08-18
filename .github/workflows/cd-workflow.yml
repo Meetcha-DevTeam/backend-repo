@@ -92,6 +92,22 @@ jobs:
 
             echo "🔎 Verify env inside container (redirect URI)"
             sudo docker exec "$APP_NAME" /bin/sh -lc 'printenv | grep -E "^GOOGLE_(CLIENT_ID|REDIRECT_URI|CLIENT_SECRET)=" || true'
+            
+            echo "🧪 Nginx config test"
+            if sudo nginx -t; then
+              echo "🔁 Reloading Nginx"
+              (sudo systemctl reload nginx || sudo service nginx reload || sudo nginx -s reload) || {
+                echo "⚠️ Reload failed — trying full restart"
+                sudo systemctl restart nginx || sudo service nginx restart
+              }
+            else
+              echo "❌ Nginx config invalid. Showing error log tail"
+              sudo tail -n 100 /var/log/nginx/error.log || true
+              exit 1
+            fi
+
+            echo "🩺 Nginx status (brief)"
+            (sudo systemctl status nginx --no-pager -l || sudo service nginx status) || true
 
             echo "🚮 Cleaning up old images & any old containers with the same label"
             OLD_LABELED=$(sudo docker ps -aq -f "label=app=$APP_NAME" | tr ' ' '\n' | grep -v "$(sudo docker ps -q -f name="^/${APP_NAME}$")" || true)
