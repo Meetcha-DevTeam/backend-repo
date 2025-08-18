@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cd-${{ github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -59,6 +63,7 @@ jobs:
           envs: GITHUB_SHA
           script: |
             set -e
+            exec 200>/tmp/meetcha-cd.lock; flock -n 200 || { echo "Another deploy in progress. Exit."; exit 0; }
 
             APP_NAME="meetcha"
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
