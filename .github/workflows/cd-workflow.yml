@@ -62,11 +62,13 @@ jobs:
 
             APP_NAME="meetcha"
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
-
-            echo "✋🏻 Remove any container that occupies the name"
-            sudo docker rm -f "$APP_NAME" || true
-  
-  
+            
+            echo "✋🏻 Remove any container that occupies the name/label"
+            sudo docker rm -f "$APP_NAME" 2>/dev/null || true
+            IDS=$(sudo docker ps -aq -f "label=app=$APP_NAME" || true)
+            if [ -n "$IDS" ]; then
+            sudo docker rm -f $IDS || true
+            fi
   
             echo "🐳 Current docker containers:"
             sudo docker ps -a
