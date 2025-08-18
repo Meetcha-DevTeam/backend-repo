@@ -64,11 +64,10 @@ jobs:
             IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
 
             echo "✋🏻 Remove any container that occupies the name"
-            CID=$(sudo docker ps -aq -f name="^/${APP_NAME}$" || true)
-            if [ -n "$CID" ]; then
-              sudo docker rm -f $CID || true
-            fi
-
+            sudo docker rm -f "$APP_NAME" || true
+  
+  
+  
             echo "🐳 Current docker containers:"
             sudo docker ps -a
 
@@ -110,11 +109,13 @@ jobs:
             (sudo systemctl status nginx --no-pager -l || sudo service nginx status) || true
 
             echo "🚮 Cleaning up old images & any old containers with the same label"
-            OLD_LABELED=$(sudo docker ps -aq -f "label=app=$APP_NAME" | tr ' ' '\n' | grep -v "$(sudo docker ps -q -f name="^/${APP_NAME}$")" || true)
+            CUR=$(sudo docker ps -q -f "name=^${APP_NAME}$" || true)
+            OLD_LABELED=$(sudo docker ps -aq -f "label=app=${APP_NAME}" | grep -v "^${CUR}$" || true)
             if [ -n "$OLD_LABELED" ]; then
-              sudo docker rm -f $OLD_LABELED || true
+            sudo docker rm -f $OLD_LABELED || true
             fi
             sudo docker image prune -f
+
       
       
 
