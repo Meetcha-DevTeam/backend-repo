@@ -3,12 +3,12 @@ name: CD with Gradle and Docker
 on:
   push:
     branches:
-      - 'dev'
+      # - 'dev'
       - 'main'
       # - 'dev2' 
   pull_request:
     branches:
-      - 'dev'
+      # - 'dev'
       - 'main'
       # - 'dev2' 
 
@@ -61,6 +61,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
           envs: GITHUB_SHA
+          command_timeout: 30m 
           script: |
             set -e
             exec 200>/tmp/meetcha-cd.lock; flock -n 200 || { echo "Another deploy in progress. Exit."; exit 0; }
@@ -136,10 +137,3 @@ jobs:
             sudo docker rm -f $OLD_LABELED || true
             fi
             sudo docker image prune -f
-
-      
-      
-
-
-
-
