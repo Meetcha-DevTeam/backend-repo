@@ -27,7 +27,7 @@ KST(Asia/Seoul) 기준 운영을 권장하며, DB는 MySQL을 사용합니다.
 - 타임슬롯 투표(선택 시간 저장)
 - **대안 시간 계산 알고리즘**(가중치/우선순위 기반)
 - **확정 시 Google Calendar 동기화**
-- 알림/상태 전이(예: BEFORE → CONFIRMED, 실패 시 MATCH_FAILED)
+- 알림/상태 전이
 
 
 ## System Architecture
