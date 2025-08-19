@@ -5,15 +5,19 @@ on:
     branches:
       - 'dev'
       - 'main'
-      - 'dev2' 
+      # - 'dev2' 
   pull_request:
     branches:
       - 'dev'
       - 'main'
-      - 'dev2' 
+      # - 'dev2' 
 
 permissions:
   contents: read
+
+concurrency:
+  group: cd-${{ github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -59,20 +63,40 @@ jobs:
           envs: GITHUB_SHA
           script: |
             set -e
+            exec 200>/tmp/meetcha-cd.lock; flock -n 200 || { echo "Another deploy in progress. Exit."; exit 0; }
 
-            echo "✋🏻 Stopping and removing existing container (if exists)"
-            sudo docker stop meetcha || true
-            sudo docker rm meetcha || true
-  
+            APP_NAME="meetcha"
+            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
+            
+            echo "✋🏻 Remove any container that occupies the name"
 
+            # 0) 이름으로 바로 식별 가능하면 제거
+            if sudo docker inspect "$APP_NAME" >/dev/null 2>&1; then
+            sudo docker rm -f "$APP_NAME" || true
+            fi
+            
+            # 1) 정확히 같은 이름(도커 내부는 /이 붙음) 전부 제거
+            IDS_BY_NAME=$(sudo docker ps -aq -f "name=^/${APP_NAME}$" || true)
+            [ -n "$IDS_BY_NAME" ] && sudo docker rm -f $IDS_BY_NAME || true
+            
+            # 2) 동일 라벨 달린 이전 컨테이너도 제거(혹시 모를 잔재)
+            IDS_BY_LABEL=$(sudo docker ps -aq -f "label=app=${APP_NAME}" || true)
+            [ -n "$IDS_BY_LABEL" ] && sudo docker rm -f $IDS_BY_LABEL || true
+            
+            # 3) dead/exited 잔재 정리 + 이름 락 해제 대기
+            sudo docker container prune -f || true
+            sleep 2
+            
+            
+            
             echo "🐳 Current docker containers:"
             sudo docker ps -a
 
             echo "🥳 Pulling new image"
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+            sudo docker pull "$IMAGE"
 
             echo "🌱 Running new container with ENV"
-            sudo docker run -d --name meetcha \
+            sudo docker run -d --name "$APP_NAME" --label app="$APP_NAME" \
               -p 8000:8080 \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               -e SPRING_DATASOURCE_URL="${{ secrets.RDS_URL }}" \
@@ -81,14 +105,41 @@ jobs:
               -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
               -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \
-              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
+              "$IMAGE"
 
             echo "✅ Container status:"
             sudo docker ps -a
 
-            echo "🚮 Cleaning up old images"
+            echo "🔎 Verify env inside container (redirect URI)"
+            sudo docker exec "$APP_NAME" /bin/sh -lc 'printenv | grep -E "^GOOGLE_(CLIENT_ID|REDIRECT_URI|CLIENT_SECRET)=" || true'
+            
+            echo "🧪 Nginx config test"
+            if sudo nginx -t; then
+              echo "🔁 Reloading Nginx"
+              (sudo systemctl reload nginx || sudo service nginx reload || sudo nginx -s reload) || {
+                echo "⚠️ Reload failed — trying full restart"
+                sudo systemctl restart nginx || sudo service nginx restart
+              }
+            else
+              echo "❌ Nginx config invalid. Showing error log tail"
+              sudo tail -n 100 /var/log/nginx/error.log || true
+              exit 1
+            fi
+
+            echo "🩺 Nginx status (brief)"
+            (sudo systemctl status nginx --no-pager -l || sudo service nginx status) || true
+
+            echo "🚮 Cleaning up old images & any old containers with the same label"
+            CUR=$(sudo docker ps -q -f "name=^${APP_NAME}$" || true)
+            OLD_LABELED=$(sudo docker ps -aq -f "label=app=${APP_NAME}" | grep -v "^${CUR}$" || true)
+            if [ -n "$OLD_LABELED" ]; then
+            sudo docker rm -f $OLD_LABELED || true
+            fi
             sudo docker image prune -f
+
       
+      
+
 
 
 

@@ -92,4 +92,118 @@ public class MeetingTimeCalculatorTest {
         assertEquals(m(0, 15, 30), result);
     }
 
+    @Test
+    @DisplayName("여러 겹침(동일 최장 구간이 여러 개, 여러 날짜): Spare→Day→TimePriority가 순서대로 적용된다")
+    void pick_respectsAllThreePriorities_withManyOverlaps() {
+        // day0: 08–12, 14–18 / day1: 08–12, 14–18  (모두 동일 길이 4시간)
+        Participant a = p("A",
+                tr(m(0, 8, 0), m(0, 12, 0)), tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 8, 0), m(1, 12, 0)), tr(m(1, 14, 0), m(1, 18, 0))
+        );
+        Participant b = p("B",
+                tr(m(0, 8, 0), m(0, 12, 0)), tr(m(0, 14, 0), m(0, 18, 0)),
+                tr(m(1, 8, 0), m(1, 12, 0)), tr(m(1, 14, 0), m(1, 18, 0))
+        );
+
+        // 60분(2블록) 미팅 → 각 4시간 블록의 중앙 시작: 09:30, 15:30
+        // 1) Spare: 4시간 블록(최장)들의 중앙들이 후보 → (day0 09:30, 15:30 / day1 09:30, 15:30)
+        // 2) Day: 더 이른 날짜(day0)만 남김 → (09:30, 15:30)
+        // 3) TimePriority: 12–16(최상위)인 15:30 선택
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 15, 30), result);
+    }
+
+    @Test
+    @DisplayName("Spare(최장 구간)가 Day/Time보다 우선한다: 더 늦은 날짜라도 최장 구간의 중앙을 선택")
+    void pick_longerBlockOnLaterDay_winsOverEarlierDayAndTimePriority() {
+        // day0: 14–18 (4h) / day1: 12–22 (10h)
+        Participant a = p("A", tr(m(0,14,0), m(0,18,0)), tr(m(1,12,0), m(1,22,0)));
+        Participant b = p("B", tr(m(0,14,0), m(0,18,0)), tr(m(1,12,0), m(1,22,0)));
+
+        // 60분(2블록) → day1 12–22(10h=20블록)의 중앙 시작 = 12:00 + ((20-2)/2)*30 = 16:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(1, 16, 30), result); // 더 늦은 날짜라도 최장 구간이 이김
+    }
+
+    @Test
+    @DisplayName("같은 날에 동일 길이 블록이 여러 개면 TimePriority로 12–16대가 선택된다")
+    void pick_timePriorityWithinSameDay_whenMultipleEqualBlocks() {
+        // day0: 08–12, 12–16, 16–20 (모두 4h)
+        Participant a = p("A",
+                tr(m(0,8,0), m(0,12,0)), tr(m(0,12,0), m(0,16,0)), tr(m(0,16,0), m(0,20,0))
+        );
+        Participant b = p("B",
+                tr(m(0,8,0), m(0,12,0)), tr(m(0,12,0), m(0,16,0)), tr(m(0,16,0), m(0,20,0))
+        );
+
+        // 60분(2블록) → 중앙 후보: 09:30, 13:30, 17:30
+        // TimePriority: 12–16(최상) → 13:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 13, 30), result);
+    }
+
+    @Test
+    @DisplayName("회의 길이가 90분처럼 홀수 블록일 때 중앙 내림(floor) 처리 확인")
+    void pick_centerFloor_whenHitIsOddBlocks() {
+        // day0: 08–12 (4h=8블록)
+        Participant a = p("A", tr(m(0,8,0), m(0,12,0)));
+        Participant b = p("B", tr(m(0,8,0), m(0,12,0)));
+
+        // 90분(3블록) → 중앙 = start + ((8-3)//2)*30 = 08:00 + 60 = 09:00
+        Meeting meeting = meetingOf(90, Arrays.asList(a, b));
+
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+
+        assertNotNull(result);
+        assertEquals(m(0, 9, 0), result);
+    }
+
+    @Test
+    @DisplayName("공통 슬롯은 있으나 회의 길이만큼 연속이 안 되면 null")
+    void returnsNull_whenCommonButTooShortForDuration() {
+        Participant a = p("A", tr(m(0,10,0), m(0,10,30))); // 10:00~10:30
+        Participant b = p("B", tr(m(0,10,0), m(0,10,30))); // 10:00~10:30
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b)); // 60분 회의(2블록 필요)
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
+
+    @Test
+    @DisplayName("겹침이 60분인데 회의가 90분이면 null")
+    void returnsNull_whenHitExceedsContiguousCommon() {
+        Participant a = p("A", tr(m(0,10,0), m(0,11,0))); // 10:00~11:00 (60분)
+        Participant b = p("B", tr(m(0,10,0), m(0,11,0)));
+        Meeting meeting = meetingOf(90, Arrays.asList(a, b)); // 90분(3블록) 필요
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
+
+    @Test
+    @DisplayName("여러 날짜에 공통이 있어도 모두 연속 부족이면 null")
+    void returnsNull_whenAllDaysHaveOnlyShortContiguous() {
+        Participant a = p("A",
+                tr(m(0,10,0), m(0,10,30)), // day0: 30분
+                tr(m(1,14,0), m(1,14,30))  // day1: 30분
+        );
+        Participant b = p("B",
+                tr(m(0,10,0), m(0,10,30)),
+                tr(m(1,14,0), m(1,14,30))
+        );
+        Meeting meeting = meetingOf(60, Arrays.asList(a, b));
+        Integer result = MeetingTimeCalculator.calculateMeetingTime(meeting);
+        assertNull(result);
+    }
+
 }
