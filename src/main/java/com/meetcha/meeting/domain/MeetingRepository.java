@@ -77,7 +77,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     WHERE m.createdBy = :userId
        OR EXISTS (
            SELECT 1 FROM MeetingParticipant p
-           WHERE p.meetingId = m AND p.userId = :userId
+       WHERE p.meetingId = m.meetingId AND p.userId = :userId
        )
     ORDER BY m.createdAt DESC
 """)

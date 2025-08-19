@@ -33,7 +33,7 @@ public class MeetingListService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-        List<MeetingParticipantDto> participantDtos =
+        List<MeetingParticipantDto> participants =
                 participantRepository.findParticipantDtosByMeetingId(meetingId);
 
         return new MeetingDetailResponse(
@@ -45,7 +45,7 @@ public class MeetingListService {
                 meeting.getDurationMinutes(),
                 meeting.getConfirmedTime(),
                 meeting.getMeetingCode(),
-                participantDtos
+                participants
         );
     }
 
