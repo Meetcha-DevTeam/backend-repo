@@ -32,11 +32,11 @@ KST(Asia/Seoul) 기준 운영을 권장하며, DB는 MySQL을 사용합니다.
 
 ## System Architecture
 
-![System Architecture](asset/Meetcha_System_Architecture_Diagram.png)
+![System Architecture](assert/Meetcha_System_Architecture_Diagram.png)
 
 ## Data Model(ERD)
 
-![ERD](asset/Meetcha_ERD.png)
+![ERD](assert/Meetcha_ERD.png)
 
 ## 기술 스택
 
