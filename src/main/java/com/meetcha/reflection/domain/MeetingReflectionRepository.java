@@ -11,20 +11,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MeetingReflectionRepository extends JpaRepository<MeetingReflectionEntity, UUID> {
-    //사용자가 이 미팅에 대해 이미 회고를 작성했는지 확인
+
+    // 사용자가 이 미팅에 대해 이미 회고를 작성했는지 확인
     Optional<MeetingReflectionEntity> findByMeeting_MeetingIdAndUser_UserId(UUID meetingId, UUID userId);
 
-    //해당 미팅에 대한 회고가 존재하는지 확인
+    // 해당 미팅에 대한 회고가 존재하는지 확인
     boolean existsByMeeting_MeetingIdAndUser_UserId(UUID meetingId, UUID userId);
 
-    //미팅 회고 목록 요약 조회
-    //confirmedTime은 문자열 포맷으로 변환
-    //회고 작성 시점 기준으로 정렬
+    // 미팅 회고 목록 요약 조회 (alias 제거, 프로젝트 이름은 p.name)
     @Query("""
     SELECT new com.meetcha.reflection.dto.GetWrittenReflectionResponse(
          m.meetingId,
          p.projectId,
-         COALESCE(a.customName, p.name),
+         p.name,
          m.title,
          m.confirmedTime,
          r.completedWork,
@@ -33,19 +32,17 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     FROM MeetingReflectionEntity r
     JOIN r.meeting m
     LEFT JOIN m.project p
-    LEFT JOIN UserProjectAliasEntity a
-    ON a.project.projectId = p.projectId AND a.user.userId = r.user.userId
     WHERE r.user.userId = :userId
     ORDER BY r.createdAt DESC
     """)
     List<GetWrittenReflectionResponse> findWrittenReflectionByUserId(@Param("userId") UUID userId);
 
-    //특정 회고 상세 조회
+    // 특정 회고 상세 조회 (alias 제거)
     @Query("""
     SELECT new com.meetcha.reflection.dto.GetReflectionResponse(
         m.meetingId,
         p.projectId,
-        COALESCE(a.customName, p.name),
+        p.name,
         m.title,
         m.description,
         m.confirmedTime,
@@ -58,17 +55,14 @@ public interface MeetingReflectionRepository extends JpaRepository<MeetingReflec
     FROM MeetingReflectionEntity r
     JOIN r.meeting m
     LEFT JOIN m.project p
-    LEFT JOIN UserProjectAliasEntity a
-        ON a.project.projectId = p.projectId AND a.user.userId = r.user.userId
     WHERE m.meetingId = :meetingId AND r.user.userId = :userId
-""")
+    """)
     Optional<GetReflectionResponse> findReflectionDetailByMeetingIdAndUserId(
             @Param("meetingId") UUID meetingId,
             @Param("userId") UUID userId
     );
 
-    //작성한 회고 조회
+    // 작성한 회고 전체 조회
     @Query("SELECT r FROM MeetingReflectionEntity r WHERE r.user.userId = :userId")
     List<MeetingReflectionEntity> findAllByUserId(@Param("userId") UUID userId);
-
 }
