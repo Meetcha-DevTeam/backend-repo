@@ -55,7 +55,7 @@ public class JoinMeetingService {
         }
 
         // 중복 참가 방지
-        if (participantRepository.existsByMeetingIdAndUserId(meetingId, userId)) {
+        if (participantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId)) {
             throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
         }
 
@@ -144,7 +144,7 @@ public class JoinMeetingService {
 
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
-                .findByMeetingIdAndUserId(meetingId, userId)
+                .findByMeeting_MeetingIdAndUserId(meetingId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
         UUID participantId = participant.getParticipantId();

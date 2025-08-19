@@ -11,11 +11,11 @@ import java.util.UUID;
 
 public interface MeetingParticipantRepository extends JpaRepository<MeetingParticipant, UUID> {
 
-    boolean existsByMeetingIdAndUserId(UUID meetingId, UUID userId);
+    boolean existsByMeeting_MeetingIdAndUserId(UUID meetingId, UUID userId);
 
-    Optional<MeetingParticipant> findByMeetingIdAndUserId(UUID meetingId, UUID userId);
+    Optional<MeetingParticipant> findByMeeting_MeetingIdAndUserId(UUID meetingId, UUID userId);
 
-    List<MeetingParticipant> findAllByMeetingId(UUID meetingId);
+    List<MeetingParticipant> findAllByMeeting_MeetingId(UUID meetingId);
 
     List<MeetingParticipant> findByUserId(UUID userId);
 
