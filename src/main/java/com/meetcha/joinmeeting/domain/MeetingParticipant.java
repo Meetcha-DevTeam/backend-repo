@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.domain;
 
+import com.meetcha.meeting.domain.MeetingEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,14 +23,14 @@ public class MeetingParticipant {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "meeting_id", nullable = false)
-    private UUID meetingId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meeting_id", nullable = false)
+    private MeetingEntity meeting;
 
-
-    public static MeetingParticipant create(UUID userId, UUID meetingId, String nickname) {
+    public static MeetingParticipant create(UUID userId, MeetingEntity meeting, String nickname) {
         MeetingParticipant participant = new MeetingParticipant();
         participant.userId = userId;
-        participant.meetingId = meetingId;
+        participant.meeting = meeting;
         participant.nickname = nickname;
         return participant;
     }

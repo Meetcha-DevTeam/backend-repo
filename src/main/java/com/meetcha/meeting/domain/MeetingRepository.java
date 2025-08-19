@@ -21,7 +21,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
           m.createdBy = :userId
           OR EXISTS (
               SELECT 1 FROM MeetingParticipant p
-              WHERE p.meetingId = m.meetingId AND p.userId = :userId
+              WHERE p.meeting = m AND p.userId = :userId
           )
       )
       AND NOT EXISTS (
@@ -42,7 +42,11 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
           m.createdBy = :userId
           OR EXISTS (
               SELECT 1 FROM MeetingParticipant p
+<<<<<<< HEAD
               WHERE p.meetingId = m.meetingId AND p.userId = :userId
+=======
+              WHERE p.meeting = m AND p.userId = :userId
+>>>>>>> 549cab2b873c5e471762a8044e234ad4c3981b0f
           )
       )
       AND NOT EXISTS (
@@ -77,7 +81,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     WHERE m.createdBy = :userId
        OR EXISTS (
            SELECT 1 FROM MeetingParticipant p
-       WHERE p.meetingId = m.meetingId AND p.userId = :userId
+           WHERE p.meeting = m AND p.userId = :userId
        )
     ORDER BY m.createdAt DESC
 """)
