@@ -22,7 +22,7 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
     @Query("""
        SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
            p.participantId,
-           p.nickname,
+           COALESCE(p.nickname, u.name),
            u.profileImgSrc
        )
        FROM MeetingParticipant p
