@@ -35,7 +35,7 @@ public class MeetingService {
                 .durationMinutes(request.durationMinutes())
                 .deadline(deadline)
                 .createdAt(now)
-                .meetingStatus(MeetingStatus.BEFORE)
+                .meetingStatus(MeetingStatus.MATCHING)
                 .confirmedTime(null)
                 .createdBy(creatorId)
                 .projectId(request.projectId().orElse(null))
