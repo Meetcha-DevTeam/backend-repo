@@ -7,7 +7,7 @@ Google Calendar 연동 기반의 미팅 스케줄러 백엔드.
 
 ## 링크 모음
 
-- 🔗 API 명세서: [API 설계](https://www.notion.so/API-2233a31c4bd980fc8ee9ca4edeaee570?pvs=21)
+- 🔗 API 명세서: [API 설계](https://grey-sedum-df2.notion.site/API-2233a31c4bd980fc8ee9ca4edeaee570?source=copy_link)
 - 🌐 운영 베이스 URL:
 - 🖼 **ERD**:  https://www.erdcloud.com/d/C46Ljm7qCBwsCaF6i
 - 🗂 프론트엔드 레포: https://github.com/Meetcha-DevTeam/frontend-repo
