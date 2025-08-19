@@ -8,7 +8,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "meeting_participants")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class MeetingParticipant {
 
     @Id

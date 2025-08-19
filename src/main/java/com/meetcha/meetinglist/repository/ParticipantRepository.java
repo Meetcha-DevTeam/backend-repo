@@ -16,18 +16,18 @@ public interface ParticipantRepository extends JpaRepository<MeetingParticipant,
     List<MeetingParticipant> findByMeeting_MeetingId(UUID meetingId);
     List<MeetingParticipant> findByUserId(UUID userId);
     @Query("""
-       SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
-           p.participantId,
-           p.nickname,
-           u.profileImageUrl
-       )
-       FROM MeetingParticipant p
-       JOIN UserEntity u ON u.userId = p.userId      -- Hibernate 6 OK
-       WHERE p.meetingId = :meetingId
-       ORDER BY p.nickname ASC
-    """)
+   SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
+       p.participantId,
+       p.nickname,
+       u.profileImgSrc
+   )
+   FROM MeetingParticipant p
+   JOIN UserEntity u ON u.userId = p.userId
+   WHERE p.meetingId = :meetingId
+   ORDER BY p.nickname ASC
+""")
     List<MeetingParticipantDto> findParticipantDtosByMeetingId(@Param("meetingId") UUID meetingId);
 
-    @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meeting.meetingId = :meetingId")
+    @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meetingId = :meetingId")
     List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
 }
