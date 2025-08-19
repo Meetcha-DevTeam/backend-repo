@@ -7,10 +7,11 @@ Google Calendar 연동 기반의 미팅 스케줄러 백엔드.
 
 ## 링크 모음
 
-- 🔗 API 명세서: [API 설계](https://www.notion.so/API-2233a31c4bd980fc8ee9ca4edeaee570?pvs=21)
-- 🌐 운영 베이스 URL:
-- 🖼 **ERD**:  https://www.erdcloud.com/d/C46Ljm7qCBwsCaF6i
-- 🗂 프론트엔드 레포: https://github.com/Meetcha-DevTeam/frontend-repo
+- 🔗 API 명세서: [API 명세서](https://grey-sedum-df2.notion.site/API-2233a31c4bd980fc8ee9ca4edeaee570?source=copy_link)
+- 🌐 운영 베이스 URL: [https://kuit5-meetcha.xyz](https://kuit5-meetcha.xyz)
+- 🖼 ERD:  [Meetcha ERD](https://www.erdcloud.com/d/C46Ljm7qCBwsCaF6i)
+- 🗂 프론트엔드 레포: [Meetcha FE Repo](https://github.com/Meetcha-DevTeam/frontend-repo)
+
 
 
 ## 개요
@@ -25,8 +26,8 @@ KST(Asia/Seoul) 기준 운영을 권장하며, DB는 MySQL을 사용합니다.
 - OAuth2 기반 로그인(Google)
 - 미팅 생성/공유, 참여자 초대
 - 타임슬롯 투표(선택 시간 저장)
-- **대안 시간 계산 알고리즘**(가중치/우선순위 기반)
-- **확정 시 Google Calendar 동기화**
+- 대안 시간 계산 알고리즘(가중치/우선순위 기반)
+- 확정 시 Google Calendar 동기화
 - 알림/상태 전이
 
 

@@ -6,6 +6,7 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidAlternativeTimeException;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.util.DateTimeUtils;
+import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import com.meetcha.meetinglist.dto.AlternativeTimeDto;
@@ -14,7 +15,6 @@ import com.meetcha.meetinglist.dto.AlternativeVoteRequest;
 import com.meetcha.meetinglist.dto.AlternativeVoteResponse;
 import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
 import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
-import com.meetcha.meetinglist.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ import java.util.UUID;
 public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
-    private final ParticipantRepository participantRepository;
+    private final MeetingParticipantRepository meetingParticipantRepository;
     private final JwtProvider jwtProvider;
 
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
@@ -62,7 +62,7 @@ public class AlternativeTimeService {
 
     private List<String> getIncludedNames(UUID meetingId, List<String> excludedNames) {
         // 전체 참여자 닉네임 리스트 조회
-        List<String> allParticipants = participantRepository.findNicknamesByMeetingId(meetingId);
+        List<String> allParticipants = meetingParticipantRepository.findNicknamesByMeetingId(meetingId);
 
         // 제외자 제외한 결과 반환
         return allParticipants.stream()

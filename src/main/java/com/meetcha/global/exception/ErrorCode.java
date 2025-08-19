@@ -39,11 +39,11 @@ public enum ErrorCode {
     PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅 참여자를 찾을 수 없습니다."),
     REFLECTION_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "미팅을 찾을 수 없습니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "리소스를 찾을 수 없습니다."),
+    PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "프로젝트를 찾을 수 없습니다."),
 
     //409 Conflict
     ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, 409, "이미 대안시간 투표를 제출하였습니다."),
     ALREADY_SUBMITTED_REFLECTION(HttpStatus.BAD_REQUEST,409, "이미 회고를 작성한 미팅입니다."),
-
     DUPLICATE_PROJECT_NAME(HttpStatus.CONFLICT, 409, "이미 존재하는 프로젝트 이름입니다."),
 
     // 409 Conflict

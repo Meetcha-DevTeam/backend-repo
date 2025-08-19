@@ -29,7 +29,7 @@ public class MeetingScheduleSyncService {
      */
     @Transactional(readOnly = true)
     public void syncMeetingToCalendars(MeetingEntity meeting) {
-        List<MeetingParticipant> participants = participantRepository.findAllByMeetingId(meeting.getMeetingId());
+        List<MeetingParticipant> participants = participantRepository.findAllByMeeting_MeetingId(meeting.getMeetingId());
 
         for (MeetingParticipant participant : participants) {
             // 1. 사용자 조회
