@@ -1,11 +1,14 @@
 package com.meetcha.meeting.service;
 
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidMeetingRequestException;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
+import com.meetcha.project.domain.ProjectEntity;
+import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +23,21 @@ public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final MeetingCandidateDateRepository candidateDateRepository;
+    private final ProjectRepository projectRepository;
+
     private final Clock clock = Clock.systemDefaultZone();
 
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, UUID creatorId) {
         validateRequest(request);
 
         LocalDateTime now = LocalDateTime.now(clock);
-
         LocalDateTime deadline = DateTimeUtils.kstToUtc(request.deadline());
+
+        ProjectEntity project = null;
+        if (request.projectId().isPresent()) {
+            project = projectRepository.findById(request.projectId().get())
+                    .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+        }
 
         MeetingEntity meeting = MeetingEntity.builder()
                 .title(request.title())
@@ -38,7 +48,7 @@ public class MeetingService {
                 .meetingStatus(MeetingStatus.MATCHING)
                 .confirmedTime(null)
                 .createdBy(creatorId)
-                .projectId(request.projectId().orElse(null))
+                .project(project)
                 .meetingCode(UUID.randomUUID().toString().substring(0, 8))
                 .build();
 
