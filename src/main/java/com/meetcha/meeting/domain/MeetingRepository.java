@@ -1,7 +1,7 @@
 package com.meetcha.meeting.domain;
 
-import com.meetcha.meetinglist.domain.ParticipantEntity;
 import com.meetcha.reflection.domain.MeetingReflectionEntity;
+import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +20,8 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
       AND (
           m.createdBy = :userId
           OR EXISTS (
-              SELECT 1 FROM ParticipantEntity p
-              WHERE p.meeting = m AND p.userId = :userId
+              SELECT 1 FROM MeetingParticipant p
+              WHERE p.meetingId = m AND p.userId = :userId
           )
       )
       AND NOT EXISTS (
@@ -41,8 +41,8 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
       AND (
           m.createdBy = :userId
           OR EXISTS (
-              SELECT 1 FROM ParticipantEntity p
-              WHERE p.meeting = m AND p.userId = :userId
+              SELECT 1 FROM MeetingParticipant p
+              WHERE p.meetingId = m AND p.userId = :userId
           )
       )
       AND NOT EXISTS (
@@ -76,8 +76,8 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     FROM MeetingEntity m
     WHERE m.createdBy = :userId
        OR EXISTS (
-           SELECT 1 FROM ParticipantEntity p
-           WHERE p.meeting = m AND p.userId = :userId
+           SELECT 1 FROM MeetingParticipant p
+           WHERE p.meetingId = m AND p.userId = :userId
        )
     ORDER BY m.createdAt DESC
 """)

@@ -1,5 +1,6 @@
 package com.meetcha.meetinglist.dto;
 
+import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
 import com.meetcha.meeting.domain.MeetingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,5 +20,5 @@ public class MeetingDetailResponse {
     private Integer durationMinutes;
     private LocalDateTime confirmedTime;
     private String meetingCode;
-    private List<ParticipantDto> participants;
+    private List<MeetingParticipantDto> participants;
 }
