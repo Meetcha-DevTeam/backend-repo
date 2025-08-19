@@ -62,7 +62,7 @@ public class JoinMeetingService {
         // 참가자 저장
         MeetingParticipant participant = MeetingParticipant.create(
                 userId,
-                meetingId,
+                meeting,
                 request.nickname()
         );
         participantRepository.save(participant);
