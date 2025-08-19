@@ -2,14 +2,14 @@ package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
+import com.meetcha.joinmeeting.domain.MeetingParticipant;
+import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
-import com.meetcha.meetinglist.domain.ParticipantEntity;
 import com.meetcha.meetinglist.dto.NeedReflectionResponse;
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.MeetingListResponse;
-import com.meetcha.meetinglist.dto.ParticipantDto;
 import com.meetcha.meetinglist.repository.ParticipantRepository;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,15 +33,8 @@ public class MeetingListService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
 
-        List<ParticipantEntity> participantEntities = participantRepository.findByMeeting_MeetingId(meetingId);
-
-        List<ParticipantDto> participantDtos = participantEntities.stream()
-                .map(p -> new ParticipantDto(
-                        p.getId(),
-                        p.getNickname(),
-                        p.getProfileImageUrl()
-                ))
-                .toList();
+        List<MeetingParticipantDto> participantDtos =
+                participantRepository.findParticipantDtosByMeetingId(meetingId);
 
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
