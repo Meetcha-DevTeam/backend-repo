@@ -28,6 +28,6 @@ public interface ParticipantRepository extends JpaRepository<MeetingParticipant,
 """)
     List<MeetingParticipantDto> findParticipantDtosByMeetingId(@Param("meetingId") UUID meetingId);
 
-    @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meeting.meetingId = :meetingId")
+    @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meetingId = :meetingId")
     List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
 }
