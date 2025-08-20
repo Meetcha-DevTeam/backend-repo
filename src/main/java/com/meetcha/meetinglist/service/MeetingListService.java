@@ -1,6 +1,7 @@
 package com.meetcha.meetinglist.service;
 
 import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
@@ -42,7 +43,7 @@ public class MeetingListService {
                 meeting.getMeetingStatus(),
                 meeting.getDeadline(),
                 meeting.getDurationMinutes(),
-                meeting.getConfirmedTime(),
+                DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
                 meeting.getMeetingCode(),
                 participantDtos
         );
