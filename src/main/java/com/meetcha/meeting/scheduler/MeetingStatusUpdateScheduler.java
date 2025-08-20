@@ -59,7 +59,7 @@ public class MeetingStatusUpdateScheduler {
     @Transactional
     public void confirmFromAlternativeTimes() {
 //        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternative();
-        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate();
+        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(MeetingStatus.MATCHING);
 
         for (MeetingEntity meeting : targets) {
             Optional<AlternativeTimeEntity> confirmed = alternativeTimeRepository
