@@ -11,6 +11,7 @@ import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -27,18 +28,14 @@ public class MeetingService {
 
     private final Clock clock = Clock.systemDefaultZone();
 
+    @Transactional
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, UUID creatorId) {
         validateRequest(request);
 
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime deadline = DateTimeUtils.kstToUtc(request.deadline());
 
-        ProjectEntity project = null;
-        if (request.projectId().isPresent()) {
-            project = projectRepository.findById(request.projectId().get())
-                    .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
-        }
-
+        // 먼저 meeting 생성(프로젝트는 나중에 세터로)
         MeetingEntity meeting = MeetingEntity.builder()
                 .title(request.title())
                 .description(request.description())
@@ -48,24 +45,30 @@ public class MeetingService {
                 .meetingStatus(MeetingStatus.MATCHING)
                 .confirmedTime(null)
                 .createdBy(creatorId)
-                .project(project)
                 .meetingCode(UUID.randomUUID().toString().substring(0, 8))
                 .build();
 
+        // projectId가 오면 meetings.project_id 세팅
+        request.projectId().ifPresent(pid -> {
+            ProjectEntity project = projectRepository.findById(pid)
+                    .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
+            meeting.setProject(project); // ★ 세터로 FK 갱신
+        });
+
         meetingRepository.save(meeting);
 
-        //후보 날짜 저장
+        // 후보 날짜 저장
         List<LocalDate> candidateDates = request.candidateDates();
-
-        if (candidateDates != null) {
+        if (candidateDates != null && !candidateDates.isEmpty()) {
             for (LocalDate date : candidateDates) {
-                MeetingCandidateDateEntity candidate =
-                        new MeetingCandidateDateEntity(meeting, date);
-                candidateDateRepository.save(candidate);
+                candidateDateRepository.save(new MeetingCandidateDateEntity(meeting, date));
             }
         }
 
-        return new MeetingCreateResponse(meeting.getMeetingId(), DateTimeUtils.utcToKst(meeting.getCreatedAt()));
+        return new MeetingCreateResponse(
+                meeting.getMeetingId(),
+                DateTimeUtils.utcToKst(meeting.getCreatedAt())
+        );
     }
 
     private void validateRequest(MeetingCreateRequest request) {

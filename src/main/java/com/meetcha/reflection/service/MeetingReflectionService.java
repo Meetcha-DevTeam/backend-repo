@@ -7,6 +7,7 @@ import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.service.algorithm.Meeting;
+import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import com.meetcha.reflection.dto.*;
@@ -30,38 +31,42 @@ public class MeetingReflectionService {
     private final MeetingReflectionRepository reflectionRepository;
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
+    private final com.meetcha.project.domain.ProjectRepository projectRepository;
 
     @Transactional
     public CreateReflectionResponseDto createReflection(UUID userId, UUID meetingId, CreateReflectionRequestDto dto) {
-
-        // 미팅 존재 여부 확인
+        // 미팅/유저 확인
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
 
-        // 사용자 존재 여부 확인
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException(ErrorCode.USER_NOT_FOUND));
 
-        // 중복 회고 작성 방지
-        if (reflectionRepository.findByMeeting_MeetingIdAndUser_UserId(meetingId, userId).isPresent()) {
+        // 중복 작성 방지
+        if (reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meetingId, userId)) {
             throw new ConflictException(ErrorCode.ALREADY_SUBMITTED_REFLECTION);
         }
 
-        // 회고 저장
+        //프론트에서 projectId가 오면 meetings.project_id 갱신 (nullable)
+        if (dto.getProjectId() != null) {
+            ProjectEntity project = projectRepository.findById(dto.getProjectId())
+                    .orElseThrow(() -> new NotFoundException(ErrorCode.PROJECT_NOT_FOUND));
+            meeting.setProject(project);
+        }
+
+        // 회고 저장 (reflection에는 projectId 없음)
         MeetingReflectionEntity reflection = MeetingReflectionEntity.builder()
                 .meeting(meeting)
                 .user(user)
-                .projectId(dto.getProjectId()) // nullable
                 .contribution(dto.getContribution())
                 .role(dto.getRole())
                 .thought(dto.getThought())
-                .completedWork(dto.getCompletedWork())   // nullable
-                .plannedWork(dto.getPlannedWork())       // nullable
+                .completedWork(dto.getCompletedWork())
+                .plannedWork(dto.getPlannedWork())
                 .createdAt(LocalDateTime.now())
                 .build();
 
         reflectionRepository.save(reflection);
-
         return new CreateReflectionResponseDto(reflection.getReflectionId());
     }
 
