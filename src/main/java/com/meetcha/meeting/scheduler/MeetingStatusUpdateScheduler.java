@@ -58,7 +58,8 @@ public class MeetingStatusUpdateScheduler {
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     @Transactional
     public void confirmFromAlternativeTimes() {
-        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternative();
+//        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternative();
+        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate();
 
         for (MeetingEntity meeting : targets) {
             Optional<AlternativeTimeEntity> confirmed = alternativeTimeRepository
