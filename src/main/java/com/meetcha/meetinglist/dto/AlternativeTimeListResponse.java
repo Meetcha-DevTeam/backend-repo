@@ -29,7 +29,7 @@ public class AlternativeTimeListResponse {
         // 체크된 시간(선택된 시간)을 찾아냄
         LocalDateTime selected = dtoList.stream()
                 .filter(AlternativeTimeDto::isChecked)
-                .map(AlternativeTimeDto::getStartTime)
+                .map(dto -> DateTimeUtils.kstStringToUtc(dto.getStartTime()))
                 .findFirst()
                 .orElse(null);
 
