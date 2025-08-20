@@ -85,12 +85,22 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
 """)
     List<MeetingEntity> findMyMeetings(@Param("userId") UUID userId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<MeetingEntity> findByIdForUpdate(UUID meetingId);
 
-    // 락을 사용하는 새로운 메소드 추가
+
+    // (1) 단건 조회 + PESSIMISTIC_WRITE 락
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT m FROM MeetingEntity m WHERE m.meetingStatus = 'MATCHING' AND m.alternativeDeadline < CURRENT_TIMESTAMP")
+    @Query("SELECT m FROM MeetingEntity m WHERE m.meetingId = :id")
+    Optional<MeetingEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    // (2) 대안 시간 확정 대상들 조회 + PESSIMISTIC_WRITE 락
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT m FROM MeetingEntity m
+        WHERE m.alternativeDeadline IS NOT NULL
+          AND m.confirmedTime IS NULL
+          AND m.alternativeDeadline < CURRENT_TIMESTAMP
+          AND m.meetingStatus = 'MATCHING'
+    """)
     List<MeetingEntity> findMeetingsToConfirmFromAlternativeForUpdate();
 
 }
