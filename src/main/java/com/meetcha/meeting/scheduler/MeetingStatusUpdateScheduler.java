@@ -26,8 +26,8 @@ public class MeetingStatusUpdateScheduler {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final MeetingScheduleSyncService syncService;
 
-    // 매 5분마다 실행 -30마다 실행해도 되나
-    @Scheduled(fixedRate = 5 * 60 * 1000)
+
+    @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     public void updateMeetingStatuses() {
         LocalDateTime now = LocalDateTime.now();
 
@@ -55,7 +55,7 @@ public class MeetingStatusUpdateScheduler {
         meetingRepository.saveAll(toEnd);
     }
 
-    @Scheduled(cron = "0 */10 * * * *") // 매 10분마다 실행
+    @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     @Transactional
     public void confirmFromAlternativeTimes() {
         List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternative();
