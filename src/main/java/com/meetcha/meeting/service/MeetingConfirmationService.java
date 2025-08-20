@@ -84,7 +84,7 @@ public class MeetingConfirmationService {
         }
 
         // 2. 알고리즘: 가장 많은 참여자가 가능한 시간대 추출
-        LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes);
+        LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes); //todo
         log.info(" 알고리즘: 가장 많은 참여자가 가능한 시간대 추출 완료{}",bestSlot);
 
 
