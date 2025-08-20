@@ -171,7 +171,15 @@ public class JoinMeetingService {
     }
 
     @Transactional(readOnly = true)
-    public ApiResponse<List<GetSelectedTime>> getMyAvailableTimes(UUID meetingId, UUID participantId) {
+    public ApiResponse<List<GetSelectedTime>> getMyAvailableTimes(UUID meetingId, UUID userId) {
+        // userId로 participant 조회
+        MeetingParticipant participant = participantRepository
+                .findByMeeting_MeetingIdAndUserId(meetingId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+        UUID participantId = participant.getParticipantId();
+
+        // availability 조회
         List<ParticipantAvailability> times =
                 availabilityRepository.findByMeetingIdAndParticipantId(meetingId, participantId);
 
@@ -188,6 +196,7 @@ public class JoinMeetingService {
 
         return ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", selectedTimes);
     }
+
 
     private UUID extractUserId(String authorizationHeader) {
         String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
