@@ -89,7 +89,6 @@ public class AlternativeTimeService {
                 .findByMeetingIdAndStartTime(meetingId, DateTimeUtils.kstToUtc(request.getAlternativeTime()))
                 .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));
 
-
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);
         if (alreadyVoted) {

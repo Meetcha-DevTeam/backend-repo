@@ -14,11 +14,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class AlternativeTimeDto {
-
     @JsonIgnore
     private LocalDateTime startTime;
     @JsonIgnore
     private LocalDateTime endTime;
+  
     private Integer adjustedDurationMinutes;
     private List<String> excludedUserNames;
     private List<String> includedUserNames;
