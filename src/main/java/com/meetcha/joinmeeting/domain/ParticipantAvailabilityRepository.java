@@ -9,4 +9,7 @@ public interface ParticipantAvailabilityRepository extends JpaRepository<Partici
     void deleteByMeetingIdAndParticipantId(UUID meetingId, UUID participantId);
 
     List<ParticipantAvailability> findByMeetingId(UUID meetingId);
+
+    List<ParticipantAvailability> findByMeetingIdAndParticipantId(UUID meetingId, UUID participantId);
+
 }

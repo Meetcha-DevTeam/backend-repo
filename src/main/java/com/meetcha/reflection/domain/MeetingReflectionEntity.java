@@ -10,9 +10,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "meeting_reflections", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"meeting_id", "user_id"})
-})
+@Table(name = "meeting_reflections",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"meeting_id", "user_id"}))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,16 +24,13 @@ public class MeetingReflectionEntity {
     @Column(name = "reflection_id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID reflectionId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meeting_id", nullable = false, columnDefinition = "BINARY(16)")
     private MeetingEntity meeting;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, columnDefinition = "BINARY(16)")
     private UserEntity user;
-
-    @Column(name = "project_id", columnDefinition = "BINARY(16)")
-    private UUID projectId;
 
     @Column(name = "contribution", nullable = false)
     private int contribution;

@@ -1,6 +1,9 @@
 package com.meetcha.joinmeeting.controller;
 
+import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.global.util.AuthHeaderUtils;
+import com.meetcha.joinmeeting.dto.GetSelectedTime;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
@@ -11,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -20,6 +24,7 @@ import java.util.UUID;
 public class JoinMeetingController {
 
     private final JoinMeetingService joinMeetingService;
+    private final JwtProvider jwtProvider;
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
@@ -50,4 +55,14 @@ public class JoinMeetingController {
         return ResponseEntity.ok(ApiResponse.success(200, "미팅 정보 조회 성공", response));
     }
 
+    @GetMapping("/{meetingId}/available-times")
+    public ResponseEntity<ApiResponse<List<GetSelectedTime>>> getMyAvailableTimes(
+            @PathVariable UUID meetingId,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+        ApiResponse<List<GetSelectedTime>> response =
+                joinMeetingService.getMyAvailableTimes(meetingId, userId);
+        return ResponseEntity.ok(response);
+    }
 }
