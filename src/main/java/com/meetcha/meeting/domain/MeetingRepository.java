@@ -2,7 +2,9 @@ package com.meetcha.meeting.domain;
 
 import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
@@ -82,5 +84,23 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     ORDER BY m.createdAt DESC
 """)
     List<MeetingEntity> findMyMeetings(@Param("userId") UUID userId);
+
+
+
+    // (1) 단건 조회 + PESSIMISTIC_WRITE 락
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT m FROM MeetingEntity m WHERE m.meetingId = :id")
+    Optional<MeetingEntity> findByIdForUpdate(@Param("id") UUID id);
+
+    // (2) 대안 시간 확정 대상들 조회 + PESSIMISTIC_WRITE 락
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT m FROM MeetingEntity m
+        WHERE m.alternativeDeadline IS NOT NULL
+          AND m.confirmedTime IS NULL
+          AND m.alternativeDeadline < CURRENT_TIMESTAMP
+          AND m.meetingStatus = 'MATCHING'
+    """)
+    List<MeetingEntity> findMeetingsToConfirmFromAlternativeForUpdate();
 
 }
