@@ -83,7 +83,7 @@ public class AlternativeTimeCalculator {
         for (Integer minutes : getLessParticipantMeetingTimes(meeting)) {
             LocalDateTime start = toLocalDateTime(minutes);
             results.add(AlternativeTimeEntity.builder()
-                    .alternativeTimeId(UUID.randomUUID())
+//                    .alternativeTimeId(UUID.randomUUID())
                     .meetingId(meetingId)
                     .startTime(start)
                     .endTime(start.plusMinutes(adjustedDuration2))

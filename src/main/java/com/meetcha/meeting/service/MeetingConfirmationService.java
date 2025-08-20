@@ -69,7 +69,7 @@ public class MeetingConfirmationService {
 
             } else {
                 log.info("saveAlternativeTimeCandidates 호출");
-                saveAlternativeTimeCandidates(alterTimes);
+                saveAlternativeTimeCandidates(meetingId,alterTimes);
 //                updateAlternativeDeadlineFromCandidates(meeting);
                 updateAlternativeDeadlineFromCandidates(meeting, alterTimes);
                 meeting.setMeetingStatus(MeetingStatus.MATCHING);
@@ -84,7 +84,7 @@ public class MeetingConfirmationService {
         }
 
         // 2. 알고리즘: 가장 많은 참여자가 가능한 시간대 추출
-        LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes);
+        LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes); //todo
         log.info(" 알고리즘: 가장 많은 참여자가 가능한 시간대 추출 완료{}",bestSlot);
 
 
@@ -101,7 +101,7 @@ public class MeetingConfirmationService {
 
     }
 
-    private void saveAlternativeTimeCandidates(List<AlternativeTimeEntity> alterTimes) {
+    private void saveAlternativeTimeCandidates(UUID meetingId, List<AlternativeTimeEntity> alterTimes) {
         log.info("saveAlternativeTimeCandidates 접근 완료");
         log.info("alterTimes size={}", alterTimes.size());
         for (AlternativeTimeEntity t : alterTimes) {
@@ -109,8 +109,18 @@ public class MeetingConfirmationService {
                     t.getStartTime(), t.getEndTime(), t.getMeetingId(),
                     t.getExcludedParticipants() == null ? 0 : t.getExcludedParticipants().length());
         }
+        alternativeTimeRepository.deleteByMeetingId(meetingId);
+        List<AlternativeTimeEntity> fresh = alterTimes.stream()
+                .map(it -> AlternativeTimeEntity.create(
+                        it.getStartTime(),
+                        it.getEndTime(),
+                        it.getDurationAdjustedMinutes(),
+                        it.getExcludedParticipants(),
+                        it.getMeetingId()
+                ))
+                .toList();
 
-        alternativeTimeRepository.saveAll(alterTimes);
+        alternativeTimeRepository.saveAll(fresh);
         alternativeTimeRepository.flush();
         log.info("alternativeTimeRepository.saveAll OK");
     }

@@ -1,5 +1,6 @@
 package com.meetcha.meeting.service;
 
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.service.algorithm.Meeting;
@@ -57,12 +58,16 @@ public class MeetingConverter {
         );
     }
 
-    private static int toMinutes(LocalDateTime time) {
-        return time.getDayOfYear() * 24 * 60 + time.getHour() * 60 + time.getMinute();
+    private static int toMinutes(LocalDateTime timeUtc) {
+        LocalDateTime timeKst = DateTimeUtils.utcToKst(timeUtc);
+        return timeKst.getDayOfYear() * 24 * 60 + timeKst.getHour() * 60 + timeKst.getMinute();
     }
 
     public static LocalDateTime toLocalDateTime(int totalMinutes) {
         LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
+        LocalDateTime kstTime = baseDate.atStartOfDay().plusMinutes(totalMinutes);
+
+        // 다시 DB 저장용으로는 UTC 변환
+        return DateTimeUtils.kstToUtc(kstTime);
     }
 }

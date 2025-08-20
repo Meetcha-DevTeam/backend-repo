@@ -1,5 +1,7 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.auth.domain.UserRepository;
+import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
@@ -41,6 +43,7 @@ public class JoinMeetingService {
     private final MeetingRepository meetingRepository;
     private final JwtProvider jwtProvider;
     private final MeetingCandidateDateRepository meetingCandidateDateRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
@@ -61,11 +64,20 @@ public class JoinMeetingService {
             throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
         }
 
+
+        // 닉네임 확인 (없으면 users.name 가져오기)
+        String nickname = request.nickname();
+        if (nickname == null || nickname.isBlank()) {
+            nickname = userRepository.findById(userId)
+                    .map(UserEntity::getName)
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        }
+
         // 참가자 저장
         MeetingParticipant participant = MeetingParticipant.create(
                 userId,
                 meeting,
-                request.nickname()
+                nickname
         );
         participantRepository.save(participant);
 
