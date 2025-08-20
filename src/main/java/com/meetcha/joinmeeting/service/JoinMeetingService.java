@@ -11,6 +11,7 @@ import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
+import com.meetcha.joinmeeting.dto.GetSelectedTime;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -168,6 +170,24 @@ public class JoinMeetingService {
         return new JoinMeetingResponse(meetingId, participantId);
     }
 
+    @Transactional(readOnly = true)
+    public ApiResponse<List<GetSelectedTime>> getMyAvailableTimes(UUID meetingId, UUID participantId) {
+        List<ParticipantAvailability> times =
+                availabilityRepository.findByMeetingIdAndParticipantId(meetingId, participantId);
+
+        if (times.isEmpty()) {
+            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        List<GetSelectedTime> selectedTimes = times.stream()
+                .map(t -> new GetSelectedTime(
+                        DateTimeUtils.utcToKstString(t.getStartAt()),
+                        DateTimeUtils.utcToKstString(t.getEndAt())
+                ))
+                .toList();
+
+        return ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", selectedTimes);
+    }
 
     private UUID extractUserId(String authorizationHeader) {
         String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
