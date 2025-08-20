@@ -3,11 +3,9 @@ package com.meetcha.user.controller;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.AuthHeaderUtils;
-import com.meetcha.user.dto.CreateScheduleRequest;
-import com.meetcha.user.dto.ScheduleDetailResponse;
-import com.meetcha.user.dto.UpdateScheduleRequest;
-import com.meetcha.user.dto.ScheduleResponse;
+import com.meetcha.user.dto.*;
 import com.meetcha.user.service.UserScheduleService;
+import com.meetcha.user.service.UserProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,6 +21,7 @@ import java.util.UUID;
 @RequestMapping("/user")
 public class UserScheduleController {
 
+    private final UserProfileService userProfileService;
     private final UserScheduleService userScheduleService;
     private final JwtProvider jwtProvider;
 
@@ -84,6 +83,16 @@ public class UserScheduleController {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.deleteSchedule(userId, eventId);
         return ApiResponse.success(200, "일정 삭제 성공");
+    }
+
+    //유저 정보 조회(마이페이지)
+    @GetMapping("/mypage")
+    public ApiResponse<MyPageResponse> getMyPage(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+        MyPageResponse response = userProfileService.getMyPage(userId);
+        return ApiResponse.success(200, "마이페이지 정보 조회 성공", response);
     }
 
 }
