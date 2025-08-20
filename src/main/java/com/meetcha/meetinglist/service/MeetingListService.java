@@ -43,7 +43,8 @@ public class MeetingListService {
                 meeting.getMeetingStatus(),
                 meeting.getDeadline(),
                 meeting.getDurationMinutes(),
-                DateTimeUtils.kstToUtc(meeting.getConfirmedTime()),
+//                DateTimeUtils.kstToUtc(meeting.getConfirmedTime()),
+                meeting.getConfirmedTime(),
                 meeting.getMeetingCode(),
                 participantDtos
         );
