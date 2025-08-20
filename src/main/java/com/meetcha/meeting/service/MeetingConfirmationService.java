@@ -101,7 +101,16 @@ public class MeetingConfirmationService {
     }
 
     private void saveAlternativeTimeCandidates(List<AlternativeTimeEntity> alterTimes) {
+        log.info("alterTimes size={}", alterTimes.size());
+        for (AlternativeTimeEntity t : alterTimes) {
+            log.info("cand start={} end={} meetingId={} excluded.len={}",
+                    t.getStartTime(), t.getEndTime(), t.getMeetingId(),
+                    t.getExcludedParticipants() == null ? 0 : t.getExcludedParticipants().length());
+        }
+
         alternativeTimeRepository.saveAll(alterTimes);
+        alternativeTimeRepository.flush();
+        log.info("alternativeTimeRepository.saveAll OK");
     }
 
     // 기존 candidates 바로 갖다 쓰기
