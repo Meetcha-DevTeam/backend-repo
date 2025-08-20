@@ -57,9 +57,10 @@ public class MeetingConfirmationService {
 
         if (bestStartMinutes == null) {
             // 대안 시간 후보 산출 시도
+            log.info("대안 시간 후보 산출 시도 {}",bestStartMinutes);
             List<AlternativeTimeEntity> alterTimes = AlternativeTimeCalculator.getAlternativeTimes(converted,meetingId);
             boolean hasCandidate = !alterTimes.isEmpty();
-            log.info("대안 시간 후보 산출 완료");
+            log.info("대안 시간 후보 산출 완료 {}",hasCandidate);
 
             if (!hasCandidate) {
                 // 이때 가용 시간이 없는 경우 미팅 상태 실패로 지정
@@ -83,7 +84,7 @@ public class MeetingConfirmationService {
 
         // 2. 알고리즘: 가장 많은 참여자가 가능한 시간대 추출
         LocalDateTime bestSlot = MeetingConverter.toLocalDateTime(bestStartMinutes);
-        log.info(" 알고리즘: 가장 많은 참여자가 가능한 시간대 추출 완료");
+        log.info(" 알고리즘: 가장 많은 참여자가 가능한 시간대 추출 완료{}",bestSlot);
 
 
 

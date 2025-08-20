@@ -1,6 +1,7 @@
 package com.meetcha.meeting.service.algorithm;
 
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
  *   1. 진행 시간을 줄여 가능한 시간 확보
  *   2. 일부 참여자를 줄여 가능한 시간 확보
  */
+@Slf4j
 public class AlternativeTimeCalculator {
 
     private static final int PER = 30;
@@ -28,6 +30,7 @@ public class AlternativeTimeCalculator {
      */
     public static List<AlternativeTimeEntity> getAlternativeTimes(Meeting meeting, UUID meetingId) {
         List<AlternativeTimeEntity> results = new ArrayList<>();
+        log.info("getAlternativeTimes 진입 {}",results);
 
         // 전략 1: 진행 시간 줄이기
         Map<Integer, Integer> timeSequenceDuration = getTimeSequence(meeting, PER, (cur, tot) -> cur == tot);
