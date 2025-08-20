@@ -68,6 +68,7 @@ public class MeetingConfirmationService {
                 log.info("가용 시간이 없는 경우 미팅 상태 실패로 지정");
 
             } else {
+                log.info("saveAlternativeTimeCandidates 호출");
                 saveAlternativeTimeCandidates(alterTimes);
 //                updateAlternativeDeadlineFromCandidates(meeting);
                 updateAlternativeDeadlineFromCandidates(meeting, alterTimes);
@@ -101,6 +102,7 @@ public class MeetingConfirmationService {
     }
 
     private void saveAlternativeTimeCandidates(List<AlternativeTimeEntity> alterTimes) {
+        log.info("saveAlternativeTimeCandidates 접근 완료");
         log.info("alterTimes size={}", alterTimes.size());
         for (AlternativeTimeEntity t : alterTimes) {
             log.info("cand start={} end={} meetingId={} excluded.len={}",
