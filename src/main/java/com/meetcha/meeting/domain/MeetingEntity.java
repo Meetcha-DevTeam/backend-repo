@@ -1,9 +1,10 @@
-
 package com.meetcha.meeting.domain;
 
 import com.meetcha.project.domain.ProjectEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,7 +12,14 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "meetings")
+@Table(
+        name = "meetings",
+        uniqueConstraints = @UniqueConstraint(name = "uk_meetings_meeting_code", columnNames = "meeting_code"),
+        indexes = {
+                @Index(name = "idx_meetings_created_by", columnList = "created_by"),
+                @Index(name = "idx_meetings_project_id", columnList = "project_id")
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,7 +29,8 @@ public class MeetingEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "meeting_id", columnDefinition = "BINARY(16)", nullable = false)
+    @JdbcType(BinaryJdbcType.class)
+    @Column(name = "meeting_id", nullable = false)
     private UUID meetingId;
 
     @Column(name = "title", nullable = false)
@@ -30,45 +39,48 @@ public class MeetingEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "duration_minutes")
-    private Integer durationMinutes; // 30분 단위 저장
+    @Column(name = "duration_minutes", nullable = false)
+    private Integer durationMinutes; // NOT NULL
 
-    @Column(name = "deadline")
-    private LocalDateTime deadline;
+    @Column(name = "deadline", nullable = false)
+    private LocalDateTime deadline; // NOT NULL
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; // NOT NULL
 
     @Enumerated(EnumType.STRING)
     @Column(name = "meeting_status", nullable = false)
-    private MeetingStatus meetingStatus; // 시작전, 진행중, 완료
+    private MeetingStatus meetingStatus; // NOT NULL
 
     @Column(name = "confirmed_time")
-    private LocalDateTime confirmedTime;
+    private LocalDateTime confirmedTime; // NULL
 
-    @Column(name = "meeting_code", nullable = false, unique = true)
-    private String meetingCode;
+    @Column(name = "meeting_code", nullable = false, length = 64)
+    private String meetingCode; // NOT NULL (Unique 제약은 @Table에서)
 
     @Column(name = "alternative_deadline")
-    private LocalDateTime alternativeDeadline;
+    private LocalDateTime alternativeDeadline; // NULL
 
+    @JdbcType(BinaryJdbcType.class)
     @Column(name = "created_by", nullable = false)
-    private UUID createdBy;
+    private UUID createdBy; // NOT NULL
 
-    @Column(name = "project_id", nullable = true, insertable = false, updatable = false)
-    private UUID projectId;
-
-    // todo 미팅 생성 시 디폴트 값 설정 -> Service에서 직접 UUID 생성 후 채워넣음
-
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectEntity project;
+
+    /** 읽기용 편의 getter */
+    @Transient
+    public UUID getProjectId() {
+        return project != null ? project.getProjectId() : null;
+    }
 
     public boolean isDeadlinePassed() {
         return deadline != null && deadline.isBefore(LocalDateTime.now());
     }
 
     @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<MeetingCandidateDateEntity> candidateDates = new ArrayList<>();
-
 }
