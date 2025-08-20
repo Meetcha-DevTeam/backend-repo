@@ -1,6 +1,5 @@
 package com.meetcha.joinmeeting.controller;
 
-import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.AuthHeaderUtils;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 
-import java.rmi.server.UID;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,7 +24,7 @@ import java.util.UUID;
 public class JoinMeetingController {
 
     private final JoinMeetingService joinMeetingService;
-    private JwtProvider jwtProvider;
+    private final JwtProvider jwtProvider;
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
