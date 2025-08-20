@@ -10,6 +10,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AlternativeVoteRequest {
-    //대안 시간 투표 제출 요청
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime alternativeTime;
 }
