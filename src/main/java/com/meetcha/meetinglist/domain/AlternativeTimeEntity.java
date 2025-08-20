@@ -41,6 +41,12 @@ public class AlternativeTimeEntity {
             String excludedParticipants,
             UUID meetingId
     ) {
+        if (startTime == null || endTime == null || meetingId == null) {
+            throw new IllegalArgumentException("start/end/meetingId is required");
+        }
+        if (!endTime.isAfter(startTime)) {
+            throw new IllegalArgumentException("endTime must be after startTime");
+        }
         return AlternativeTimeEntity.builder()
                 .startTime(startTime)
                 .endTime(endTime)
