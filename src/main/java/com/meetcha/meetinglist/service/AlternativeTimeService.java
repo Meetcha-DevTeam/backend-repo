@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -57,18 +58,26 @@ public class AlternativeTimeService {
 
     private List<String> getExcludedNames(String raw) {
         if (raw == null || raw.isBlank()) return List.of();
-        return Arrays.asList(raw.split(",")); // 또는 JSON 파싱
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .toList();
     }
 
     private List<String> getIncludedNames(UUID meetingId, List<String> excludedNames) {
-        // 전체 참여자 닉네임 리스트 조회
-        List<String> allParticipants = meetingParticipantRepository.findNicknamesByMeetingId(meetingId);
+        // excludedNames 가 null이면 빈 리스트로 대체
+        List<String> safeExcluded = Optional.ofNullable(excludedNames).orElse(List.of());
 
-        // 제외자 제외한 결과 반환
+        // 전체 참여자 닉네임 조회 (null 방어)
+        List<String> allParticipants =
+                Optional.ofNullable(meetingParticipantRepository.findNicknamesByMeetingId(meetingId))
+                        .orElse(List.of());
+
         return allParticipants.stream()
-                .filter(name -> !excludedNames.contains(name))
+                .filter(name -> name != null && !safeExcluded.contains(name))
                 .toList();
     }
+
 
 
     @Transactional
