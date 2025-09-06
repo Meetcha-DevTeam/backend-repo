@@ -52,8 +52,6 @@ public class LoginService {
 
         ResponseEntity<Map> tokenResponse;
         try {
-            log.info("Google Token Request => code={}, clientId={}, redirectUri={}", code, googleProps.getClientId(), googleProps.getRedirectUri());
-
             tokenResponse = restTemplate.exchange(
                     "https://oauth2.googleapis.com/token",
                     HttpMethod.POST,
