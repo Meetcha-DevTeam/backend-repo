@@ -11,6 +11,7 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidGoogleCodeException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -28,6 +29,7 @@ public class LoginService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private Logger log;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
@@ -49,6 +51,8 @@ public class LoginService {
 
         ResponseEntity<Map> tokenResponse;
         try {
+            log.info("Google Token Request => code={}, clientId={}, redirectUri={}", code, googleProps.getClientId(), googleProps.getRedirectUri());
+
             tokenResponse = restTemplate.exchange(
                     "https://oauth2.googleapis.com/token",
                     HttpMethod.POST,
