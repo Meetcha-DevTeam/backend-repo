@@ -11,6 +11,7 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.exception.InvalidGoogleCodeException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoginService {
@@ -29,7 +31,6 @@ public class LoginService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private Logger log;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
