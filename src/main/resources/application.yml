@@ -1,0 +1,32 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  profiles:
+    active: prod
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        database-platform: org.hibernate.dialect.MySQLDialect
+        show_sql: true
+        format_sql: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration: 86400000   #1일
+  refresh-token-expiration : 1209600000   #2주
+
+google:
+  client-id : ${GOOGLE_CLIENT_ID}
+  client-secret : ${GOOGLE_CLIENT_SECRET}
+  redirect-uri : ${GOOGLE_REDIRECT_URI}
