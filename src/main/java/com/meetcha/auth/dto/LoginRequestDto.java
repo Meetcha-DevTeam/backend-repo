@@ -8,4 +8,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginRequestDto {
     private String code;
+    private String redirectUri;
 }

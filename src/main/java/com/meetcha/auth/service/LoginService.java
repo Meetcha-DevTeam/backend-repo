@@ -34,6 +34,7 @@ public class LoginService {
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
+        String redirectUrl = request.getRedirectUri();
         RestTemplate restTemplate = new RestTemplate();
 
         // 구글 토큰 교환
@@ -44,7 +45,7 @@ public class LoginService {
         tokenParams.add("code", code);
         tokenParams.add("client_id", googleProps.getClientId());
         tokenParams.add("client_secret", googleProps.getClientSecret());
-        tokenParams.add("redirect_uri", googleProps.getRedirectUri());
+        tokenParams.add("redirect_uri", redirectUrl);
         tokenParams.add("grant_type", "authorization_code");
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest =
