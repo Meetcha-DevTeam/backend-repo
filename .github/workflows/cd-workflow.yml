@@ -103,6 +103,7 @@ jobs:
               -e SPRING_DATASOURCE_URL="${{ secrets.RDS_URL }}" \
               -e SPRING_DATASOURCE_USERNAME="${{ secrets.RDS_USERNAME }}" \
               -e SPRING_DATASOURCE_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
+              -e SPRING_DATASOURCE_PORT="${{ secrets.RDS_PORT }}" \
               -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
               -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
               -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \

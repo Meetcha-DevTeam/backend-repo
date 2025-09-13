@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${RDS_URL}:${RDS_PORT}/${RDS_USERNAME}?createDatabaseIfNotExist=true
+    username: ${RDS_DB_HOST}
+    password: ${RDS_PASSWORD}
+
