@@ -40,7 +40,7 @@ public class LoginService {
         // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
         log.info("[OAuth] start googleLogin: code={}, redirectUri='{}', clientId='{}', clientSecret='{}'",
                 code,
-                googleProps.getRedirectUri(), googleProps.getClientId(), googleProps.getClientSecret());
+                redirectUrl, googleProps.getClientId(), googleProps.getClientSecret());
 
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
