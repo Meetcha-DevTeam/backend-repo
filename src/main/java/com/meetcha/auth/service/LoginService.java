@@ -37,6 +37,11 @@ public class LoginService {
         String redirectUrl = request.getRedirectUri();
         RestTemplate restTemplate = new RestTemplate();
 
+        // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
+        log.info("[OAuth] start googleLogin: code={}, redirectUri='{}', clientId='{}', clientSecret='{}'",
+                code,
+                googleProps.getRedirectUri(), googleProps.getClientId(), googleProps.getClientSecret());
+
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -60,10 +65,12 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
+            log.error("[OAuth] token exchange ERROR: {}", e.toString(), e);
             throw new InvalidGoogleCodeException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
+            log.error("[OAuth] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
             throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
