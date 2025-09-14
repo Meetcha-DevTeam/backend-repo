@@ -37,7 +37,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         var config = new org.springframework.web.cors.CorsConfiguration();
-        config.setAllowedOriginPatterns(java.util.List.of("http://localhost:5173")); // Vite 기본 포트
+        config.setAllowedOriginPatterns(java.util.List.of("http://localhost:5173", "https://app.kuit5-meetcha.xyz")); // Vite 기본 포트
         config.setAllowedMethods(java.util.List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(java.util.List.of("Authorization","Content-Type","Accept"));
         config.setAllowCredentials(true); // 쿠키/세션이나 Authorization을 함께 쓰면 true
