@@ -34,7 +34,7 @@ public class LoginService {
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
-        String redirectUrl = request.getRedirectUri();
+        String redirectUrl = request.getRedirectUri()+"/login-complete";
         RestTemplate restTemplate = new RestTemplate();
 
         // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
