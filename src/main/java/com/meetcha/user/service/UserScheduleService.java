@@ -146,7 +146,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserScheduleService {
 
-    private final GoogleTokenService googleTokenService;   // ✅ 항상 유효한 구글 토큰 확보
+    private final GoogleTokenService googleTokenService;
     private final GoogleCalendarClient googleCalendarClient;
 
     // 유저 일정 조회
@@ -163,12 +163,12 @@ public class UserScheduleService {
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        String rrule = RecurrenceUtils.buildGoogleRRule(request.recurrence(), request.startAt());
+        String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
         return googleCalendarClient.createEvent(
                 accessToken,
-                request.title(),
-                request.startAt(),
-                request.endAt(),
+                request.getTitle(),
+                request.getStartAt(),
+                request.getEndAt(),
                 rrule
         );
     }
@@ -178,11 +178,11 @@ public class UserScheduleService {
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.updateEvent(
                 accessToken,
-                request.eventId(),
-                request.title(),
-                request.startAt(),
-                request.endAt(),
-                request.recurrence()
+                request.getEventId(),
+                request.getTitle(),
+                request.getStartAt(),
+                request.getEndAt(),
+                request.getRecurrence()
         );
     }
 
