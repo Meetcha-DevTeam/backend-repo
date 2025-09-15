@@ -41,7 +41,7 @@ public class GoogleAuthController {
         }
 
         // 3) 최초 연동인데 refreshToken이 없으면 에러
-        if (req.refreshToken() == null || req.refreshToken().isBlank()) {
+        if (req.getRefreshToken() == null || req.getRefreshToken().isBlank()) {
             // 프론트 로그인 URL 점검 유도
             throw new CustomException(ErrorCode.MISSING_GOOGLE_REFRESH_TOKEN);
         }
@@ -49,9 +49,9 @@ public class GoogleAuthController {
         // 4) 저장
         googleTokenService.saveInitialGoogleTokens(
                 pathUserId,
-                req.accessToken(),
-                req.refreshToken(),
-                req.expiresInSec()
+                req.getAccessToken(),
+                req.getRefreshToken(),
+                req.getExpiresInSec()
         );
 
         return ApiResponse.success(200, "구글 OAuth 토큰이 성공적으로 저장되었습니다.");
