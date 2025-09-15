@@ -1,8 +1,8 @@
 package com.meetcha.meetinglist.service;
 
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.util.DateTimeUtils;
-import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
 import com.meetcha.meeting.domain.MeetingEntity;
@@ -31,7 +31,7 @@ public class MeetingListService {
 
     public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         List<MeetingParticipantDto> participantDtos =
                 meetingParticipantRepository.findParticipantDtosByMeetingId(meetingId);
@@ -44,7 +44,6 @@ public class MeetingListService {
                 DateTimeUtils.utcToKst(meeting.getDeadline()),
                 meeting.getDurationMinutes(),
                 DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
-//                meeting.getConfirmedTime(),
                 meeting.getMeetingCode(),
                 participantDtos
         );

@@ -6,7 +6,6 @@ import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.InvalidJoinMeetingRequestException;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
@@ -24,12 +23,12 @@ import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -98,30 +97,26 @@ public class JoinMeetingService {
     }
 
     //미팅코드 유효검사
-    public ApiResponse<ValidateMeetingCodeResponse> validateMeetingCode(String code) {
+    public ValidateMeetingCodeResponse validateMeetingCode(String code) {
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
 
-
-
-        var body = new ValidateMeetingCodeResponse(
+        return new ValidateMeetingCodeResponse(
                 meeting.getMeetingId(),
                 meeting.getTitle(),
                 meeting.getDescription(),
                 DateTimeUtils.utcToKst(meeting.getDeadline()),
                 isClosed
         );
-
-        return ApiResponse.success(200, "유효한 미팅입니다.", body);
     }
 
 
     //미팅 참여, 미팅정보확인 시 사용
     public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         //candidate 조회
         List<LocalDate> candidateDates = meetingCandidateDateRepository
@@ -147,7 +142,7 @@ public class JoinMeetingService {
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new InvalidJoinMeetingRequestException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.isDeadlinePassed()) {
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
@@ -183,7 +178,7 @@ public class JoinMeetingService {
     }
 
     @Transactional(readOnly = true)
-    public ApiResponse<List<GetSelectedTime>> getMyAvailableTimes(UUID meetingId, UUID userId) {
+    public List<GetSelectedTime> getMyAvailableTimes(UUID meetingId, UUID userId) {
         // userId로 participant 조회
         MeetingParticipant participant = participantRepository
                 .findByMeeting_MeetingIdAndUserId(meetingId, userId)
@@ -199,14 +194,12 @@ public class JoinMeetingService {
             throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 
-        List<GetSelectedTime> selectedTimes = times.stream()
+        return times.stream()
                 .map(t -> new GetSelectedTime(
                         DateTimeUtils.utcToKstString(t.getStartAt()),
                         DateTimeUtils.utcToKstString(t.getEndAt())
                 ))
                 .toList();
-
-        return ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", selectedTimes);
     }
 
 

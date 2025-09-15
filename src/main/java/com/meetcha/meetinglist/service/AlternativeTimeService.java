@@ -3,7 +3,6 @@ package com.meetcha.meetinglist.service;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.InvalidAlternativeTimeException;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
@@ -87,7 +86,7 @@ public class AlternativeTimeService {
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
                 .findByMeetingIdAndStartTime(meetingId, DateTimeUtils.kstToUtc(request.getAlternativeTime()))
-                .orElseThrow(() -> new InvalidAlternativeTimeException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);

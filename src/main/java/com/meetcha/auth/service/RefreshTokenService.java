@@ -6,8 +6,8 @@ import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.domain.RefreshTokenRepository;
 import com.meetcha.auth.domain.UserRepository;
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.RefreshTokenInvalidException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,14 +25,14 @@ public class RefreshTokenService {
     @Transactional
     public TokenResponseDto reissueAccessToken(String refreshToken) {
         RefreshTokenEntity entity = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new RefreshTokenInvalidException(ErrorCode.INVALID_REFRESH_TOKEN));
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REFRESH_TOKEN));
 
         if (entity.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RefreshTokenInvalidException(ErrorCode.EXPIRED_REFRESH_TOKEN);
+            throw new CustomException(ErrorCode.EXPIRED_REFRESH_TOKEN);
         }
 
         UserEntity user = userRepository.findById(entity.getUserId())
-                .orElseThrow(() -> new RefreshTokenInvalidException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String newAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
         String newRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());

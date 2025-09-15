@@ -2,9 +2,8 @@ package com.meetcha.project.service;
 
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
-import com.meetcha.global.exception.ConflictException;
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.NotFoundException;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
@@ -36,11 +35,11 @@ public class ProjectService {
     public CreateProjectResponse createProject(CreateProjectRequest request, UUID userId) {
         //유저 조회
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         //중복된 이름 확인
         if (projectRepository.existsByUser_UserIdAndName(userId, request.getName())) {
-            throw new ConflictException(ErrorCode.DUPLICATE_PROJECT_NAME);
+            throw new CustomException(ErrorCode.DUPLICATE_PROJECT_NAME);
         }
 
         //프로젝트 테이블에 저장

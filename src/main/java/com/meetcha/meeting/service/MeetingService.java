@@ -2,7 +2,6 @@ package com.meetcha.meeting.service;
 
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.InvalidMeetingRequestException;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
@@ -97,7 +96,7 @@ public class MeetingService {
         }
 
         if (!errors.isEmpty()) {
-            throw new InvalidMeetingRequestException(errors);
+            throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
         }
     }
 }

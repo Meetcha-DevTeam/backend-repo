@@ -37,20 +37,20 @@ public class MeetingReflectionService {
     public CreateReflectionResponseDto createReflection(UUID userId, UUID meetingId, CreateReflectionRequestDto dto) {
         // 미팅/유저 확인
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 중복 작성 방지
         if (reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(meetingId, userId)) {
-            throw new ConflictException(ErrorCode.ALREADY_SUBMITTED_REFLECTION);
+            throw new CustomException(ErrorCode.ALREADY_SUBMITTED_REFLECTION);
         }
 
         //프론트에서 projectId가 오면 meetings.project_id 갱신 (nullable)
         if (dto.getProjectId() != null) {
             ProjectEntity project = projectRepository.findById(dto.getProjectId())
-                    .orElseThrow(() -> new NotFoundException(ErrorCode.PROJECT_NOT_FOUND));
+                    .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
             meeting.setProject(project);
         }
 
@@ -79,7 +79,7 @@ public class MeetingReflectionService {
     //특정 회고 상세 조회
     public GetReflectionResponse getReflectionDetail(UUID userId, UUID meetingId) {
         return reflectionRepository.findReflectionDetailByMeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.REFLECTION_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.REFLECTION_NOT_FOUND));
     }
 
     //미팅건수+기여도+역할조회
