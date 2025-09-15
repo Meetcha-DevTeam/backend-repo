@@ -36,7 +36,8 @@ public class MeetingListController {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
-        return ResponseEntity.ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
     }
 
     // 미팅 상세 조회
@@ -46,7 +47,8 @@ public class MeetingListController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         MeetingDetailResponse response = meetingListService.getMeetingDetail(meetingId, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 상세 조회 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "미팅 상세 조회 성공", response));
     }
 
 
@@ -58,7 +60,8 @@ public class MeetingListController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         MeetingDetailResponse response = meetingListService.getMeetingDetail(meetingId, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "참가자 목록 조회 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "참가자 목록 조회 성공", response));
     }
 
 
@@ -70,7 +73,8 @@ public class MeetingListController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         AlternativeTimeListResponse response = alternativeTimeService.getAlternativeTimeList(meetingId, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "대안 시간 후보 조회 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "대안 시간 후보 조회 성공", response));
     }
 
 
@@ -82,7 +86,8 @@ public class MeetingListController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         AlternativeVoteResponse response = alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "대안 시간 투표 제출 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "대안 시간 투표 제출 성공", response));
     }
 
 
@@ -94,7 +99,8 @@ public class MeetingListController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
     }
 
     //작성이 필요한 미팅 조회
@@ -105,7 +111,8 @@ public class MeetingListController {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
 
         List<NeedReflectionResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
 
 

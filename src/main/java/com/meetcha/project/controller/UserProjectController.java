@@ -9,6 +9,8 @@ import com.meetcha.project.dto.GetProjectsDto;
 import com.meetcha.project.service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,24 +26,27 @@ public class UserProjectController {
 
     //프로젝트 조회
     @GetMapping("/projects")
-    public ApiResponse<List<GetProjectsDto>> getUserProjects(
+    public ResponseEntity<ApiResponse<List<GetProjectsDto>>> getUserProjects(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         List<GetProjectsDto> projects = projectService.getUserProjects(userId);
 
-        return ApiResponse.success(200, "프로젝트 목록 조회 성공", projects);
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "프로젝트 목록 조회 성공", projects));
     }
 
     //프로젝트 생성
     @PostMapping("/projects")
-    public ApiResponse<CreateProjectResponse> createProject(
+    public ResponseEntity<ApiResponse<CreateProjectResponse>> createProject(
             @Valid @RequestBody CreateProjectRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         CreateProjectResponse response = projectService.createProject(request, userId);
 
-        return ApiResponse.success(201, "프로젝트 생성 성공", response);}
-
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(201, "프로젝트 생성 성공", response));
+    }
 }

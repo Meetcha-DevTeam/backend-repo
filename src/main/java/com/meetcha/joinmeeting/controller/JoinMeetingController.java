@@ -35,24 +35,27 @@ public class JoinMeetingController {
     ) {
         log.debug("joinMeeting 메서드 진입");
         JoinMeetingResponse response = joinMeetingService.join(meetingId, request, authorizationHeader);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 참여 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "미팅 참여 성공", response));
 
     }
 
-    //미팅 코드 유효성 검사
+    // 미팅 코드 유효성 검사
     @GetMapping("/code/{code}")
     public ResponseEntity<ApiResponse<ValidateMeetingCodeResponse>> validateMeetingCode(
             @PathVariable String code
     ) {
-        return ResponseEntity.ok(joinMeetingService.validateMeetingCode(code));
+        ValidateMeetingCodeResponse response = joinMeetingService.validateMeetingCode(code);
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "유효한 미팅입니다.", response));
     }
-
 
     // 미팅 정보 조회
     @GetMapping("/id/{meetingId}")
     public ResponseEntity<ApiResponse<MeetingInfoResponse>> getMeetingInfo(@PathVariable UUID meetingId) {
         MeetingInfoResponse response = joinMeetingService.getMeetingInfo(meetingId);
-        return ResponseEntity.ok(ApiResponse.success(200, "미팅 정보 조회 성공", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "미팅 정보 조회 성공", response));
     }
 
     @GetMapping("/{meetingId}/available-times")
@@ -61,8 +64,9 @@ public class JoinMeetingController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        ApiResponse<List<GetSelectedTime>> response =
-                joinMeetingService.getMyAvailableTimes(meetingId, userId);
-        return ResponseEntity.ok(response);
+        List<GetSelectedTime> response = joinMeetingService.getMyAvailableTimes(meetingId, userId);
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", response)
+        );
     }
 }

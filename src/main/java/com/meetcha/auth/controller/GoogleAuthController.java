@@ -9,6 +9,8 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -26,7 +28,7 @@ public class GoogleAuthController {
      * 호출 시점: 구글 로그인 + 동의 후, 프론트가 code로 토큰 교환을 끝낸 직후
      */
     @PostMapping("/{userId}/google/tokens")
-    public ApiResponse<Void> saveInitialGoogleTokens(
+    public ResponseEntity<ApiResponse<Void>> saveInitialGoogleTokens(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable("userId") UUID pathUserId,
             @RequestBody @Valid GoogleInitialTokenRequest req
@@ -54,6 +56,7 @@ public class GoogleAuthController {
                 req.getExpiresInSec()
         );
 
-        return ApiResponse.success(200, "구글 OAuth 토큰이 성공적으로 저장되었습니다.");
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "구글 OAuth 토큰이 성공적으로 저장되었습니다."));
     }
 }

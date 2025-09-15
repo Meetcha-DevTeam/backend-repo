@@ -1,14 +1,28 @@
 package com.meetcha.global.exception;
 
-import lombok.Getter;
+import java.util.Map;
 
-/// todo  다른 customException 이 클래스로 통합예정
-@Getter
 public class CustomException extends RuntimeException {
     private final ErrorCode errorCode;
+    private final Map<String, String> fieldErrors;
 
     public CustomException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
+        this.fieldErrors = null;
+    }
+
+    public CustomException(ErrorCode errorCode, Map<String, String> fieldErrors) {
+        super(errorCode.getMessage());
+        this.errorCode = errorCode;
+        this.fieldErrors = fieldErrors;
+    }
+
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public Map<String, String> getFieldErrors() {
+        return fieldErrors;
     }
 }

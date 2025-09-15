@@ -22,15 +22,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
         TokenResponseDto response = loginService.googleLogin(request);
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+                .ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
         TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+                .ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
     }
 }

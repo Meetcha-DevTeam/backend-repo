@@ -9,6 +9,7 @@ import com.meetcha.reflection.dto.GetReflectionResponse;
 import com.meetcha.reflection.dto.GetWrittenReflectionResponse;
 import com.meetcha.reflection.service.MeetingReflectionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,7 +35,7 @@ public class MeetingReflectionController {
 
         CreateReflectionResponseDto response = reflectionService.createReflection(userId, meetingId, requestDto);
         return ResponseEntity
-                .status(201)
+                .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(201, "회고가 성공적으로 작성되었습니다.", response));
     }
 
@@ -46,7 +47,8 @@ public class MeetingReflectionController {
 
         List<GetWrittenReflectionResponse> responses = reflectionService.getWrittenReflections(userId);
 
-        return ResponseEntity.ok(ApiResponse.success(200, "회고 조회 성공", responses));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "회고 조회 성공", responses));
     }
 
     //특정 회고 조회
@@ -59,7 +61,8 @@ public class MeetingReflectionController {
 
         GetReflectionResponse response = reflectionService.getReflectionDetail(userId, meetingId);
 
-        return ResponseEntity.ok(ApiResponse.success(200, "회고 상세 조회에 성공했습니다.", response));
+        return ResponseEntity
+                .ok(ApiResponse.success(200, "회고 상세 조회에 성공했습니다.", response));
     }
 
 }

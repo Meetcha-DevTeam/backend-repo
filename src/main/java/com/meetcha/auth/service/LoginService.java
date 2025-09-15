@@ -8,11 +8,10 @@ import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.domain.RefreshTokenRepository;
 import com.meetcha.auth.domain.UserRepository;
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.InvalidGoogleCodeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -66,12 +65,12 @@ public class LoginService {
             );
         } catch (Exception e) {
             log.error("[OAuth] token exchange ERROR: {}", e.toString(), e);
-            throw new InvalidGoogleCodeException(ErrorCode.INVALID_GOOGLE_CODE);
+            throw new CustomException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
             log.error("[OAuth] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
-            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
+            throw new CustomException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
         Map<String, Object> tokenBody = tokenResponse.getBody();
@@ -102,11 +101,11 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
-            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
+            throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
-            throw new InvalidGoogleCodeException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
+            throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         Map<String, Object> userInfo = userInfoResponse.getBody();
