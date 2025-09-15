@@ -66,7 +66,7 @@ public class JoinMeetingService {
 
 
         // 닉네임 확인 (없으면 users.name 가져오기)
-        String nickname = request.nickname();
+        String nickname = request.getNickname();
         if (nickname == null || nickname.isBlank()) {
             nickname = userRepository.findById(userId)
                     .map(UserEntity::getName)
@@ -82,12 +82,12 @@ public class JoinMeetingService {
         participantRepository.save(participant);
 
         //  선택 시간 저장
-        List<ParticipantAvailability> availabilities = request.selectedTimes().stream()
+        List<ParticipantAvailability> availabilities = request.getSelectedTimes().stream()
                 .map(slot -> ParticipantAvailability.create(
                         participant.getParticipantId(),
                         meetingId,
-                        DateTimeUtils.kstToUtc(slot.startAt()),
-                        DateTimeUtils.kstToUtc(slot.endAt())
+                        DateTimeUtils.kstToUtc(slot.getStartAt()),
+                        DateTimeUtils.kstToUtc(slot.getEndAt())
                 ))
                 .toList();
 
@@ -167,12 +167,12 @@ public class JoinMeetingService {
         availabilityRepository.deleteByMeetingIdAndParticipantId(meetingId, participantId);
 
         // 5. 새 availability 저장
-        List<ParticipantAvailability> availabilities = request.selectedTimes().stream()
+        List<ParticipantAvailability> availabilities = request.getSelectedTimes().stream()
                 .map(slot -> ParticipantAvailability.create(
                         participantId,
                         meetingId,
-                        DateTimeUtils.kstToUtc(slot.startAt()),
-                        DateTimeUtils.kstToUtc(slot.endAt())
+                        DateTimeUtils.kstToUtc(slot.getStartAt()),
+                        DateTimeUtils.kstToUtc(slot.getEndAt())
                 ))
                 .toList();
 

@@ -1,7 +1,16 @@
 package com.meetcha.joinmeeting.dto;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 
-public record JoinMeetingResponse(
-        UUID meetingId,
-        UUID participantId
-) {}
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class JoinMeetingResponse {
+    UUID meetingId;
+    UUID participantId;
+}

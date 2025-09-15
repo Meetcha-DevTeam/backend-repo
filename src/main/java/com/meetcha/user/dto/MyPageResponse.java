@@ -1,6 +1,15 @@
 package com.meetcha.user.dto;
 
-public record MyPageResponse(
-        String nickname,
-        String profileImgUrl
-) {}
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class MyPageResponse{
+        String nickname;
+        String profileImgUrl;
+}

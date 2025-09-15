@@ -33,13 +33,13 @@ public class MeetingService {
         validateRequest(request);
 
         LocalDateTime now = LocalDateTime.now(clock);
-        LocalDateTime deadline = DateTimeUtils.kstToUtc(request.deadline());
+        LocalDateTime deadline = DateTimeUtils.kstToUtc(request.getDeadline());
 
         // 먼저 meeting 생성(프로젝트는 나중에 세터로)
         MeetingEntity meeting = MeetingEntity.builder()
-                .title(request.title())
-                .description(request.description())
-                .durationMinutes(request.durationMinutes())
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .durationMinutes(request.getDurationMinutes())
                 .deadline(deadline)
                 .createdAt(now)
                 .meetingStatus(MeetingStatus.MATCHING)
@@ -49,7 +49,7 @@ public class MeetingService {
                 .build();
 
         // projectId가 오면 meetings.project_id 세팅
-        request.projectId().ifPresent(pid -> {
+        request.getProjectId().ifPresent(pid -> {
             ProjectEntity project = projectRepository.findById(pid)
                     .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
             meeting.setProject(project); // ★ 세터로 FK 갱신
@@ -58,7 +58,7 @@ public class MeetingService {
         meetingRepository.save(meeting);
 
         // 후보 날짜 저장
-        List<LocalDate> candidateDates = request.candidateDates();
+        List<LocalDate> candidateDates = request.getCandidateDates();
         if (candidateDates != null && !candidateDates.isEmpty()) {
             for (LocalDate date : candidateDates) {
                 candidateDateRepository.save(new MeetingCandidateDateEntity(meeting, date));
@@ -74,11 +74,11 @@ public class MeetingService {
     private void validateRequest(MeetingCreateRequest request) {
         Map<String, String> errors = new HashMap<>();
 
-        if (request.durationMinutes() < 1 || request.durationMinutes() > 719) {
+        if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
             errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
         }
 
-        List<LocalDate> dates = request.candidateDates();
+        List<LocalDate> dates = request.getCandidateDates();
         if (dates == null || dates.isEmpty() || dates.size() > 10) {
             errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
         } else {
@@ -90,7 +90,7 @@ public class MeetingService {
             }
 
             LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
-            LocalDateTime deadline = request.deadline();
+            LocalDateTime deadline = request.getDeadline();
             if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
                 errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
             }
