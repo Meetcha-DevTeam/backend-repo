@@ -4,7 +4,6 @@ import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.exception.NotFoundException;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
