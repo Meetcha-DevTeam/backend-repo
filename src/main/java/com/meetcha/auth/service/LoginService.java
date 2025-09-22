@@ -33,7 +33,7 @@ public class LoginService {
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
-        String redirectUrl = request.getRedirectUri()+"/login-complete";
+        String redirectUrl = request.getRedirectUri() + "/login-complete";
         RestTemplate restTemplate = new RestTemplate();
 
         // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
@@ -83,7 +83,10 @@ public class LoginService {
         if (expiresInObj instanceof Number n) {
             expiresInSec = n.longValue();
         } else if (expiresInObj != null) {
-            try { expiresInSec = Long.parseLong(String.valueOf(expiresInObj)); } catch (NumberFormatException ignored) {}
+            try {
+                expiresInSec = Long.parseLong(String.valueOf(expiresInObj));
+            } catch (NumberFormatException ignored) {
+            }
         }
         LocalDateTime accessTokenExpiry = LocalDateTime.now().plusSeconds(expiresInSec);
 
@@ -153,4 +156,13 @@ public class LoginService {
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 
+
+    public String testLogin(String email) {
+        UserEntity user = userRepository.findByEmail(email).orElseThrow();
+
+        String accessToken = jwtProvider.createAccessToken(user.getUserId(),
+                user.getEmail());
+
+        return accessToken;
+    }
 }
