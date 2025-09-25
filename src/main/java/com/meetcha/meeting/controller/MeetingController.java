@@ -1,6 +1,7 @@
 package com.meetcha.meeting.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
@@ -19,14 +20,12 @@ import java.util.UUID;
 public class MeetingController {
 
     private final MeetingService meetingService;
-    private final JwtProvider jwtProvider;
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<MeetingCreateResponse>> createMeeting(
             @RequestBody MeetingCreateRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         MeetingCreateResponse response = meetingService.createMeeting(request, userId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
