@@ -1,9 +1,7 @@
 package com.meetcha.reflection.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.reflection.dto.CreateReflectionRequestDto;
 import com.meetcha.reflection.dto.CreateReflectionResponseDto;
 import com.meetcha.reflection.dto.GetReflectionResponse;

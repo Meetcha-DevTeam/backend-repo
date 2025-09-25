@@ -1,9 +1,7 @@
 package com.meetcha.joinmeeting.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.dto.GetSelectedTime;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
@@ -25,7 +23,6 @@ import java.util.UUID;
 public class JoinMeetingController {
 
     private final JoinMeetingService joinMeetingService;
-    private final JwtProvider jwtProvider;
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")

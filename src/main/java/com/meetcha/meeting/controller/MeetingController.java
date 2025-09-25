@@ -1,9 +1,7 @@
 package com.meetcha.meeting.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.meeting.service.MeetingService;

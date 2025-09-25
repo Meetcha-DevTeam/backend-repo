@@ -1,6 +1,5 @@
 package com.meetcha.project.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.project.dto.CreateProjectRequest;

@@ -1,6 +1,5 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
@@ -26,7 +25,6 @@ public class MeetingListController {
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
     private final JoinMeetingService joinMeetingService;
-    private final JwtProvider jwtProvider;
 
     // 미팅 목록 조회
     @GetMapping("")
@@ -106,7 +104,4 @@ public class MeetingListController {
         return ResponseEntity
                 .ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
-
-
-
 }
