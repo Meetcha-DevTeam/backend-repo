@@ -3,6 +3,7 @@ package com.meetcha.auth.controller;
 import com.meetcha.auth.dto.GoogleInitialTokenRequest;
 import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.auth.service.GoogleTokenService;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.exception.CustomException;
@@ -22,6 +23,11 @@ public class GoogleAuthController {
 
     private final GoogleTokenService googleTokenService;
     private final JwtProvider jwtProvider;
+
+    @GetMapping("/test")
+    public UUID testApi(@AuthUser UUID userId){
+        return userId;
+    }
 
     /**
      * 구글 OAuth 초기 토큰 저장 API

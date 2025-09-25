@@ -1,8 +1,7 @@
 package com.meetcha.joinmeeting.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.dto.GetSelectedTime;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
@@ -24,7 +23,6 @@ import java.util.UUID;
 public class JoinMeetingController {
 
     private final JoinMeetingService joinMeetingService;
-    private final JwtProvider jwtProvider;
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
@@ -61,9 +59,8 @@ public class JoinMeetingController {
     @GetMapping("/{meetingId}/available-times")
     public ResponseEntity<ApiResponse<List<GetSelectedTime>>> getMyAvailableTimes(
             @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         List<GetSelectedTime> response = joinMeetingService.getMyAvailableTimes(meetingId, userId);
         return ResponseEntity
                 .ok(ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", response)

@@ -1,8 +1,7 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
@@ -26,15 +25,12 @@ public class MeetingListController {
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
     private final JoinMeetingService joinMeetingService;
-    private final JwtProvider jwtProvider;
 
     // 미팅 목록 조회
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-
         List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
         return ResponseEntity
                 .ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
@@ -50,8 +46,6 @@ public class MeetingListController {
         return ResponseEntity
                 .ok(ApiResponse.success(200, "미팅 상세 조회 성공", response));
     }
-
-
 
     //미팅 참가자 목록 조회
     @GetMapping("/{meetingId}/participants")
@@ -77,7 +71,6 @@ public class MeetingListController {
                 .ok(ApiResponse.success(200, "대안 시간 후보 조회 성공", response));
     }
 
-
     //대안 시간 투표 제출
     @PostMapping("/{meetingId}/alternative-vote")
     public ResponseEntity<ApiResponse<AlternativeVoteResponse>> submitAlternativeVote(
@@ -89,7 +82,6 @@ public class MeetingListController {
         return ResponseEntity
                 .ok(ApiResponse.success(200, "대안 시간 투표 제출 성공", response));
     }
-
 
     // 미팅 참여 정보 수정
     @PatchMapping("/{meetingId}")
@@ -106,15 +98,10 @@ public class MeetingListController {
     //작성이 필요한 미팅 조회
     @GetMapping("/need-reflection")
     public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-
         List<NeedReflectionResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
         return ResponseEntity
                 .ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
     }
-
-
-
 }

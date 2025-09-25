@@ -7,6 +7,7 @@ import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,4 +32,12 @@ public class UserController {
         return ResponseEntity
                 .ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
     }
+
+    @PostMapping("/test")
+    public ResponseEntity<String> testLogin(
+            @RequestBody String email) {
+        String response = loginService.testLogin(email);
+        return ResponseEntity.ok(response);
+    }
+
 }

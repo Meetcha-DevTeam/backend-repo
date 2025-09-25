@@ -1,8 +1,7 @@
 package com.meetcha.project.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.project.dto.CreateProjectRequest;
 import com.meetcha.project.dto.CreateProjectResponse;
 import com.meetcha.project.dto.GetProjectsDto;
@@ -21,15 +20,13 @@ import java.util.UUID;
 @RequestMapping("/user")
 public class UserProjectController {
 
-    private final JwtProvider jwtProvider;
     private final ProjectService projectService;
 
     //프로젝트 조회
     @GetMapping("/projects")
     public ResponseEntity<ApiResponse<List<GetProjectsDto>>> getUserProjects(
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         List<GetProjectsDto> projects = projectService.getUserProjects(userId);
 
         return ResponseEntity
@@ -40,9 +37,8 @@ public class UserProjectController {
     @PostMapping("/projects")
     public ResponseEntity<ApiResponse<CreateProjectResponse>> createProject(
             @Valid @RequestBody CreateProjectRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         CreateProjectResponse response = projectService.createProject(request, userId);
 
         return ResponseEntity
