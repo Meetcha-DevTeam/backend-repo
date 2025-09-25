@@ -64,7 +64,6 @@ public class JoinMeetingController {
             @PathVariable UUID meetingId,
             @AuthUser UUID userId
     ) {
-//        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         List<GetSelectedTime> response = joinMeetingService.getMyAvailableTimes(meetingId, userId);
         return ResponseEntity
                 .ok(ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", response)
