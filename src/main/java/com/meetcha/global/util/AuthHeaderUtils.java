@@ -2,7 +2,9 @@ package com.meetcha.global.util;
 
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AuthHeaderUtils {
 
     private AuthHeaderUtils() {}

@@ -1,8 +1,7 @@
 package com.meetcha.reflection.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.reflection.dto.CreateReflectionRequestDto;
 import com.meetcha.reflection.dto.CreateReflectionResponseDto;
 import com.meetcha.reflection.dto.GetReflectionResponse;
@@ -22,36 +21,30 @@ import java.util.UUID;
 public class MeetingReflectionController {
 
     private final MeetingReflectionService reflectionService;
-    private final JwtProvider jwtProvider;
 
     //회고 생성
     @PostMapping("/{meetingId}/reflection/create")
     public CreateReflectionResponseDto createReflection(
             @PathVariable UUID meetingId,
             @RequestBody CreateReflectionRequestDto requestDto,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return reflectionService.createReflection(userId, meetingId, requestDto);
     }
 
         //미팅 회고 목록 요약 조회
     @GetMapping("/reflections")
-    public List<GetWrittenReflectionResponse> getWrittenReflections(@RequestHeader("Authorization") String authorizationHeader
+    public List<GetWrittenReflectionResponse> getWrittenReflections(@AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return reflectionService.getWrittenReflections(userId);
-
     }
 
     //특정 회고 조회
     @GetMapping("/{meetingId}/reflection")
     public GetReflectionResponse getReflectionDetail(
             @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return reflectionService.getReflectionDetail(userId, meetingId);
     }
-
 }

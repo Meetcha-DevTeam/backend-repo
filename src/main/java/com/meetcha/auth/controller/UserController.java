@@ -7,6 +7,7 @@ import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,4 +28,11 @@ public class UserController {
     public TokenResponseDto refresh(@RequestBody RefreshTokenRequestDto request) {
         return refreshTokenService.reissueAccessToken(request.getRefreshToken());
     }
+
+    @PostMapping("/test")
+    public ResponseEntity<String> testLogin(
+            @RequestBody String email) {
+        return loginService.testLogin(email);
+    }
+
 }

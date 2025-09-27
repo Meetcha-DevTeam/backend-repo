@@ -1,8 +1,7 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
@@ -26,14 +25,12 @@ public class MeetingListController {
     private final MeetingListService meetingListService;
     private final AlternativeTimeService alternativeTimeService;
     private final JoinMeetingService joinMeetingService;
-    private final JwtProvider jwtProvider;
 
     // 미팅 목록 조회
     @GetMapping("")
     public List<MeetingListResponse> getMyMeetingList(
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return meetingListService.getMyMeetings(userId);
     }
 
@@ -45,8 +42,6 @@ public class MeetingListController {
     ) {
         return meetingListService.getMeetingDetail(meetingId, authorizationHeader);
     }
-
-
 
     //미팅 참가자 목록 조회
     @GetMapping("/{meetingId}/participants")
@@ -68,8 +63,7 @@ public class MeetingListController {
        return alternativeTimeService.getAlternativeTimeList(meetingId, authorizationHeader);
     }
 
-
-        //대안 시간 투표 제출
+    //대안 시간 투표 제출
     @PostMapping("/{meetingId}/alternative-vote")
     public AlternativeVoteResponse submitAlternativeVote(
             @PathVariable UUID meetingId,
@@ -79,8 +73,7 @@ public class MeetingListController {
         return alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
     }
 
-
-        // 미팅 참여 정보 수정
+    // 미팅 참여 정보 수정
     @PatchMapping("/{meetingId}")
     public JoinMeetingResponse updateParticipation(
             @PathVariable UUID meetingId,
@@ -92,10 +85,9 @@ public class MeetingListController {
 
         //작성이 필요한 미팅 조회
     @GetMapping("/need-reflection")
-    public List<NeedReflectionResponse> getFilteredMeetings(
-            @RequestHeader("Authorization") String authorizationHeader
+    public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        return meetingListService.getMeetingsNeedingReflection(userId);
+      return meetingListService.getMeetingsNeedingReflection(userId);
     }
 }
