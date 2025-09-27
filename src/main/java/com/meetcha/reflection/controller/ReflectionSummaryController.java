@@ -23,11 +23,9 @@ public class ReflectionSummaryController {
     private final JwtProvider jwtProvider;
 
     @GetMapping("/summary")
-    public ResponseEntity<ApiResponse<GetReflectionSummaryResponse>> getReflectionSummary(HttpServletRequest request) {
+    public GetReflectionSummaryResponse getReflectionSummary(HttpServletRequest request) {
         UUID userId = extractUserIdFromToken(request);
-        GetReflectionSummaryResponse response = reflectionService.getReflectionSummary(userId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "회고 요약 조회 성공", response));
+        return reflectionService.getReflectionSummary(userId);
     }
 
     private UUID extractUserIdFromToken(HttpServletRequest request) {

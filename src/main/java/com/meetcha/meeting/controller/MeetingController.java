@@ -20,13 +20,10 @@ public class MeetingController {
     private final MeetingService meetingService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<MeetingCreateResponse>> createMeeting(
+    public MeetingCreateResponse createMeeting(
             @RequestBody MeetingCreateRequest request,
             @AuthUser UUID userId
     ) {
-        MeetingCreateResponse response = meetingService.createMeeting(request, userId);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "미팅이 성공적으로 생성되었습니다.", response));
+        return meetingService.createMeeting(request, userId);
     }
 }

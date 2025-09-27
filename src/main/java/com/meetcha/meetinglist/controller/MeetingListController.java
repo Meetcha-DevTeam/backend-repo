@@ -28,80 +28,66 @@ public class MeetingListController {
 
     // 미팅 목록 조회
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<MeetingListResponse>>> getMyMeetingList(
+    public List<MeetingListResponse> getMyMeetingList(
             @AuthUser UUID userId
     ) {
-        List<MeetingListResponse> meetings = meetingListService.getMyMeetings(userId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "유저 미팅 목록 조회 성공", meetings));
+        return meetingListService.getMyMeetings(userId);
     }
 
     // 미팅 상세 조회
     @GetMapping("/{meetingId}")
-    public ResponseEntity<ApiResponse<MeetingDetailResponse>> getMeetingDetail(
+    public MeetingDetailResponse getMeetingDetail(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        MeetingDetailResponse response = meetingListService.getMeetingDetail(meetingId, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "미팅 상세 조회 성공", response));
+        return meetingListService.getMeetingDetail(meetingId, authorizationHeader);
     }
 
     //미팅 참가자 목록 조회
     @GetMapping("/{meetingId}/participants")
-    public ResponseEntity<ApiResponse<MeetingDetailResponse>> getParticipants(
+    public MeetingDetailResponse getParticipants(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        MeetingDetailResponse response = meetingListService.getMeetingDetail(meetingId, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "참가자 목록 조회 성공", response));
+        return meetingListService.getMeetingDetail(meetingId, authorizationHeader);
     }
 
 
 
     //대안 시간 후보 조회
     @GetMapping("/{meetingId}/alternative-times")
-    public ResponseEntity<ApiResponse<AlternativeTimeListResponse>> getAlternativeTimeList(
+    public AlternativeTimeListResponse getAlternativeTimeList(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        AlternativeTimeListResponse response = alternativeTimeService.getAlternativeTimeList(meetingId, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "대안 시간 후보 조회 성공", response));
+       return alternativeTimeService.getAlternativeTimeList(meetingId, authorizationHeader);
     }
 
     //대안 시간 투표 제출
     @PostMapping("/{meetingId}/alternative-vote")
-    public ResponseEntity<ApiResponse<AlternativeVoteResponse>> submitAlternativeVote(
+    public AlternativeVoteResponse submitAlternativeVote(
             @PathVariable UUID meetingId,
             @RequestBody AlternativeVoteRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        AlternativeVoteResponse response = alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "대안 시간 투표 제출 성공", response));
+        return alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
     }
 
     // 미팅 참여 정보 수정
     @PatchMapping("/{meetingId}")
-    public ResponseEntity<ApiResponse<JoinMeetingResponse>> updateParticipation(
+    public JoinMeetingResponse updateParticipation(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
-        JoinMeetingResponse response = joinMeetingService.updateParticipation(meetingId, request, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "미팅 참여 정보 수정 성공", response));
+       return joinMeetingService.updateParticipation(meetingId, request, authorizationHeader);
     }
 
-    //작성이 필요한 미팅 조회
+        //작성이 필요한 미팅 조회
     @GetMapping("/need-reflection")
-    public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
+    public List<NeedReflectionResponse> getFilteredMeetings(
             @AuthUser UUID userId
     ) {
-        List<NeedReflectionResponse> meetings = meetingListService.getMeetingsNeedingReflection(userId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "미팅 목록 조회 성공", meetings));
+      return meetingListService.getMeetingsNeedingReflection(userId);
     }
 }
