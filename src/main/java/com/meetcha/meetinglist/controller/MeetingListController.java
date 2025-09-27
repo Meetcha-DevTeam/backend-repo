@@ -85,7 +85,7 @@ public class MeetingListController {
 
         //작성이 필요한 미팅 조회
     @GetMapping("/need-reflection")
-    public ResponseEntity<ApiResponse<List<NeedReflectionResponse>>> getFilteredMeetings(
+    public List<NeedReflectionResponse> getFilteredMeetings(
             @AuthUser UUID userId
     ) {
       return meetingListService.getMeetingsNeedingReflection(userId);

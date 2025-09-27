@@ -24,7 +24,7 @@ public class UserProjectController {
 
     //프로젝트 조회
     @GetMapping("/projects")
-    public ResponseEntity<ApiResponse<List<GetProjectsDto>>> getUserProjects(
+    public List<GetProjectsDto> getUserProjects(
             @AuthUser UUID userId
     ) {
         return projectService.getUserProjects(userId);

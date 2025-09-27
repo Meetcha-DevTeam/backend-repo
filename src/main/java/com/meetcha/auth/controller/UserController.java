@@ -30,7 +30,7 @@ public class UserController {
     }
 
     @PostMapping("/test")
-    public ResponseEntity<String> testLogin(
+    public String testLogin(
             @RequestBody String email) {
         return loginService.testLogin(email);
     }
