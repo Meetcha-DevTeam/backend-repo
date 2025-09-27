@@ -56,6 +56,5 @@ public class JoinMeetingController {
             @AuthUser UUID userId
     ) {
          return joinMeetingService.getMyAvailableTimes(meetingId, userId);
-      );
     }
 }
