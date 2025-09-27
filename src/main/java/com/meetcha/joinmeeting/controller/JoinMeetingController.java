@@ -10,6 +10,7 @@ import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
@@ -28,45 +29,35 @@ public class JoinMeetingController {
 
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
-    public ResponseEntity<ApiResponse<JoinMeetingResponse>> joinMeeting(
+    public JoinMeetingResponse joinMeeting(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         log.debug("joinMeeting 메서드 진입");
-        JoinMeetingResponse response = joinMeetingService.join(meetingId, request, authorizationHeader);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "미팅 참여 성공", response));
-
+        return joinMeetingService.join(meetingId, request, authorizationHeader);
     }
 
     // 미팅 코드 유효성 검사
     @GetMapping("/code/{code}")
-    public ResponseEntity<ApiResponse<ValidateMeetingCodeResponse>> validateMeetingCode(
+    public ValidateMeetingCodeResponse validateMeetingCode(
             @PathVariable String code
     ) {
-        ValidateMeetingCodeResponse response = joinMeetingService.validateMeetingCode(code);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "유효한 미팅입니다.", response));
+        return joinMeetingService.validateMeetingCode(code);
     }
 
     // 미팅 정보 조회
     @GetMapping("/id/{meetingId}")
-    public ResponseEntity<ApiResponse<MeetingInfoResponse>> getMeetingInfo(@PathVariable UUID meetingId) {
-        MeetingInfoResponse response = joinMeetingService.getMeetingInfo(meetingId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "미팅 정보 조회 성공", response));
+    public MeetingInfoResponse getMeetingInfo(@PathVariable UUID meetingId) {
+        return joinMeetingService.getMeetingInfo(meetingId);
     }
 
     @GetMapping("/{meetingId}/available-times")
-    public ResponseEntity<ApiResponse<List<GetSelectedTime>>> getMyAvailableTimes(
+    public List<GetSelectedTime> getMyAvailableTimes(
             @PathVariable UUID meetingId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        List<GetSelectedTime> response = joinMeetingService.getMyAvailableTimes(meetingId, userId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "참가 가능 시간이 정상적으로 조회되었습니다.", response)
-        );
+        return joinMeetingService.getMyAvailableTimes(meetingId, userId);
     }
 }

@@ -26,27 +26,20 @@ public class UserProjectController {
 
     //프로젝트 조회
     @GetMapping("/projects")
-    public ResponseEntity<ApiResponse<List<GetProjectsDto>>> getUserProjects(
+    public List<GetProjectsDto> getUserProjects(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        List<GetProjectsDto> projects = projectService.getUserProjects(userId);
-
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "프로젝트 목록 조회 성공", projects));
+        return projectService.getUserProjects(userId);
     }
 
     //프로젝트 생성
     @PostMapping("/projects")
-    public ResponseEntity<ApiResponse<CreateProjectResponse>> createProject(
+    public CreateProjectResponse createProject(
             @Valid @RequestBody CreateProjectRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        CreateProjectResponse response = projectService.createProject(request, userId);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "프로젝트 생성 성공", response));
+        return projectService.createProject(request, userId);
     }
 }

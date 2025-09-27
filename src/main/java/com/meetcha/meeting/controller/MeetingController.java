@@ -22,14 +22,11 @@ public class MeetingController {
     private final JwtProvider jwtProvider;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<MeetingCreateResponse>> createMeeting(
+    public MeetingCreateResponse createMeeting(
             @RequestBody MeetingCreateRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        MeetingCreateResponse response = meetingService.createMeeting(request, userId);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "미팅이 성공적으로 생성되었습니다.", response));
+        return meetingService.createMeeting(request, userId);
     }
 }
