@@ -1,9 +1,7 @@
 package com.meetcha.auth.controller;
 
+import com.meetcha.auth.dto.*;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.auth.dto.LoginRequestDto;
-import com.meetcha.auth.dto.RefreshTokenRequestDto;
-import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -30,9 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/test")
-    public String testLogin(
-            @RequestBody String email) {
-        return loginService.testLogin(email);
+    public TestLoginResponse testLogin(
+            @RequestBody TestLoginRequest testLoginRequest) {
+        return loginService.testLogin(testLoginRequest);
     }
 
 }
