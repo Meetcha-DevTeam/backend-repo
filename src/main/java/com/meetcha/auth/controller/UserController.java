@@ -1,9 +1,7 @@
 package com.meetcha.auth.controller;
 
+import com.meetcha.auth.dto.*;
 import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.auth.dto.LoginRequestDto;
-import com.meetcha.auth.dto.RefreshTokenRequestDto;
-import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +32,10 @@ public class UserController {
     }
 
     @PostMapping("/test")
-    public ResponseEntity<String> testLogin(
-            @RequestBody String email) {
-        String response = loginService.testLogin(email);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<TestLoginResponse>> testLogin(
+            @RequestBody TestLoginRequest testLoginRequest) {
+        TestLoginResponse response = loginService.testLogin(testLoginRequest);
+        return ResponseEntity.ok(ApiResponse.success(200, "accessToken 발급했습니다.", response));
     }
 
 }
