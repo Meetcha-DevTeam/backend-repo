@@ -1,6 +1,7 @@
 package com.meetcha.global.dto;
 
 import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.exception.ErrorCodeBase;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -24,11 +25,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>(code, message, null);
     }
 
-    public static <T> ApiResponse<T> error(ErrorCode errorCode) {
+    public static <T> ApiResponse<T> error(ErrorCodeBase errorCode) {
         return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), null);
     }
 
-    public static <T> ApiResponse<T> error(ErrorCode errorCode, T data) {
+    public static <T> ApiResponse<T> error(ErrorCodeBase errorCode, T data) {
         return new ApiResponse<>(errorCode.getCode(), errorCode.getMessage(), data);
     }
 }
