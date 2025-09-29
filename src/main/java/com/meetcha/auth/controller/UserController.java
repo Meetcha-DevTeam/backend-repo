@@ -28,10 +28,9 @@ public class UserController {
     }
 
     @PostMapping("/test")
-    public ResponseEntity<ApiResponse<TestLoginResponse>> testLogin(
+    public TestLoginResponse testLogin(
             @RequestBody TestLoginRequest testLoginRequest) {
-        TestLoginResponse response = loginService.testLogin(testLoginRequest);
-        return ResponseEntity.ok(ApiResponse.success(200, "accessToken 발급했습니다.", response));
+        return loginService.testLogin(testLoginRequest);
     }
 
 }
