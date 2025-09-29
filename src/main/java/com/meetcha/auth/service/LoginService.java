@@ -2,6 +2,8 @@ package com.meetcha.auth.service;
 
 import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
+import com.meetcha.auth.dto.TestLoginRequest;
+import com.meetcha.auth.dto.TestLoginResponse;
 import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.domain.RefreshTokenEntity;
 import com.meetcha.auth.domain.UserEntity;
@@ -157,12 +159,12 @@ public class LoginService {
     }
 
 
-    public String testLogin(String email) {
-        UserEntity user = userRepository.findByEmail(email).orElseThrow();
+    public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
+        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail()).orElseThrow();
 
         String accessToken = jwtProvider.createAccessToken(user.getUserId(),
                 user.getEmail());
 
-        return accessToken;
+        return new TestLoginResponse(accessToken);
     }
 }
