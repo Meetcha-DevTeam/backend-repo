@@ -1,11 +1,13 @@
 package com.meetcha.user.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.user.dto.*;
 import com.meetcha.user.service.UserScheduleService;
 import com.meetcha.user.service.UserProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,31 +27,23 @@ public class UserScheduleController {
 
     private final UserProfileService userProfileService;
     private final UserScheduleService userScheduleService;
-    private final JwtProvider jwtProvider;
 
     //유저 스케줄 조회
     @GetMapping("/schedule")
     public List<ScheduleResponse> getSchedule(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthUser UUID userId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
     ) {
-        String bearer = AuthHeaderUtils.extractBearerToken(authorizationHeader);
-        String masked = (bearer != null && bearer.length() > 16)
-                ? bearer.substring(0, 10) + "..." + bearer.substring(bearer.length()-6)
-                : "null";
-
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return userScheduleService.getSchedule(userId, from, to);
     }
 
     // 유저 개인 일정 Google Calendar에 등록
     @PostMapping("/schedule/create")
     public String createSchedule(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody CreateScheduleRequest request
+            @AuthUser UUID userId,
+            @RequestBody @Valid CreateScheduleRequest request
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return userScheduleService.createSchedule(userId, request);
     }
 
@@ -57,37 +51,33 @@ public class UserScheduleController {
     // 유저 개인 일정 수정
     @PutMapping("/schedule/update")
     public void updateSchedule(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthUser UUID userId,
             @RequestBody UpdateScheduleRequest request
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.updateSchedule(userId, request);
     }
 
     // 단일 상세 일정 조회
     @GetMapping("/schedule/detail")
     public ScheduleDetailResponse getScheduleDetail(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthUser UUID userId,
             @RequestParam String eventId) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return userScheduleService.getScheduleDetail(userId, eventId);
     }
 
     // 유저 개인 일정 삭제
     @DeleteMapping("/schedule/delete")
     public void deleteSchedule(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthUser UUID userId,
             @RequestParam String eventId) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.deleteSchedule(userId, eventId);
     }
 
     //유저 정보 조회(마이페이지)
     @GetMapping("/mypage")
     public MyPageResponse getMyPage(
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         return userProfileService.getMyPage(userId);}
 
 }
