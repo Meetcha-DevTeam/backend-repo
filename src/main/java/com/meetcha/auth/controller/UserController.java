@@ -18,24 +18,19 @@ public class UserController {
     private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/google")
-    public ResponseEntity<ApiResponse<TokenResponseDto>> googleLogin(@RequestBody LoginRequestDto request){
-        TokenResponseDto response = loginService.googleLogin(request);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "구글 로그인에 성공했습니다.", response));
+    public TokenResponseDto googleLogin(@RequestBody LoginRequestDto request) {
+        return loginService.googleLogin(request);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<TokenResponseDto>> refresh(@RequestBody RefreshTokenRequestDto request) {
-        TokenResponseDto tokenResponse = refreshTokenService.reissueAccessToken(request.getRefreshToken());
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "accessToken 재발급에 성공했습니다.", tokenResponse));
+    public TokenResponseDto refresh(@RequestBody RefreshTokenRequestDto request) {
+        return refreshTokenService.reissueAccessToken(request.getRefreshToken());
     }
 
     @PostMapping("/test")
-    public ResponseEntity<ApiResponse<TestLoginResponse>> testLogin(
+    public TestLoginResponse testLogin(
             @RequestBody TestLoginRequest testLoginRequest) {
-        TestLoginResponse response = loginService.testLogin(testLoginRequest);
-        return ResponseEntity.ok(ApiResponse.success(200, "accessToken 발급했습니다.", response));
+        return loginService.testLogin(testLoginRequest);
     }
 
 }

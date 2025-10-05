@@ -24,36 +24,27 @@ public class MeetingReflectionController {
 
     //회고 생성
     @PostMapping("/{meetingId}/reflection/create")
-    public ResponseEntity<ApiResponse<CreateReflectionResponseDto>> createReflection(
+    public CreateReflectionResponseDto createReflection(
             @PathVariable UUID meetingId,
             @RequestBody CreateReflectionRequestDto requestDto,
             @AuthUser UUID userId
     ) {
-        CreateReflectionResponseDto response = reflectionService.createReflection(userId, meetingId, requestDto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "회고가 성공적으로 작성되었습니다.", response));
+        return reflectionService.createReflection(userId, meetingId, requestDto);
     }
 
-    //미팅 회고 목록 요약 조회
+        //미팅 회고 목록 요약 조회
     @GetMapping("/reflections")
-    public ResponseEntity<ApiResponse<List<GetWrittenReflectionResponse>>> getWrittenReflections(@AuthUser UUID userId
+    public List<GetWrittenReflectionResponse> getWrittenReflections(@AuthUser UUID userId
     ) {
-        List<GetWrittenReflectionResponse> responses = reflectionService.getWrittenReflections(userId);
-
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "회고 조회 성공", responses));
+        return reflectionService.getWrittenReflections(userId);
     }
 
     //특정 회고 조회
     @GetMapping("/{meetingId}/reflection")
-    public ResponseEntity<ApiResponse<GetReflectionResponse>> getReflectionDetail(
+    public GetReflectionResponse getReflectionDetail(
             @PathVariable UUID meetingId,
             @AuthUser UUID userId
     ) {
-        GetReflectionResponse response = reflectionService.getReflectionDetail(userId, meetingId);
-
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "회고 상세 조회에 성공했습니다.", response));
+        return reflectionService.getReflectionDetail(userId, meetingId);
     }
 }

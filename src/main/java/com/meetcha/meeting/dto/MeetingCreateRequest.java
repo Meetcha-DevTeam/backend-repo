@@ -21,5 +21,8 @@ public class MeetingCreateRequest {
     int durationMinutes;
     List<LocalDate> candidateDates;
     LocalDateTime deadline;
-    Optional<UUID> projectId;
+    private UUID projectId;
+    public Optional<UUID> getProjectId() {
+        return Optional.ofNullable(projectId);
+    }
 }

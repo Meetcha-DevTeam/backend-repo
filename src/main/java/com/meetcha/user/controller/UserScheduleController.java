@@ -29,7 +29,7 @@ public class UserScheduleController {
 
     //유저 스케줄 조회
     @GetMapping("/schedule")
-    public ResponseEntity<ApiResponse<List<ScheduleResponse>>> getSchedule(
+    public List<ScheduleResponse> getSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to
@@ -40,68 +40,54 @@ public class UserScheduleController {
                 : "null";
 
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        List<ScheduleResponse> schedules = userScheduleService.getSchedule(userId, from, to);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "유저 스케줄 조회 성공", schedules));
+        return userScheduleService.getSchedule(userId, from, to);
     }
 
     // 유저 개인 일정 Google Calendar에 등록
     @PostMapping("/schedule/create")
-    public ResponseEntity<ApiResponse<String>> createSchedule(
+    public String createSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CreateScheduleRequest request
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        String eventId = userScheduleService.createSchedule(userId, request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "일정 생성 성공", eventId));
+        return userScheduleService.createSchedule(userId, request);
     }
 
 
     // 유저 개인 일정 수정
     @PutMapping("/schedule/update")
-    public ResponseEntity<ApiResponse<Void>> updateSchedule(
+    public void updateSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody UpdateScheduleRequest request
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.updateSchedule(userId, request);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "일정 수정 성공"));
     }
 
     // 단일 상세 일정 조회
     @GetMapping("/schedule/detail")
-    public ResponseEntity<ApiResponse<ScheduleDetailResponse>> getScheduleDetail(
+    public ScheduleDetailResponse getScheduleDetail(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam String eventId) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        ScheduleDetailResponse detail = userScheduleService.getScheduleDetail(userId, eventId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "일정 상세 조회 성공", detail));
+        return userScheduleService.getScheduleDetail(userId, eventId);
     }
 
     // 유저 개인 일정 삭제
     @DeleteMapping("/schedule/delete")
-    public ResponseEntity<ApiResponse<Void>> deleteSchedule(
+    public void deleteSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam String eventId) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
         userScheduleService.deleteSchedule(userId, eventId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "일정 삭제 성공"));
     }
 
     //유저 정보 조회(마이페이지)
     @GetMapping("/mypage")
-    public ResponseEntity<ApiResponse<MyPageResponse>> getMyPage(
+    public MyPageResponse getMyPage(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        MyPageResponse response = userProfileService.getMyPage(userId);
-        return ResponseEntity
-                .ok(ApiResponse.success(200, "마이페이지 정보 조회 성공", response));
-    }
+        return userProfileService.getMyPage(userId);}
 
 }
