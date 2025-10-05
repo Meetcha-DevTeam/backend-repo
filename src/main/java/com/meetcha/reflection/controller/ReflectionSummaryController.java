@@ -1,6 +1,7 @@
 package com.meetcha.reflection.controller;
 
 import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
@@ -20,20 +21,10 @@ import java.util.UUID;
 public class ReflectionSummaryController {
 
     private final MeetingReflectionService reflectionService;
-    private final JwtProvider jwtProvider;
 
     @GetMapping("/summary")
-    public GetReflectionSummaryResponse getReflectionSummary(HttpServletRequest request) {
-        UUID userId = extractUserIdFromToken(request);
+    public GetReflectionSummaryResponse getReflectionSummary(@AuthUser UUID userId) {
         return reflectionService.getReflectionSummary(userId);
     }
 
-    private UUID extractUserIdFromToken(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (bearer != null && bearer.startsWith("Bearer ")) {
-            String token = bearer.substring(7);
-            return jwtProvider.getUserId(token);
-        }
-        throw new CustomException(ErrorCode.MISSING_AUTH_TOKEN);
-    }
 }
