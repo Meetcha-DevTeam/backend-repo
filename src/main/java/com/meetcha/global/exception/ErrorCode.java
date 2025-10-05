@@ -4,7 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-public enum ErrorCode {
+public enum ErrorCode implements ErrorCodeBase {
 
     //400 Bad Request
     INVALID_GOOGLE_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 구글 인가 코드입니다."),

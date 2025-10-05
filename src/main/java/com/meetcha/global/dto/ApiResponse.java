@@ -1,8 +1,9 @@
 package com.meetcha.global.dto;
 
-import com.meetcha.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.meetcha.global.exception.ErrorCode;
+import com.meetcha.global.exception.ErrorCodeBase;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -37,12 +38,11 @@ public class ApiResponse<T> {
         return new ApiResponse<>(path, code, message, null);
     }
 
-    //실패
-    public static <T> ApiResponse<T> error(String path, ErrorCode errorCode) {
+    public static <T> ApiResponse<T> error(String path,ErrorCodeBase errorCode) {
         return new ApiResponse<>(path, errorCode.getCode(), errorCode.getMessage(), null);
     }
 
-    public static <T> ApiResponse<T> error(String path, ErrorCode errorCode, T data) {
+    public static <T> ApiResponse<T> error(String path,ErrorCodeBase errorCode, T data) {
         return new ApiResponse<>(path, errorCode.getCode(), errorCode.getMessage(), data);
     }
 }

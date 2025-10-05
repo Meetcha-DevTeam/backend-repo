@@ -13,8 +13,8 @@ public class GlobalExceptionHandler {
     //모든 커스텀 예외 처리
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ApiResponse<Object>> handleCustomException(CustomException e, HttpServletRequest request) {
-        ErrorCode errorCode = e.getErrorCode();
         String path = request.getRequestURI();
+        ErrorCodeBase errorCode = e.getErrorCode();
 
         // fieldErrors가 있으면 data에 같이
         if (e.getFieldErrors() != null) {
