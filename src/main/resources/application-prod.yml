@@ -13,6 +13,6 @@ cloud:
     region:
       static: ap-northeast-2
     s3:
-      bucket: meetcha
+      bucket: meetcha-kuit5
     stack:
       auto: false
