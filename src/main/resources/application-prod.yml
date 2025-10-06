@@ -5,3 +5,14 @@ spring:
     username: ${RDS_DB_HOST}
     password: ${RDS_PASSWORD}
 
+cloud:
+  aws:
+    credentials:
+      access-key: ${ACCESS_KEY}
+      secret-key: ${SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: meetcha
+    stack:
+      auto: false
