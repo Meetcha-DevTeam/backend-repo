@@ -23,7 +23,7 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration: 60000   #1일
+  access-token-expiration: 86400000   #1일
   refresh-token-expiration : 1209600000   #2주
 
 google:
