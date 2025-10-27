@@ -70,10 +70,8 @@ public class AwsS3Service {
      */
     private void putObjectToS3(String fileName, MultipartFile file, ObjectMetadata metadata) {
         try (InputStream inputStream = file.getInputStream()) {
-            amazonS3.putObject(
-                    new PutObjectRequest(bucket, fileName, inputStream, metadata)
-                            .withCannedAcl(CannedAccessControlList.PublicRead)
-            );
+            amazonS3.putObject(new PutObjectRequest(bucket, fileName, inputStream, metadata));
+
             log.info("✅ S3 업로드 성공: {}", fileName);
         } catch (IOException e) {
             log.error("❌ S3 업로드 실패 (file: {})", fileName, e);
