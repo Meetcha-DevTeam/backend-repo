@@ -5,6 +5,7 @@ import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.meeting.service.MeetingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ public class MeetingController {
 
     @PostMapping("/create")
     public MeetingCreateResponse createMeeting(
-            @RequestBody MeetingCreateRequest request,
+            @RequestBody @Valid MeetingCreateRequest request,
             @AuthUser UUID userId
     ) {
         return meetingService.createMeeting(request, userId);

@@ -10,11 +10,17 @@ public enum ErrorCode implements ErrorCodeBase {
     INVALID_GOOGLE_CODE(HttpStatus.BAD_REQUEST, "유효하지 않은 구글 인가 코드입니다."),
     INVALID_MEETING_DEADLINE(HttpStatus.BAD_REQUEST, "참여 마감 시간은 후보 날짜보다 이르거나 같아야 합니다."),
     INVALID_MEETING_REQUEST(HttpStatus.BAD_REQUEST, "입력값이 유효하지 않습니다."),
+    INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 본문입니다."),
     INVALID_DURATION(HttpStatus.BAD_REQUEST, "1분 이상 719분 이하로 설정해주세요."),
     INVALID_CANDIDATE_DATES(HttpStatus.BAD_REQUEST, "후보 날짜는 최소 1개 이상, 최대 10개까지 가능합니다."),
     INVALID_CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었거나 범위가 유효하지 않습니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, "미팅 참여마감시간이 지났습니다."),
+    INVALID_ENTITY_FIELD(HttpStatus.BAD_REQUEST, "엔티티의 필수 필드가 누락되었습니다."),
+    INVALID_TIME_SLOT(HttpStatus.BAD_REQUEST, "시작 시간은 종료 시간보다 빨라야 합니다."),
+    REFLECTION_NOT_ALLOWED_FOR_MEETING_STATUS(HttpStatus.BAD_REQUEST, "완료되지 않은 미팅에 대해서는 회고를 작성할 수 없습니다."),
+
+
 
     //401 Unauthorized
     MISSING_AUTH_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 필요합니다."),
@@ -40,6 +46,8 @@ public enum ErrorCode implements ErrorCodeBase {
     REFLECTION_NOT_FOUND(HttpStatus.NOT_FOUND, "회고를 찾을 수 없습니다."),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "리소스를 찾을 수 없습니다."),
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "프로젝트를 찾을 수 없습니다."),
+    ALTERNATIVE_TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 대안 시간 후보를 찾을 수 없습니다."),
+
 
     //409 Conflict
     ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, "이미 대안시간 투표를 제출하였습니다."),
@@ -49,7 +57,12 @@ public enum ErrorCode implements ErrorCodeBase {
     NO_PARTICIPANT_AVAILABILITY(HttpStatus.CONFLICT, "참여자 가용 시간이 없어 미팅을 확정할 수 없습니다."),
 
     //500 Internal Server Error
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 서버 오류가 발생했습니다."),
+
+    //502 Bad GateWay
+    GOOGLE_API_CLIENT_ERROR(HttpStatus.BAD_GATEWAY, "Google API에 대한 클라이언트 요청이 잘못되었습니다."),
+    GOOGLE_API_SERVER_ERROR(HttpStatus.BAD_GATEWAY, "Google API 서버에 오류가 발생했습니다."),
+    GOOGLE_API_NETWORK_ERROR(HttpStatus.BAD_GATEWAY, "Google API 서버에 연결할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

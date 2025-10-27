@@ -1,5 +1,7 @@
 package com.meetcha.meetinglist.domain;
 
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,7 +44,7 @@ public class AlternativeTimeEntity {
             UUID meetingId
     ) {
         if (startTime == null || endTime == null || meetingId == null) {
-            throw new IllegalArgumentException("start/end/meetingId is required");
+            throw new CustomException(ErrorCode.INVALID_ENTITY_FIELD);
         }
         if (!endTime.isAfter(startTime)) {
             throw new IllegalArgumentException("endTime must be after startTime");

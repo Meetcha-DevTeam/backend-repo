@@ -7,6 +7,7 @@ import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class JoinMeetingController {
     @PostMapping("/id/{meetingId}/join")
     public JoinMeetingResponse joinMeeting(
             @PathVariable UUID meetingId,
-            @RequestBody JoinMeetingRequest request,
+            @RequestBody @Valid JoinMeetingRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         log.debug("joinMeeting 메서드 진입");

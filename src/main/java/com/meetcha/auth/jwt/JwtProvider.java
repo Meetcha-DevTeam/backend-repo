@@ -1,5 +1,7 @@
 package com.meetcha.auth.jwt;
 
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -54,8 +56,12 @@ public class JwtProvider {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        } catch (MalformedJwtException e) {
+            throw new CustomException(ErrorCode.MALFORMED_JWT);
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
     }
 

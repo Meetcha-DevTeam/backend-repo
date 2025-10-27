@@ -39,6 +39,10 @@ public class MeetingReflectionService {
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
+        if (meeting.getMeetingStatus() != MeetingStatus.DONE) {
+            throw new CustomException(ErrorCode.REFLECTION_NOT_ALLOWED_FOR_MEETING_STATUS);
+        }
+
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 

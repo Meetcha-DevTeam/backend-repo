@@ -65,7 +65,7 @@ public class MeetingStatusUpdateScheduler {
             Optional<AlternativeTimeEntity> confirmed = alternativeTimeRepository
                     .findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(meeting.getMeetingId());
 
-        /// 투표 결과가 있으면 그 시간(confirmed.get().getStartTime())을 미팅 확정 시간으로 저장
+            /// 투표 결과가 있으면 그 시간(confirmed.get().getStartTime())을 미팅 확정 시간으로 저장
             if (confirmed.isPresent()) {
                 meeting.setConfirmedTime(confirmed.get().getStartTime());
                 meeting.setMeetingStatus(MeetingStatus.BEFORE);

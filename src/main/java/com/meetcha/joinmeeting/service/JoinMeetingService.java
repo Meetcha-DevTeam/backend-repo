@@ -64,6 +64,13 @@ public class JoinMeetingService {
         }
 
 
+        for (JoinMeetingRequest.TimeSlot slot : request.getSelectedTimes()) {
+            if (slot.getStartAt().isAfter(slot.getEndAt())) {
+                throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
+            }
+        }
+
+
         // 닉네임 확인 (없으면 users.name 가져오기)
         String nickname = request.getNickname();
         if (nickname == null || nickname.isBlank()) {
@@ -190,9 +197,7 @@ public class JoinMeetingService {
         List<ParticipantAvailability> times =
                 availabilityRepository.findByMeetingIdAndParticipantId(meetingId, participantId);
 
-        if (times.isEmpty()) {
-            throw new CustomException(ErrorCode.RESOURCE_NOT_FOUND);
-        }
+
 
         return times.stream()
                 .map(t -> new GetSelectedTime(

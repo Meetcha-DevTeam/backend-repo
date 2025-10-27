@@ -8,6 +8,7 @@ import com.meetcha.joinmeeting.service.JoinMeetingService;
 import com.meetcha.meetinglist.dto.*;
 import com.meetcha.meetinglist.service.AlternativeTimeService;
 import com.meetcha.meetinglist.service.MeetingListService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,7 @@ public class MeetingListController {
     @PostMapping("/{meetingId}/alternative-vote")
     public AlternativeVoteResponse submitAlternativeVote(
             @PathVariable UUID meetingId,
-            @RequestBody AlternativeVoteRequest request,
+            @RequestBody @Valid AlternativeVoteRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         return alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
