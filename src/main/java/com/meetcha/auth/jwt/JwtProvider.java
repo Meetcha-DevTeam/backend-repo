@@ -52,7 +52,6 @@ public class JwtProvider {
                 .compact();
     }
 
-    // ✅ JWT 유효성 검증 (필요시 사용)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -66,7 +65,6 @@ public class JwtProvider {
         }
     }
 
-    // ✅ 이메일 추출 (만료된 토큰이면 예외로 처리)
     public String getEmail(String token) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build()
@@ -78,7 +76,6 @@ public class JwtProvider {
         }
     }
 
-    // ✅ 유저 ID 추출 (만료된 토큰이면 예외로 처리)
     public UUID getUserId(String token) {
         try {
             String subject = Jwts.parserBuilder().setSigningKey(key).build()
