@@ -1,5 +1,7 @@
 package com.meetcha.auth.jwt;
 
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -50,25 +52,44 @@ public class JwtProvider {
                 .compact();
     }
 
+    // ✅ JWT 유효성 검증 (필요시 사용)
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            // 형식 이상
+            throw new CustomException(ErrorCode.MALFORMED_JWT);
         }
     }
 
+    // ✅ 이메일 추출 (만료된 토큰이면 예외로 처리)
     public String getEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token)
-                .getBody().get("email", String.class);
+        try {
+            return Jwts.parserBuilder().setSigningKey(key).build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("email", String.class);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        }
     }
 
+    // ✅ 유저 ID 추출 (만료된 토큰이면 예외로 처리)
     public UUID getUserId(String token) {
-        String subject = Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token)
-                .getBody().getSubject();
-        return UUID.fromString(subject);
+        try {
+            String subject = Jwts.parserBuilder().setSigningKey(key).build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+            return UUID.fromString(subject);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException(ErrorCode.EXPIRED_JWT);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.MALFORMED_JWT);
+        }
     }
 }
