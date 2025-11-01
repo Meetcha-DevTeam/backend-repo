@@ -48,6 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         } catch (CustomException e) {
             // JWT 관련 CustomException 발생 시 ApiResponse 형식으로 응답
             writeErrorResponse(response, e.getErrorCode(), request.getRequestURI());
+            return;
         }
     }
 
@@ -65,6 +66,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         ApiResponse<Void> errorResponse = ApiResponse.error(path, errorCode);
 
-        new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()); // ✅ LocalDateTime 지원
+        objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        objectMapper.writeValue(response.getWriter(), errorResponse);
     }
+
 }
