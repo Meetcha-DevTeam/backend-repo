@@ -1,5 +1,9 @@
 package com.meetcha.auth.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meetcha.global.dto.ApiResponse;
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCodeBase;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,20 +28,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+
         String token = extractToken(request);
 
-        if (token != null && jwtProvider.validateToken(token)) {
-            UUID userId = jwtProvider.getUserId(token);
-            String email = jwtProvider.getEmail(token);
+        try {
+            if (token != null && jwtProvider.validateToken(token)) {
+                UUID userId = jwtProvider.getUserId(token);
+                String email = jwtProvider.getEmail(token);
 
-            JwtUserPrincipal principal = new JwtUserPrincipal(userId, email);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
+                JwtUserPrincipal principal = new JwtUserPrincipal(userId, email);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(principal, null, Collections.emptyList());
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+            filterChain.doFilter(request, response);
+
+        } catch (CustomException e) {
+            // JWT 관련 CustomException 발생 시 ApiResponse 형식으로 응답
+            writeErrorResponse(response, e.getErrorCode(), request.getRequestURI());
+            return;
         }
-
-        filterChain.doFilter(request, response);
     }
 
     private String extractToken(HttpServletRequest request) {
@@ -47,4 +59,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+    private void writeErrorResponse(HttpServletResponse response, ErrorCodeBase errorCode, String path) throws IOException {
+        response.setStatus(errorCode.getHttpStatus().value());
+        response.setContentType("application/json; charset=UTF-8");
+
+        ApiResponse<Void> errorResponse = ApiResponse.error(path, errorCode);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()); // ✅ LocalDateTime 지원
+        objectMapper.disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        objectMapper.writeValue(response.getWriter(), errorResponse);
+    }
+
 }
