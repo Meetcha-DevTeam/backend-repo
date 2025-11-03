@@ -27,6 +27,8 @@ public class UserScheduleController {
     private final UserScheduleService userScheduleService;
     private final JwtProvider jwtProvider;
 
+    public record IdResponse(String eventId) {}
+
     //유저 스케줄 조회
     @GetMapping("/schedule")
     public List<ScheduleResponse> getSchedule(
@@ -45,13 +47,23 @@ public class UserScheduleController {
 
     // 유저 개인 일정 Google Calendar에 등록
     @PostMapping("/schedule/create")
-    public String createSchedule(
+    public ResponseEntity<ApiResponse<IdResponse>> createSchedule(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody CreateScheduleRequest request
     ) {
         UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-        return userScheduleService.createSchedule(userId, request);
+        String id = userScheduleService.createSchedule(userId, request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("/user/schedule/create", 201, "CREATED", new IdResponse(id)));
     }
+
+//    public String createSchedule(
+//            @RequestHeader("Authorization") String authorizationHeader,
+//            @RequestBody CreateScheduleRequest request
+//    ) {
+//        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+//        return userScheduleService.createSchedule(userId, request);
+//    }
 
 
     // 유저 개인 일정 수정
