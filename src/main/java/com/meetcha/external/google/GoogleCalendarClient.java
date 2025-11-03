@@ -132,8 +132,11 @@ public class GoogleCalendarClient {
         body.put("start", Map.of("dateTime", startStr, "timeZone", Z_SEOUL.getId()));
         body.put("end",   Map.of("dateTime", endStr,   "timeZone", Z_SEOUL.getId()));
 
-        if (recurrenceRRule != null) {
-            body.put("recurrence", List.of(recurrenceRRule));
+        if (recurrenceRRule != null && !recurrenceRRule.isBlank() && !"NONE".equalsIgnoreCase(recurrenceRRule)) {
+            String rule = recurrenceRRule.startsWith("RRULE:")
+                    ? recurrenceRRule
+                    : "RRULE:" + recurrenceRRule;
+            body.put("recurrence", List.of(rule));
         }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
