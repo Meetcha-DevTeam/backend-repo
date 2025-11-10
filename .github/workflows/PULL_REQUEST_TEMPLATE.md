@@ -1,3 +1,5 @@
+제목: [타입] [Jira-Key]: 작업 내용 요약 (커밋 메시지 형식과 동일) -> PR 내용 작성 후 이 문장은 지워주세요
+
 ### 🎟️ Jira Ticket
 
 * (여기에 Jira 이슈 URL을 붙여넣으세요. 예: https://pds2023.atlassian.net/browse/KAN-163)
