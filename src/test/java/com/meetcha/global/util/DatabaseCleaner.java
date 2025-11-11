@@ -44,7 +44,6 @@ public class DatabaseCleaner implements InitializingBean {
         }
 
         //외래 키 제약 조건을 다시 활성화합니다.
-        //(ID를 1로 리셋하는 코드를 제거 -> UUID PK와 호환)
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
     }
 }

@@ -1,5 +1,4 @@
 spring:
-  # 1. H2 인메모리 DB 설정 (MySQL처럼 동작하도록 설정)
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
     username: sa
@@ -8,18 +7,12 @@ spring:
 
   jpa:
     hibernate:
-      # 2. 테스트가 시작될 때마다 DB 스키마(테이블)를 새로 생성
       ddl-auto: create
     properties:
       hibernate:
-        # 3. H2 DB에서 MySQL 문법을 사용하도록 설정
         dialect: org.hibernate.dialect.H2Dialect
-    # H2는 show_sql: true로 두면 로그가 너무 많아져서 false로 끄는 것을 추천
     show-sql: false
 
-# 4. [중요] JWT 시크릿 키 설정
-# 테스트는 환경 변수(${JWT_SECRET})를 모르므로, 여기서 고정된 테스트용 키를 설정해야 합니다.
-# 이 키는 실제 운영 키와 달라야 합니다.
 jwt:
   secret: 'TestSecretKeyForMeetchaProject-MustBeAtLeast256bitsLong-1234567890'
   access-token-expiration: 3600000   # 1시간
