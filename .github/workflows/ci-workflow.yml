@@ -3,14 +3,10 @@ name: CI with Gradle    # GitHub Action에서 보여질 이름을 지정
 on:          # 아래 브랜치로 push, pull request 발생 시 자동으로 실행
   push:
     branches:
-      - 'main'
-      # - 'dev'
-      # - 'dev2' 
+      - 'develop'
   pull_request:
     branches:
-      - 'main'
-      # - 'dev'
-      # - 'dev2' 
+      - 'develop'
 
 permissions:
   contents: read
@@ -32,4 +28,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: 🐘 Build with Gradle (without test)
-        run: ./gradlew clean build -x test --stacktrace
+        run: ./gradlew clean build --stacktrace
