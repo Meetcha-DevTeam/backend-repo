@@ -12,6 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class MeetingDeleteResponse {
-    private UUID meetingId;
-    private String message;
+    UUID meetingId;
+    String message;
 }
