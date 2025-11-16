@@ -6,6 +6,8 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static com.meetcha.global.util.DateTimeUtils.kstToUtc;
+
 @Entity
 @Table(name = "alternative_times")
 @Getter
@@ -47,9 +49,10 @@ public class AlternativeTimeEntity {
         if (!endTime.isAfter(startTime)) {
             throw new IllegalArgumentException("endTime must be after startTime");
         }
+
         return AlternativeTimeEntity.builder()
-                .startTime(startTime)
-                .endTime(endTime)
+                .startTime(kstToUtc(startTime))
+                .endTime(kstToUtc(endTime))
                 .durationAdjustedMinutes(durationAdjustedMinutes)
                 .excludedParticipants(excludedParticipants)
                 .meetingId(meetingId)
