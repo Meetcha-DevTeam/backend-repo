@@ -74,7 +74,7 @@ class JoinMeetingControllerTest extends AcceptanceTest {
 
     @DisplayName("미팅 정보 조회에 성공한다")
     @Test
-    void shouldReturnMeetingInfo(){
+    void getMeetingInfoShouldSucceed(){
         // given
         UserEntity user = testDataFactory.createUser("email1");
         String accessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
