@@ -45,7 +45,12 @@ public class MeetingConfirmationService {
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
         if (allAvailability.isEmpty()) {
-            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
+            // 참여자가 아무도 가용시간을 안 넣고 마감된 경우 → 매칭 실패 처리
+            meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            meetingRepository.save(meeting);
+            log.info("가용 시간 정보 없음 → MATCH_FAILED 처리, meetingId={}", meetingId);
+            return;
+//            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
         }
         log.info("참여자 가용 시간 조회 완료");
 
