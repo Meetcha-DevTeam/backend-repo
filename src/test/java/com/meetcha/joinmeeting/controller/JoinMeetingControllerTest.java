@@ -7,10 +7,14 @@ import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.TestDataFactory;
 import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.meeting.domain.MeetingEntity;
+import com.meetcha.meeting.dto.MeetingInfoResponse;
 import io.restassured.http.ContentType;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.UUID;
 
 import static com.meetcha.global.exception.ErrorCode.MEETING_NOT_FOUND;
 import static io.restassured.RestAssured.given;
@@ -68,5 +72,57 @@ class JoinMeetingControllerTest extends AcceptanceTest {
         assertThat(response.getMessage()).isEqualTo(MEETING_NOT_FOUND.getMessage());
     }
 
+    @DisplayName("미팅 정보 조회에 성공한다")
+    @Test
+    void shouldReturnMeetingInfo(){
+        // given
+        UserEntity user = testDataFactory.createUser("email1");
+        String accessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
+
+        MeetingEntity meeting = testDataFactory.createMeeting(user.getUserId());
+
+        // when
+        MeetingInfoResponse response = given()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .when()
+                .get("meeting/id/" + meeting.getMeetingId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getObject("data", MeetingInfoResponse.class);
+
+        // then
+        assertThat(response.getMeetingId()).isEqualTo(meeting.getMeetingId());
+        assertThat(response.getCandidateDates()).containsExactlyInAnyOrder(meeting.getCandidateDates().get(0).getCandidateDate(), meeting.getCandidateDates().get(1).getCandidateDate());
+    }
+
+    @DisplayName("미팅이 존재하지 않으면 404에러를 응답한다")
+    @Test
+    void getMeetingInfoShouldReturn404Code(){
+        // given
+        UserEntity user = testDataFactory.createUser("email1");
+        String accessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
+
+        UUID unknownMeetingId = UUID.randomUUID();
+
+        // when
+        ValidatableResponse validatableResponse = given()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .when()
+                .get("meeting/id/" + unknownMeetingId)
+                .then();
+
+
+        // then
+        validatableResponse.statusCode(404);
+
+        ApiResponse response = validatableResponse.extract().as(ApiResponse.class);
+        assertThat(response.getMessage()).isEqualTo(MEETING_NOT_FOUND.getMessage());
+    }
 
 }
