@@ -53,6 +53,9 @@ public class JwtProvider {
     }
 
     public boolean validateToken(String token) {
+        if (token == null || token.trim().isEmpty()) {
+            throw new CustomException(ErrorCode.MALFORMED_JWT);
+        }
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
