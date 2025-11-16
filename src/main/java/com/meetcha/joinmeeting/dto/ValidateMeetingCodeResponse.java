@@ -17,5 +17,5 @@ public class ValidateMeetingCodeResponse{
         String title;
         String description;
         LocalDateTime deadline;
-        boolean isClosed;
+        Boolean isClosed;
 }
