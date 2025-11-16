@@ -19,14 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingConfirmationService {
 
     private final MeetingRepository meetingRepository;
-    private final MeetingParticipantRepository participantRepository;
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingScheduleSyncService syncService;
     private final AlternativeTimeRepository alternativeTimeRepository;

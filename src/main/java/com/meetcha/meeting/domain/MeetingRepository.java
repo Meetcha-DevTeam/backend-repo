@@ -1,7 +1,5 @@
 package com.meetcha.meeting.domain;
 
-import com.meetcha.reflection.domain.MeetingReflectionEntity;
-import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
