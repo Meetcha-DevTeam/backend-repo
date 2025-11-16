@@ -55,6 +55,34 @@ public class MeetingStatusUpdateScheduler {
         meetingRepository.saveAll(toEnd);
     }
 
+    /**
+     * 참여 마감시간이 지난 MATCHING 미팅들에 대해
+     * 1단계 확정 로직(confirmMeeting)을 자동으로 수행
+     */
+    @Scheduled(fixedRate = 60_000) // 1분마다
+    @Transactional
+    public void confirmMeetingForDeadlinePassed() {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("[Scheduler] confirmMeetingForDeadlinePassed now={}", now);
+
+        List<MeetingEntity> targets =
+                meetingRepository.findByMeetingStatusAndConfirmedTimeIsNullAndDeadlineBefore(
+                        MeetingStatus.MATCHING, now
+                );
+
+        log.info("[Scheduler] 참여 마감 지난 MATCHING 미팅 수 = {}", targets.size());
+
+        for (MeetingEntity meeting : targets) {
+            try {
+                log.info("[Scheduler] confirmMeeting 호출: meetingId={}", meeting.getMeetingId());
+                confirmationService.confirmMeeting(meeting.getMeetingId());
+            } catch (Exception e) {
+                log.error("[Scheduler] confirmMeeting 실패: meetingId={}", meeting.getMeetingId(), e);
+            }
+        }
+    }
+
+
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     @Transactional
     public void confirmFromAlternativeTimes() {
