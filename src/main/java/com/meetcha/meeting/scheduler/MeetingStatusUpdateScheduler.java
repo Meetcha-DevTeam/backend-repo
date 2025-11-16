@@ -3,6 +3,7 @@ package com.meetcha.meeting.scheduler;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meeting.service.MeetingConfirmationService;
 import com.meetcha.meeting.service.MeetingScheduleSyncService;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
@@ -25,7 +26,7 @@ public class MeetingStatusUpdateScheduler {
     private final MeetingRepository meetingRepository;
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final MeetingScheduleSyncService syncService;
-
+    private final MeetingConfirmationService confirmationService;
 
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     public void updateMeetingStatuses() {
@@ -86,8 +87,8 @@ public class MeetingStatusUpdateScheduler {
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     @Transactional
     public void confirmFromAlternativeTimes() {
-//        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternative();
-        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(MeetingStatus.MATCHING);
+        LocalDateTime now = LocalDateTime.now();
+        List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(now);
 
         for (MeetingEntity meeting : targets) {
             Optional<AlternativeTimeEntity> confirmed = alternativeTimeRepository
@@ -107,5 +108,4 @@ public class MeetingStatusUpdateScheduler {
             }
         }
     }
-
 }
