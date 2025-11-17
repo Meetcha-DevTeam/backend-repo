@@ -136,8 +136,38 @@ public class GoogleCalendarClient {
         body.put("start", Map.of("dateTime", startStr, "timeZone", Z_SEOUL.getId()));
         body.put("end", Map.of("dateTime", endStr, "timeZone", Z_SEOUL.getId()));
 
-        if (recurrenceRRule != null) {
-            body.put("recurrence", List.of(recurrenceRRule));
+        // recurrence: null/blank/"NONE"이면 전송하지 않음 + 값 정규화해서 RRULE 보장
+        if (recurrenceRRule != null
+                && !recurrenceRRule.isBlank()
+                && !"NONE".equalsIgnoreCase(recurrenceRRule)) {
+
+            String v = recurrenceRRule.trim();
+            String rule;
+
+            if (v.startsWith("RRULE:")) {
+                // 이미 완전한 RRULE
+                rule = v;
+            } else if (v.startsWith("FREQ=")) {
+                // FREQ=...만 온 경우
+                rule = "RRULE:" + v;
+            } else {
+                // "DAILY"/"WEEKLY"/"BIWEEKLY"/"MONTHLY" 같은 축약 토큰 처리
+                String weekday = switch (startAt.getDayOfWeek()) {
+                    case MONDAY -> "MO"; case TUESDAY -> "TU"; case WEDNESDAY -> "WE";
+                    case THURSDAY -> "TH"; case FRIDAY -> "FR"; case SATURDAY -> "SA"; case SUNDAY -> "SU";
+                };
+                rule = switch (v.toUpperCase()) {
+                    case "DAILY"    -> "RRULE:FREQ=DAILY";
+                    case "WEEKLY"   -> "RRULE:FREQ=WEEKLY;BYDAY=" + weekday;        // DTSTART 요일 기준
+                    case "BIWEEKLY" -> "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=" + weekday;
+                    case "MONTHLY"  -> "RRULE:FREQ=MONTHLY";
+                    default -> null; // 알 수 없는 값이면 아예 전송하지 않음
+                };
+            }
+
+            if (rule != null) {
+                body.put("recurrence", List.of(rule));
+            }
         }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);

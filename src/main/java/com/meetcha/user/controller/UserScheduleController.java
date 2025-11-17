@@ -28,6 +28,8 @@ public class UserScheduleController {
     private final UserProfileService userProfileService;
     private final UserScheduleService userScheduleService;
 
+    public record IdResponse(String eventId) {}
+
     //유저 스케줄 조회
     @GetMapping("/schedule")
     public List<ScheduleResponse> getSchedule(
@@ -46,6 +48,14 @@ public class UserScheduleController {
     ) {
         return userScheduleService.createSchedule(userId, request);
     }
+
+//    public String createSchedule(
+//            @RequestHeader("Authorization") String authorizationHeader,
+//            @RequestBody CreateScheduleRequest request
+//    ) {
+//        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
+//        return userScheduleService.createSchedule(userId, request);
+//    }
 
 
     // 유저 개인 일정 수정

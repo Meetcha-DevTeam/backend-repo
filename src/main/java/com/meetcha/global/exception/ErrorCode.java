@@ -47,11 +47,13 @@ public enum ErrorCode implements ErrorCodeBase {
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "리소스를 찾을 수 없습니다."),
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "프로젝트를 찾을 수 없습니다."),
     ALTERNATIVE_TIME_NOT_FOUND(HttpStatus.NOT_FOUND, "해당하는 대안 시간 후보를 찾을 수 없습니다."),
+    REFRESH_TOKEN_NOT_FOUND(HttpStatus.NOT_FOUND, "리프레쉬 토큰을 찾을 수 없습니다."),
 
 
     //409 Conflict
     ALREADY_VOTED_ALTERNATIVE(HttpStatus.BAD_REQUEST, "이미 대안시간 투표를 제출하였습니다."),
     ALREADY_SUBMITTED_REFLECTION(HttpStatus.BAD_REQUEST, "이미 회고를 작성한 미팅입니다."),
+    CANNOT_DELETE_MEETING(HttpStatus.BAD_REQUEST, "매칭 실패 상태의 미팅만 삭제할 수 있습니다."),
     DUPLICATE_PROJECT_NAME(HttpStatus.CONFLICT, "이미 존재하는 프로젝트 이름입니다."),
     ALREADY_JOINED_MEETING(HttpStatus.CONFLICT, "이미 이 미팅에 참가했습니다."),
     NO_PARTICIPANT_AVAILABILITY(HttpStatus.CONFLICT, "참여자 가용 시간이 없어 미팅을 확정할 수 없습니다."),
@@ -75,4 +77,5 @@ public enum ErrorCode implements ErrorCodeBase {
     public int getCode() {
         return httpStatus.value();
     }
+
 }

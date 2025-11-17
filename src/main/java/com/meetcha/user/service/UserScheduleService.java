@@ -162,6 +162,10 @@ public class UserScheduleService {
 
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
+        String recurrence = request.getRecurrence();
+        if ("NONE".equalsIgnoreCase(recurrence) || recurrence == null || recurrence.isBlank()) {
+            recurrence = null; // NONE, 빈 값 모두 null 처리
+        }
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
