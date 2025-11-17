@@ -19,9 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.net.URL;
 
 @Slf4j
 @Service
@@ -32,16 +35,13 @@ public class LoginService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final AwsS3Service awsS3Service;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri() + "/login-complete";
         RestTemplate restTemplate = new RestTemplate();
 
-        // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
-        log.info("[OAuth] start googleLogin: code={}, redirectUri='{}', clientId='{}', clientSecret='{}'",
-                code,
-                redirectUrl, googleProps.getClientId(), googleProps.getClientSecret());
 
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
@@ -116,9 +116,20 @@ public class LoginService {
         Map<String, Object> userInfo = userInfoResponse.getBody();
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
-        String picture = (String) userInfo.get("picture");
+        String pictureUrl = (String) userInfo.get("picture");
+
+        //s3에 프사 업로드
+        String s3ProfileUrl = null;
+        try (InputStream in = new URL(pictureUrl).openStream()) {
+            String fileName = awsS3Service.createUniqueFileName("google_profile.jpg");
+            s3ProfileUrl = awsS3Service.uploadFromStream(in, fileName, "image/jpeg");
+        } catch (Exception e) {
+            log.warn("프로필 이미지 업로드 실패 (기본 이미지 사용): {}", e.getMessage());
+        }
+
 
         // 기존 유저 조회 or 생성
+        final String finalS3ProfileUrl = s3ProfileUrl;
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
@@ -126,7 +137,7 @@ public class LoginService {
                     .googleToken(googleAccessToken)
                     .googleRefreshToken(googleRefreshToken)
                     .googleTokenExpiresAt(accessTokenExpiry)
-                    .profileImgSrc(picture)
+                    .profileImgUrl(finalS3ProfileUrl)
                     .createdAt(LocalDateTime.now())
                     .build();
             return userRepository.save(newUser);
@@ -138,6 +149,12 @@ public class LoginService {
         } else {
             user.updateGoogleAccessToken(googleAccessToken, accessTokenExpiry);
         }
+
+        //프로필 이미지 반영
+        if (s3ProfileUrl != null) {
+            user.setProfileImgUrl(s3ProfileUrl);
+        }
+
         userRepository.save(user);
 
         String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
@@ -160,7 +177,8 @@ public class LoginService {
 
 
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
-        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail()).orElseThrow();
+        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String accessToken = jwtProvider.createAccessToken(user.getUserId(),
                 user.getEmail());
