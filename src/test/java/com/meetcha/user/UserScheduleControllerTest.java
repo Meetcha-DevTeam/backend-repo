@@ -19,8 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -182,6 +181,47 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 eq(newStart),
                 eq(newEnd),
                 eq(requestDto.getRecurrence())
+        );
+    }
+
+    @DisplayName("인증된 사용자가 일정 삭제를 요청하면 200 OK와 204 코드를 반환한다.(DELETE /user/schedule/delete)")
+    @Test
+    void deleteSchedule_Success() {
+        // given
+        String accessToken = testAuthHelper.createTestUserAndGetToken();
+        String eventIdToDelete = "evt_to_delete_789";
+
+        // 1. 토큰 서비스 Mock
+        when(googleTokenService.ensureValidAccessToken(any(UUID.class)))
+                .thenReturn("mock-google-api-token");
+
+        // 2. 캘린더 클라이언트 Mock (void 반환 메서드)
+        doNothing().when(googleCalendarClient).deleteEvent(
+                anyString(),
+                anyString()
+        );
+
+        // when
+        given()
+                .log().all()
+                .auth().oauth2(accessToken)
+                .queryParam("eventId", eventIdToDelete)
+                .when()
+                .delete("/user/schedule/delete")
+
+                // then (검증)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("code", equalTo(204))
+                .body("message", equalTo("요청에 성공하였습니다."))
+                .body("data", nullValue()); // void 반환이므로 data는 null
+
+
+        // googleCalendarClient.deleteEvent가 정확히 1번, 올바른 인자들로 호출되었는지 검증
+        verify(googleCalendarClient, times(1)).deleteEvent(
+                eq("mock-google-api-token"),
+                eq(eventIdToDelete)
         );
     }
 }
