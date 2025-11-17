@@ -5,6 +5,7 @@ import com.meetcha.auth.TestAuthHelper;
 import com.meetcha.auth.service.GoogleTokenService;
 import com.meetcha.external.google.GoogleCalendarClient;
 import com.meetcha.user.dto.CreateScheduleRequest;
+import com.meetcha.user.dto.ScheduleResponse;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,10 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -76,5 +79,52 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 .body("data.message", equalTo("CREATED"))
 
                 .body("data.data.eventId", equalTo(mockGoogleEventId));
+    }
+
+    @DisplayName("인증된 사용자가 일정 조회를 요청하면 200 OK와 일정 목록을 반환한다.(GET /user/schedule)")
+    @Test
+    void getSchedule_Success() {
+        // given
+        String accessToken = testAuthHelper.createTestUserAndGetToken();
+        LocalDateTime from = LocalDateTime.of(2025, 11, 1, 0, 0);
+        LocalDateTime to = LocalDateTime.of(2025, 11, 30, 23, 59);
+
+        // Mock 객체 생성
+        ScheduleResponse mockSchedule = ScheduleResponse.builder()
+                .eventId("evt_schedule_001")
+                .title("구글 캘린더 일정")
+                .startAt(from.plusDays(10))
+                .endAt(from.plusDays(10).plusHours(1))
+                .recurrence("NONE")
+                .build();
+
+        List<ScheduleResponse> mockResponseList = List.of(mockSchedule);
+
+        // Mockito 설정
+        when(googleTokenService.ensureValidAccessToken(any(UUID.class)))
+                .thenReturn("mock-google-api-token");
+
+        when(googleCalendarClient.getEvents(anyString(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(mockResponseList);
+
+        // when
+        given()
+                .log().all()
+                .auth().oauth2(accessToken)
+                .contentType(ContentType.JSON)
+                .queryParam("from", from.toString()) // 쿼리 파라미터로 전달
+                .queryParam("to", to.toString())
+                .when()
+                .get("/user/schedule")
+
+                // then (검증)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("code", equalTo(200))
+                .body("message", equalTo("요청에 성공하였습니다."))
+                .body("data", hasSize(1)) // 리스트의 크기가 1인지 확인
+                .body("data[0].eventId", equalTo("evt_schedule_001"))
+                .body("data[0].title", equalTo("구글 캘린더 일정"));
     }
 }
