@@ -7,6 +7,7 @@ import com.meetcha.reflection.dto.CreateReflectionResponseDto;
 import com.meetcha.reflection.dto.GetReflectionResponse;
 import com.meetcha.reflection.dto.GetWrittenReflectionResponse;
 import com.meetcha.reflection.service.MeetingReflectionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class MeetingReflectionController {
     @PostMapping("/{meetingId}/reflection/create")
     public CreateReflectionResponseDto createReflection(
             @PathVariable UUID meetingId,
-            @RequestBody CreateReflectionRequestDto requestDto,
+            @RequestBody @Valid CreateReflectionRequestDto requestDto,
             @AuthUser UUID userId
     ) {
         return reflectionService.createReflection(userId, meetingId, requestDto);

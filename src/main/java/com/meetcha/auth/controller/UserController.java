@@ -6,6 +6,7 @@ import com.meetcha.global.annotation.AuthUser;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.auth.service.RefreshTokenService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.Parameter;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class UserController {
 
 
     @PostMapping("/google")
-    public TokenResponseDto googleLogin(@RequestBody LoginRequestDto request) {
+    public TokenResponseDto googleLogin(@RequestBody @Valid LoginRequestDto request) {
         return loginService.googleLogin(request);
     }
 
