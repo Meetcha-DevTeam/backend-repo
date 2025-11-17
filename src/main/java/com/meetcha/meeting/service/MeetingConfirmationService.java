@@ -2,7 +2,6 @@ package com.meetcha.meeting.service;
 
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.MeetingEntity;
@@ -19,14 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingConfirmationService {
 
     private final MeetingRepository meetingRepository;
-    private final MeetingParticipantRepository participantRepository;
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingScheduleSyncService syncService;
     private final AlternativeTimeRepository alternativeTimeRepository;
@@ -45,7 +43,12 @@ public class MeetingConfirmationService {
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
         if (allAvailability.isEmpty()) {
-            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
+            // 참여자가 아무도 가용시간을 안 넣고 마감된 경우 → 매칭 실패 처리
+            meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            meetingRepository.save(meeting);
+            log.info("가용 시간 정보 없음 → MATCH_FAILED 처리, meetingId={}", meetingId);
+            return;
+//            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
         }
         log.info("참여자 가용 시간 조회 완료");
 
