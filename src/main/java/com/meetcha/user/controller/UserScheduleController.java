@@ -28,7 +28,6 @@ public class UserScheduleController {
     private final UserProfileService userProfileService;
     private final UserScheduleService userScheduleService;
 
-    public record IdResponse(String eventId) {}
 
     //유저 스케줄 조회
     @GetMapping("/schedule")
@@ -42,11 +41,14 @@ public class UserScheduleController {
 
     // 유저 개인 일정 Google Calendar에 등록
     @PostMapping("/schedule/create")
-    public String createSchedule(
-            @AuthUser UUID userId,
-            @RequestBody @Valid CreateScheduleRequest request
+    @ResponseStatus(HttpStatus.CREATED)
+    public CreateScheduleResponse createSchedule(
+                                                  @AuthUser UUID userId,
+                                                  @RequestBody CreateScheduleRequest request
     ) {
-        return userScheduleService.createSchedule(userId, request);
+        String id = userScheduleService.createSchedule(userId, request);
+
+        return new CreateScheduleResponse(id);
     }
 
 //    public String createSchedule(
