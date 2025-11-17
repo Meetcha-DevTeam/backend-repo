@@ -6,6 +6,7 @@ import com.meetcha.auth.service.GoogleTokenService;
 import com.meetcha.external.google.GoogleCalendarClient;
 import com.meetcha.user.dto.CreateScheduleRequest;
 import com.meetcha.user.dto.ScheduleResponse;
+import com.meetcha.user.dto.UpdateScheduleRequest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class UserScheduleControllerTest extends AcceptanceTest {
 
@@ -126,5 +127,61 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 .body("data", hasSize(1)) // 리스트의 크기가 1인지 확인
                 .body("data[0].eventId", equalTo("evt_schedule_001"))
                 .body("data[0].title", equalTo("구글 캘린더 일정"));
+    }
+
+    @DisplayName("인증된 사용자가 일정 수정을 요청하면 200 OK를 반환한다.(PUT /user/schedule/update)")
+    @Test
+    void updateSchedule_Success() {
+        // given
+        String accessToken = testAuthHelper.createTestUserAndGetToken();
+        String eventIdToUpdate = "evt_to_update_123";
+
+        LocalDateTime newStart = LocalDateTime.of(2025, 12, 25, 10, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2025, 12, 25, 11, 0);
+        UpdateScheduleRequest requestDto = UpdateScheduleRequest.builder()
+                .eventId(eventIdToUpdate)
+                .title("수정된 일정 (X-mas)")
+                .startAt(newStart)
+                .endAt(newEnd)
+                .recurrence("NONE")
+                .build();
+
+        when(googleTokenService.ensureValidAccessToken(any(UUID.class)))
+                .thenReturn("mock-google-api-token");
+
+        doNothing().when(googleCalendarClient).updateEvent(
+                anyString(),
+                anyString(),
+                anyString(),
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                anyString()
+        );
+
+        // when
+        given()
+                .log().all()
+                .auth().oauth2(accessToken)
+                .contentType(ContentType.JSON)
+                .body(requestDto)
+                .when()
+                .put("/user/schedule/update")
+
+                // then (검증)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("code", equalTo(200))
+                .body("message", equalTo("요청에 성공하였습니다."));
+
+        // googleCalendarClient.updateEvent가 요청 DTO의 정확한 인자들로 1번 호출되었는지 확인
+        verify(googleCalendarClient, times(1)).updateEvent(
+                eq("mock-google-api-token"),
+                eq(eventIdToUpdate),
+                eq(requestDto.getTitle()),
+                eq(newStart),
+                eq(newEnd),
+                eq(requestDto.getRecurrence())
+        );
     }
 }
