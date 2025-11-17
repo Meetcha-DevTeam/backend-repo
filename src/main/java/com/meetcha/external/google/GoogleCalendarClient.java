@@ -5,9 +5,12 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.ScheduleResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -18,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class GoogleCalendarClient {
 
     private static final String BASE = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
@@ -76,7 +80,7 @@ public class GoogleCalendarClient {
         OffsetDateTime fromUtc = from.atZone(Z_SEOUL)
                 .toOffsetDateTime()
                 .withOffsetSameInstant(ZoneOffset.UTC);
-        OffsetDateTime toUtc   = to.atZone(Z_SEOUL)
+        OffsetDateTime toUtc = to.atZone(Z_SEOUL)
                 .toOffsetDateTime()
                 .withOffsetSameInstant(ZoneOffset.UTC);
 
@@ -127,13 +131,43 @@ public class GoogleCalendarClient {
 
         // 오프셋 포함 RFC3339로 전송 (Asia/Seoul)
         String startStr = startAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
-        String endStr   = endAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
+        String endStr = endAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
 
         body.put("start", Map.of("dateTime", startStr, "timeZone", Z_SEOUL.getId()));
-        body.put("end",   Map.of("dateTime", endStr,   "timeZone", Z_SEOUL.getId()));
+        body.put("end", Map.of("dateTime", endStr, "timeZone", Z_SEOUL.getId()));
 
-        if (recurrenceRRule != null) {
-            body.put("recurrence", List.of(recurrenceRRule));
+        // recurrence: null/blank/"NONE"이면 전송하지 않음 + 값 정규화해서 RRULE 보장
+        if (recurrenceRRule != null
+                && !recurrenceRRule.isBlank()
+                && !"NONE".equalsIgnoreCase(recurrenceRRule)) {
+
+            String v = recurrenceRRule.trim();
+            String rule;
+
+            if (v.startsWith("RRULE:")) {
+                // 이미 완전한 RRULE
+                rule = v;
+            } else if (v.startsWith("FREQ=")) {
+                // FREQ=...만 온 경우
+                rule = "RRULE:" + v;
+            } else {
+                // "DAILY"/"WEEKLY"/"BIWEEKLY"/"MONTHLY" 같은 축약 토큰 처리
+                String weekday = switch (startAt.getDayOfWeek()) {
+                    case MONDAY -> "MO"; case TUESDAY -> "TU"; case WEDNESDAY -> "WE";
+                    case THURSDAY -> "TH"; case FRIDAY -> "FR"; case SATURDAY -> "SA"; case SUNDAY -> "SU";
+                };
+                rule = switch (v.toUpperCase()) {
+                    case "DAILY"    -> "RRULE:FREQ=DAILY";
+                    case "WEEKLY"   -> "RRULE:FREQ=WEEKLY;BYDAY=" + weekday;        // DTSTART 요일 기준
+                    case "BIWEEKLY" -> "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=" + weekday;
+                    case "MONTHLY"  -> "RRULE:FREQ=MONTHLY";
+                    default -> null; // 알 수 없는 값이면 아예 전송하지 않음
+                };
+            }
+
+            if (rule != null) {
+                body.put("recurrence", List.of(rule));
+            }
         }
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
@@ -162,17 +196,17 @@ public class GoogleCalendarClient {
         body.put("summary", title);
 
         String startStr = startAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
-        String endStr   = endAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
+        String endStr = endAt.atZone(Z_SEOUL).format(RFC3339_OFFSET);
 
         body.put("start", Map.of("dateTime", startStr, "timeZone", Z_SEOUL.getId()));
-        body.put("end",   Map.of("dateTime", endStr,   "timeZone", Z_SEOUL.getId()));
+        body.put("end", Map.of("dateTime", endStr, "timeZone", Z_SEOUL.getId()));
 
         if (!"NONE".equalsIgnoreCase(recurrenceOption)) {
             List<String> recurrence = switch (recurrenceOption.toUpperCase()) {
-                case "DAILY"    -> List.of("RRULE:FREQ=DAILY");
-                case "WEEKLY"   -> List.of("RRULE:FREQ=WEEKLY");
+                case "DAILY" -> List.of("RRULE:FREQ=DAILY");
+                case "WEEKLY" -> List.of("RRULE:FREQ=WEEKLY");
                 case "BIWEEKLY" -> List.of("RRULE:FREQ=WEEKLY;INTERVAL=2");
-                case "MONTHLY"  -> List.of("RRULE:FREQ=MONTHLY");
+                case "MONTHLY" -> List.of("RRULE:FREQ=MONTHLY");
                 default -> null;
             };
             if (recurrence != null) {
@@ -192,6 +226,18 @@ public class GoogleCalendarClient {
             throw e;
         } catch (HttpClientErrorException.Unauthorized e) {
             throw new CustomException(ErrorCode.GOOGLE_TOKEN_EXPIRED);
+        } catch (HttpClientErrorException e) {
+            // 구글이 보낸 400 Bad Request, 404 Not Found 등이 여기에 해당
+            log.error("Google Calendar Client Error (4xx): status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new CustomException(ErrorCode.GOOGLE_API_CLIENT_ERROR);
+        } catch (HttpServerErrorException e) {
+            // Google 서버 자체에 문제가 있을 때 발생
+            log.error("Google Calendar Server Error (5xx): status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new CustomException(ErrorCode.GOOGLE_API_SERVER_ERROR);
+        } catch (ResourceAccessException e) {
+            // 타임아웃 또는 네트워크 연결 자체에 문제가 있을 때 발생
+            log.error("Google Calendar Network Error: {}", e.getMessage());
+            throw new CustomException(ErrorCode.GOOGLE_API_NETWORK_ERROR);
         }
     }
 
@@ -225,7 +271,7 @@ public class GoogleCalendarClient {
             Map<String, Object> body = response.getBody();
 
             Map<String, String> start = (Map<String, String>) body.get("start");
-            Map<String, String> end   = (Map<String, String>) body.get("end");
+            Map<String, String> end = (Map<String, String>) body.get("end");
 
             List<String> recurrenceList = (List<String>) body.get("recurrence");
             String recurrence = RecurrenceUtils.parseRecurrenceToLabel(recurrenceList);
@@ -252,7 +298,7 @@ public class GoogleCalendarClient {
 
     private ScheduleResponse toScheduleResponse(Map<String, Object> item) {
         Map<String, String> start = (Map<String, String>) item.get("start");
-        Map<String, String> end   = (Map<String, String>) item.get("end");
+        Map<String, String> end = (Map<String, String>) item.get("end");
 
         String title = (String) item.getOrDefault("summary", "제목 없음");
         String eventId = (String) item.get("id");

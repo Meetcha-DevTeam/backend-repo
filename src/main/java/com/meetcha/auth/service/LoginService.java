@@ -42,10 +42,6 @@ public class LoginService {
         String redirectUrl = request.getRedirectUri() + "/login-complete";
         RestTemplate restTemplate = new RestTemplate();
 
-        // === 1) 인입값/환경 로그 (민감정보 마스킹) ===
-        log.info("[OAuth] start googleLogin: code={}, redirectUri='{}', clientId='{}', clientSecret='{}'",
-                code,
-                redirectUrl, googleProps.getClientId(), googleProps.getClientSecret());
 
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
@@ -181,7 +177,8 @@ public class LoginService {
 
 
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
-        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail()).orElseThrow();
+        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String accessToken = jwtProvider.createAccessToken(user.getUserId(),
                 user.getEmail());

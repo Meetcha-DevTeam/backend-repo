@@ -1,10 +1,14 @@
 package com.meetcha.meetinglist.domain;
 
+import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import static com.meetcha.global.util.DateTimeUtils.kstToUtc;
 
 @Entity
 @Table(name = "alternative_times")
@@ -42,14 +46,15 @@ public class AlternativeTimeEntity {
             UUID meetingId
     ) {
         if (startTime == null || endTime == null || meetingId == null) {
-            throw new IllegalArgumentException("start/end/meetingId is required");
+            throw new CustomException(ErrorCode.INVALID_ENTITY_FIELD);
         }
         if (!endTime.isAfter(startTime)) {
             throw new IllegalArgumentException("endTime must be after startTime");
         }
+
         return AlternativeTimeEntity.builder()
-                .startTime(startTime)
-                .endTime(endTime)
+                .startTime(kstToUtc(startTime))
+                .endTime(kstToUtc(endTime))
                 .durationAdjustedMinutes(durationAdjustedMinutes)
                 .excludedParticipants(excludedParticipants)
                 .meetingId(meetingId)

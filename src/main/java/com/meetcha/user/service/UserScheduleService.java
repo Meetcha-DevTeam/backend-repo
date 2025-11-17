@@ -162,6 +162,12 @@ public class UserScheduleService {
 
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
+        String recurrence = request.getRecurrence();
+        if ("NONE".equalsIgnoreCase(recurrence) || recurrence == null || recurrence.isBlank()) {
+            recurrence = null; // NONE, 빈 값 모두 null 처리
+        }
+        validateTimeSlot(request.getStartAt(), request.getEndAt());
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
         return googleCalendarClient.createEvent(
@@ -175,6 +181,8 @@ public class UserScheduleService {
 
     // 유저 일정 수정
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
+        validateTimeSlot(request.getStartAt(), request.getEndAt());
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.updateEvent(
                 accessToken,
@@ -196,5 +204,11 @@ public class UserScheduleService {
     public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         return googleCalendarClient.getEventById(accessToken, eventId);
+    }
+
+    private void validateTimeSlot(LocalDateTime startAt, LocalDateTime endAt) {
+        if (startAt.isAfter(endAt)) {
+            throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
+        }
     }
 }
