@@ -1,5 +1,7 @@
 package com.meetcha.global.util;
 
+import com.meetcha.auth.domain.RefreshTokenEntity;
+import com.meetcha.auth.domain.RefreshTokenRepository;
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
@@ -23,6 +25,9 @@ public class TestDataFactory {
 
     @Autowired
     private MeetingParticipantRepository meetingParticipantRepository;
+
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     public UserEntity createUser(String email) {
         LocalDateTime now = LocalDateTime.now();
@@ -59,5 +64,10 @@ public class TestDataFactory {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 미팅입니다."));
         MeetingParticipant meetingParticipant = MeetingParticipant.create(userId, meeting, nickname);
         return meetingParticipantRepository.save(meetingParticipant);
+    }
+
+    public RefreshTokenEntity saveRefreshToken(UUID userId, String refreshToken, LocalDateTime expireAt) {
+        RefreshTokenEntity refresh = new RefreshTokenEntity(userId, refreshToken, expireAt);
+        return refreshTokenRepository.save(refresh);
     }
 }
