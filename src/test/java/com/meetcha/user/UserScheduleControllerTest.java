@@ -277,4 +277,27 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 eq(eventIdToView)
         );
     }
+
+    @DisplayName("인증된 사용자가 유저 정보 조회를 요청하면 200 OK와 닉네임, 프로필 이미지 URL을 반환한다.(GET /user/mypage)")
+    @Test
+    void getMyPage_Success() {
+        // given
+        String accessToken = testAuthHelper.createTestUserAndGetToken();
+
+        // when
+        given()
+                .log().all()
+                .auth().oauth2(accessToken) // 인증 토큰 전달
+                .when()
+                .get("/user/mypage")
+
+                // then (검증)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("code", equalTo(200))
+                .body("message", equalTo("요청에 성공하였습니다."))
+                .body("data.nickname", equalTo("테스트유저"))
+                .body("data.profileImgUrl", nullValue()); // TestAuthHelper가 이미지를 설정하지 않았으므로 null
+    }
 }
