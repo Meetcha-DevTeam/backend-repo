@@ -5,6 +5,7 @@ import com.meetcha.auth.TestAuthHelper;
 import com.meetcha.auth.service.GoogleTokenService;
 import com.meetcha.external.google.GoogleCalendarClient;
 import com.meetcha.user.dto.CreateScheduleRequest;
+import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import io.restassured.http.ContentType;
@@ -222,6 +223,58 @@ class UserScheduleControllerTest extends AcceptanceTest {
         verify(googleCalendarClient, times(1)).deleteEvent(
                 eq("mock-google-api-token"),
                 eq(eventIdToDelete)
+        );
+    }
+
+    @DisplayName("인증된 사용자가 상세 일정 조회를 요청하면 200 OK와 상세 일정 객체를 반환한다.(GET /user/schedule/detail)")
+    @Test
+    void getScheduleDetail_Success() {
+        // given
+        String accessToken = testAuthHelper.createTestUserAndGetToken();
+        String eventIdToView = "evt_detail_456";
+
+        LocalDateTime start = LocalDateTime.of(2025, 10, 31, 18, 0);
+        LocalDateTime end = LocalDateTime.of(2025, 10, 31, 20, 0);
+
+        // Mock 객체 생성
+        ScheduleDetailResponse mockScheduleDetail = ScheduleDetailResponse.builder()
+                .eventId(eventIdToView)
+                .title("할로윈 파티")
+                .startAt(start)
+                .endAt(end)
+                .recurrence("NONE")
+                .build();
+
+        // 1. 토큰 서비스 Mock
+        when(googleTokenService.ensureValidAccessToken(any(UUID.class)))
+                .thenReturn("mock-google-api-token");
+
+        // 2. 캘린더 클라이언트 Mock
+        when(googleCalendarClient.getEventById(anyString(), anyString()))
+                .thenReturn(mockScheduleDetail);
+
+        // when
+        given()
+                .log().all()
+                .auth().oauth2(accessToken)
+                .queryParam("eventId", eventIdToView)
+                .when()
+                .get("/user/schedule/detail")
+
+                // then (검증)
+                .then()
+                .log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("code", equalTo(200))
+                .body("message", equalTo("요청에 성공하였습니다."))
+                .body("data.eventId", equalTo(eventIdToView))
+                .body("data.title", equalTo("할로윈 파티"))
+                .body("data.recurrence", equalTo("NONE"));
+
+        // googleCalendarClient.getEventById가 정확히 1번, 올바른 인자들로 호출되었는지 확인
+        verify(googleCalendarClient, times(1)).getEventById(
+                eq("mock-google-api-token"),
+                eq(eventIdToView)
         );
     }
 }
