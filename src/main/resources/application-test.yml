@@ -17,3 +17,15 @@ jwt:
   secret: 'TestSecretKeyForMeetchaProject-MustBeAtLeast256bitsLong-1234567890'
   access-token-expiration: 3600000   # 1시간
   refresh-token-expiration : 86400000 # 1일
+
+cloud:
+  aws:
+    credentials:
+      access-key: access_key
+      secret-key: secret_key
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: bucket-name
+    stack:
+      auto: false
