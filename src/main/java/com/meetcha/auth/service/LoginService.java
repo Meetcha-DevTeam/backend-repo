@@ -1,180 +1,109 @@
 package com.meetcha.auth.service;
 
-import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.TestLoginRequest;
 import com.meetcha.auth.dto.TestLoginResponse;
 import com.meetcha.auth.dto.TokenResponseDto;
-import com.meetcha.auth.domain.RefreshTokenEntity;
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.jwt.JwtProvider;
-import com.meetcha.auth.domain.RefreshTokenRepository;
 import com.meetcha.auth.domain.UserRepository;
+import com.meetcha.external.google.GoogleOAuthClient;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.net.URL;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LoginService {
-
-    private final GoogleOAuthProperties googleProps;
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AwsS3Service awsS3Service;
+    private final GoogleOAuthClient googleOAuthClient;
+    private final SignupService signupService;
+    private final RefreshTokenService refreshTokenService;
+    private final UpdateUserService updateUserService;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri() + "/login-complete";
-        RestTemplate restTemplate = new RestTemplate();
-
 
         // 구글 토큰 교환
-        HttpHeaders tokenHeaders = new HttpHeaders();
-        tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-        MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
-        tokenParams.add("code", code);
-        tokenParams.add("client_id", googleProps.getClientId());
-        tokenParams.add("client_secret", googleProps.getClientSecret());
-        tokenParams.add("redirect_uri", redirectUrl);
-        tokenParams.add("grant_type", "authorization_code");
-
-        HttpEntity<MultiValueMap<String, String>> tokenRequest =
-                new HttpEntity<>(tokenParams, tokenHeaders);
-
-        ResponseEntity<Map> tokenResponse;
-        try {
-            tokenResponse = restTemplate.exchange(
-                    "https://oauth2.googleapis.com/token",
-                    HttpMethod.POST,
-                    tokenRequest,
-                    Map.class
-            );
-        } catch (Exception e) {
-            log.error("[OAuth] token exchange ERROR: {}", e.toString(), e);
-            throw new CustomException(ErrorCode.INVALID_GOOGLE_CODE);
-        }
-
-        if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
-            log.error("[OAuth] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
-            throw new CustomException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
-        }
-
-        Map<String, Object> tokenBody = tokenResponse.getBody();
+        Map<String, Object> tokenBody = googleOAuthClient.fetchToken(code, redirectUrl);
         String googleAccessToken = (String) tokenBody.get("access_token");
         String googleRefreshToken = (String) tokenBody.get("refresh_token"); // 최초 로그인시에만 내려올 수 있음
 
         // expires_in 값을 LocalDateTime으로 변환
+        LocalDateTime accessTokenExpiry = getAccessTokenExpiry(tokenBody);
+
+        // 구글 사용자 정보
+        Map<String, Object> userInfo = googleOAuthClient.fetchUserInfo(googleAccessToken);
+        String email = (String) userInfo.get("email");
+        String name = (String) userInfo.get("name");
+        String pictureUrl = (String) userInfo.get("picture");
+
+        //s3에 프사 업로드
+        String s3ProfileUrl = uploadProfileImage(pictureUrl);
+
+        // 기존 유저 조회 or 생성
+        UserEntity user = synchronizeUser(email, googleAccessToken, googleRefreshToken, accessTokenExpiry, s3ProfileUrl, name);
+
+        String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
+        String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
+
+        // RefreshToken 저장 (있으면 갱신, 없으면 생성)
+        refreshTokenService.save(user, jwtRefreshToken);
+
+        return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
+    }
+
+    private static LocalDateTime getAccessTokenExpiry(Map<String, Object> tokenBody) {
         long expiresInSec = 3600L;
         Object expiresInObj = tokenBody.get("expires_in");
         if (expiresInObj instanceof Number n) {
             expiresInSec = n.longValue();
-        } else if (expiresInObj != null) {
+        }
+        else if (expiresInObj != null) {
             try {
                 expiresInSec = Long.parseLong(String.valueOf(expiresInObj));
             } catch (NumberFormatException ignored) {
             }
         }
         LocalDateTime accessTokenExpiry = LocalDateTime.now().plusSeconds(expiresInSec);
+        return accessTokenExpiry;
+    }
 
-        // 구글 사용자 정보
-        HttpHeaders userInfoHeaders = new HttpHeaders();
-        userInfoHeaders.setBearerAuth(googleAccessToken);
-        HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
-
-        ResponseEntity<Map> userInfoResponse;
-        try {
-            userInfoResponse = restTemplate.exchange(
-                    "https://www.googleapis.com/oauth2/v3/userinfo",
-                    HttpMethod.GET,
-                    userInfoRequest,
-                    Map.class
-            );
-        } catch (Exception e) {
-            throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
-        }
-
-        if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
-            throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
-        }
-
-        Map<String, Object> userInfo = userInfoResponse.getBody();
-        String email = (String) userInfo.get("email");
-        String name = (String) userInfo.get("name");
-        String pictureUrl = (String) userInfo.get("picture");
-
-        //s3에 프사 업로드
+    private String uploadProfileImage(String pictureUrl) {
         String s3ProfileUrl = null;
-        try (InputStream in = new URL(pictureUrl).openStream()) {
+        try (InputStream in = loadImageAsStream(pictureUrl)) {
             String fileName = awsS3Service.createUniqueFileName("google_profile.jpg");
             s3ProfileUrl = awsS3Service.uploadFromStream(in, fileName, "image/jpeg");
         } catch (Exception e) {
             log.warn("프로필 이미지 업로드 실패 (기본 이미지 사용): {}", e.getMessage());
         }
-
-
-        // 기존 유저 조회 or 생성
-        final String finalS3ProfileUrl = s3ProfileUrl;
-        UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
-            UserEntity newUser = UserEntity.builder()
-                    .email(email)
-                    .name(name)
-                    .googleToken(googleAccessToken)
-                    .googleRefreshToken(googleRefreshToken)
-                    .googleTokenExpiresAt(accessTokenExpiry)
-                    .profileImgUrl(finalS3ProfileUrl)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            return userRepository.save(newUser);
-        });
-
-        // 항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
-        if (googleRefreshToken != null && !googleRefreshToken.isBlank()) {
-            user.updateGoogleAllTokens(googleAccessToken, googleRefreshToken, accessTokenExpiry);
-        } else {
-            user.updateGoogleAccessToken(googleAccessToken, accessTokenExpiry);
-        }
-
-        //프로필 이미지 반영
-        if (s3ProfileUrl != null) {
-            user.setProfileImgUrl(s3ProfileUrl);
-        }
-
-        userRepository.save(user);
-
-        String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
-        String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
-
-        // RefreshToken 저장(있으면 갱신, 없으면 생성)
-        refreshTokenRepository.findByUserId(user.getUserId())
-                .ifPresentOrElse(
-                        existing -> {
-                            existing.update(jwtRefreshToken, LocalDateTime.now().plusDays(14));
-                            refreshTokenRepository.save(existing);
-                        },
-                        () -> refreshTokenRepository.save(
-                                new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14))
-                        )
-                );
-
-        return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
+        return s3ProfileUrl;
     }
 
+    public InputStream loadImageAsStream(String pictureUrl) throws IOException {
+        return new URL(pictureUrl).openStream();
+    }
+
+    private UserEntity synchronizeUser(String email, String googleAccessToken, String googleRefreshToken, LocalDateTime accessTokenExpiry, String s3ProfileUrl, String name) {
+        Optional<UserEntity> byEmail = userRepository.findByEmail(email);
+        if(byEmail.isPresent()){
+            return updateUserService.syncWithGoogleUserInfo(email, googleAccessToken, googleRefreshToken, accessTokenExpiry, s3ProfileUrl);
+        }
+        return signupService.signup(email, name, googleAccessToken, googleRefreshToken, accessTokenExpiry, s3ProfileUrl, accessTokenExpiry);
+    }
 
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
         UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())

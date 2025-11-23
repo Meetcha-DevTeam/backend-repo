@@ -42,4 +42,14 @@ public class RefreshTokenService {
 
         return new TokenResponseDto(newAccessToken, newRefreshToken);
     }
+
+    public void save(UserEntity user, String jwtRefreshToken) {
+        refreshTokenRepository.findByUserId(user.getUserId()).ifPresentOrElse(existing -> {
+            existing.update(jwtRefreshToken, LocalDateTime.now().plusDays(14));
+            refreshTokenRepository.save(existing);
+        }
+        ,() -> {
+            refreshTokenRepository.save(new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14)));
+        });
+    }
 }
