@@ -21,6 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -36,12 +37,11 @@ public class LoginService {
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final AwsS3Service awsS3Service;
+    private final RestTemplate restTemplate;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri() + "/login-complete";
-        RestTemplate restTemplate = new RestTemplate();
-
 
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
@@ -120,7 +120,7 @@ public class LoginService {
 
         //s3에 프사 업로드
         String s3ProfileUrl = null;
-        try (InputStream in = new URL(pictureUrl).openStream()) {
+        try (InputStream in = loadImageAsStream(pictureUrl)) {
             String fileName = awsS3Service.createUniqueFileName("google_profile.jpg");
             s3ProfileUrl = awsS3Service.uploadFromStream(in, fileName, "image/jpeg");
         } catch (Exception e) {
@@ -175,6 +175,9 @@ public class LoginService {
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 
+    public InputStream loadImageAsStream(String pictureUrl) throws IOException {
+        return new URL(pictureUrl).openStream();
+    }
 
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
         UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
