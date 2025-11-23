@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: jdbc:mysql://${RDS_URL}:${RDS_PORT}/${RDS_USERNAME}?createDatabaseIfNotExist=true
+    username: ${RDS_DB_HOST}
+    password: ${RDS_PASSWORD}
 
 cloud:
   aws:
