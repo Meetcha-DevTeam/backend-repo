@@ -116,4 +116,6 @@ class MeetingStatusUpdateSchedulerTest {
         verify(syncService, never()).syncMeetingToCalendars(any());
     }
 
+
 }
+

@@ -30,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 @ExtendWith(MockitoExtension.class)
 class MeetingConfirmationServiceTest {
@@ -43,8 +45,9 @@ class MeetingConfirmationServiceTest {
     @InjectMocks
     private MeetingConfirmationService service;
 
-    /** 실제 엔티티 생성 헬퍼 */
-    private ParticipantAvailability avail(UUID pid, UUID meetingId, LocalDateTime start, LocalDateTime end) {
+    /* 실제 엔티티 생성 헬퍼 */
+
+private ParticipantAvailability avail(UUID pid, UUID meetingId, LocalDateTime start, LocalDateTime end) {
         return ParticipantAvailability.create(pid, meetingId, start, end);
     }
 
