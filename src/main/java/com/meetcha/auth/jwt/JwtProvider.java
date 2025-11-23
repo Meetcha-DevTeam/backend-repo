@@ -60,11 +60,11 @@ public class JwtProvider {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            // 만료된 토큰
             throw new CustomException(ErrorCode.EXPIRED_JWT);
-        } catch (JwtException | IllegalArgumentException e) {
-            // 형식 이상
+        } catch (MalformedJwtException e) {
             throw new CustomException(ErrorCode.MALFORMED_JWT);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
         }
     }
 

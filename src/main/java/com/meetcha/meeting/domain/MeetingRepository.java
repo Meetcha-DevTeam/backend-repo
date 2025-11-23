@@ -1,7 +1,7 @@
 package com.meetcha.meeting.domain;
 
-import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
+import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -39,7 +39,6 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
 
     //기여도할일조회api에서 사용하는 쿼리
     @Query("""
-<<<<<<< HEAD
                 SELECT COUNT(m) FROM MeetingEntity m
                 WHERE m.meetingStatus = :status
                   AND (
@@ -54,22 +53,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
                       WHERE r.meeting = m AND r.user.userId = :userId
                   )
             """)
-=======
-    SELECT COUNT(m) FROM MeetingEntity m
-    WHERE m.meetingStatus = :status
-      AND (
-          m.createdBy = :userId
-          OR EXISTS (
-              SELECT 1 FROM MeetingParticipant p
-              WHERE p.meeting = m AND p.userId = :userId
-          )
-      )
-      AND NOT EXISTS (
-          SELECT 1 FROM MeetingReflectionEntity r
-          WHERE r.meeting = m AND r.user.userId = :userId
-      )
-""")
->>>>>>> 85e98df2ca7a12082da40dec92a27d86d99450fa
+
     long countMeetingsNeedReflection(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
@@ -112,13 +96,14 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     // (2) 대안 시간 확정 대상들 조회 + PESSIMISTIC_WRITE 락
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-                    SELECT m FROM MeetingEntity m
-                    WHERE m.alternativeDeadline IS NOT NULL
-                      AND m.confirmedTime IS NULL
-                      AND m.alternativeDeadline < CURRENT_TIMESTAMP
-                  AND m.meetingStatus = :status
-            """)
-    List<MeetingEntity> findMeetingsToConfirmFromAlternativeForUpdate(
-            @Param("status") MeetingStatus status
-    );
+    SELECT m FROM MeetingEntity m
+    WHERE m.meetingStatus = 'MATCHING'
+      AND m.confirmedTime IS NULL
+      AND m.alternativeDeadline IS NOT NULL
+      AND m.alternativeDeadline <= :now
+""")
+    List<MeetingEntity> findMeetingsToConfirmFromAlternativeForUpdate(@Param("now") LocalDateTime now);
+
+
+    List<MeetingEntity> findByMeetingStatusAndConfirmedTimeIsNullAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);
 }

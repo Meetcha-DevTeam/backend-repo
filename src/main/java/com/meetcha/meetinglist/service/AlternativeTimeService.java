@@ -89,8 +89,8 @@ public class AlternativeTimeService {
 
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
-                .findByMeetingIdAndStartTime(meetingId, utcStartTime)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .findByMeetingIdAndStartTime(meetingId, DateTimeUtils.kstToUtc(request.getAlternativeTime()))
+                .orElseThrow(() -> new CustomException(ErrorCode.ALTERNATIVE_TIME_NOT_FOUND));
 
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);

@@ -6,6 +6,7 @@ import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
+import com.meetcha.meeting.dto.MeetingDeleteResponse;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +69,31 @@ public class MeetingService {
                 meeting.getMeetingId(),
                 DateTimeUtils.utcToKst(meeting.getCreatedAt())
         );
+    }
+
+    @Transactional
+    public MeetingDeleteResponse deleteFailedMeeting(UUID meetingId, UUID userId) {
+        // 미팅 조회
+        MeetingEntity meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+
+        // 미팅 생성자 권한 확인
+        if (!meeting.getCreatedBy().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN);
+        }
+
+        // 매칭 실패 상태 확인
+        if (meeting.getMeetingStatus() != MeetingStatus.MATCH_FAILED) {
+            throw new CustomException(ErrorCode.CANNOT_DELETE_MEETING);
+        }
+
+        // 미팅 삭제 (cascade로 후보 날짜도 함께 삭제됨)
+        meetingRepository.delete(meeting);
+
+        return MeetingDeleteResponse.builder()
+                .meetingId(meetingId)
+                .message("매칭 실패된 미팅이 삭제되었습니다.")
+                .build();
     }
 
     private void validateRequest(MeetingCreateRequest request) {
