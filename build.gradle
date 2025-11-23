@@ -48,7 +48,6 @@ dependencies {
 	testImplementation 'io.rest-assured:json-path:5.4.0'
 	//H2 (테스트용 인메모리 DB)
 	testRuntimeOnly 'com.h2database:h2'
-
 }
 
 tasks.named('test') {

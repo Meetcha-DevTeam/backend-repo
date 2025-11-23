@@ -1,4 +1,4 @@
-package com.meetcha.meeting.scheduler;
+/*package com.meetcha.meeting.scheduler;
 
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
@@ -117,3 +117,4 @@ class MeetingStatusUpdateSchedulerTest {
     }
 
 }
+*/

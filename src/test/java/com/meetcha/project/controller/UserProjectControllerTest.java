@@ -66,5 +66,4 @@ class UserProjectControllerTest {
                         "meetcha-test-secret-key-1234567890".getBytes()))
                 .compact();
     }
-}
-*/
+}*/

@@ -37,8 +37,8 @@ public class UserEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "profile_img_url")
-    private String profileImgUrl;
+    @Column(name = "profile_img_src")
+    private String profileImgSrc;
 
     @Column(name = "google_refresh_token")
     private String googleRefreshToken;
