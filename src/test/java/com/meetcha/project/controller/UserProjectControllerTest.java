@@ -1,4 +1,4 @@
-/*package com.meetcha.project.controller;
+package com.meetcha.project.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -66,4 +66,4 @@ class UserProjectControllerTest {
                         "meetcha-test-secret-key-1234567890".getBytes()))
                 .compact();
     }
-}*/
+}
