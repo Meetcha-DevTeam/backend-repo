@@ -1,4 +1,4 @@
-/*package com.meetcha.meeting.service;
+package com.meetcha.meeting.service;
 
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
@@ -41,14 +41,10 @@ class MeetingConfirmationServiceTest {
     @Mock private AlternativeTimeRepository alternativeTimeRepository;
 
     @InjectMocks
-    private MeetingConfirmationService service;*/
+    private MeetingConfirmationService service;
 
-    /** 실제 엔티티 생성 헬퍼 **/
-/*
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-private ParticipantAvailability avail(UUID pid, UUID meetingId, LocalDateTime start, LocalDateTime end) {
+    /** 실제 엔티티 생성 헬퍼 */
+    private ParticipantAvailability avail(UUID pid, UUID meetingId, LocalDateTime start, LocalDateTime end) {
         return ParticipantAvailability.create(pid, meetingId, start, end);
     }
 
@@ -236,4 +232,4 @@ private ParticipantAvailability avail(UUID pid, UUID meetingId, LocalDateTime st
         verify(alternativeTimeRepository, never()).saveAll(anyList());
         verify(meetingRepository, never()).save(any());
     }
-}*/
+}

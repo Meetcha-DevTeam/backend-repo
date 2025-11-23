@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class MyPageResponse{
         String nickname;
-        String profileImgSrc;
+        String profileImgUrl;
 }

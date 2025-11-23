@@ -1,7 +1,5 @@
 package com.meetcha.meeting.domain;
 
-import com.meetcha.joinmeeting.domain.MeetingParticipant;
-import com.meetcha.reflection.domain.MeetingReflectionEntity;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -53,7 +51,6 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
                       WHERE r.meeting = m AND r.user.userId = :userId
                   )
             """)
-
     long countMeetingsNeedReflection(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status

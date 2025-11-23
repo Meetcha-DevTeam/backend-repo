@@ -1,4 +1,4 @@
-package com.meetcha;
+package com.meetcha.meetcha;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
