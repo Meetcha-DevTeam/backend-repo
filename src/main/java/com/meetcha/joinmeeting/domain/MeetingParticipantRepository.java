@@ -23,7 +23,7 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
        SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
            p.participantId,
            COALESCE(p.nickname, u.name),
-           u.profileImgUrl
+           u.profileImgSrc
        )
        FROM MeetingParticipant p
        JOIN UserEntity u ON u.userId = p.userId
