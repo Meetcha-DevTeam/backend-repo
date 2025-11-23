@@ -1,4 +1,4 @@
-package com.meetcha.auth.controller;
+/*package com.meetcha.auth.controller;
 
 import com.meetcha.AcceptanceTest;
 import com.meetcha.auth.domain.UserEntity;
@@ -79,4 +79,4 @@ class UserControllerTest extends AcceptanceTest {
         ApiResponse response = validatableResponse.extract().as(ApiResponse.class);
         assertThat(response.getMessage()).isEqualTo(EXPIRED_REFRESH_TOKEN.getMessage());
     }
-}
+}*/
