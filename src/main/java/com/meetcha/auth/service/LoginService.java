@@ -115,7 +115,7 @@ public class LoginService {
         Map<String, Object> userInfo = userInfoResponse.getBody();
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
-        String picture = (String) userInfo.get("picture")
+        String picture = (String) userInfo.get("picture");
 
         // 기존 유저 조회 or 생성
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
@@ -130,6 +130,10 @@ public class LoginService {
                     .build();
             return userRepository.save(newUser);
         });
+
+        // 항상 이름/프로필사진 업데이트
+        user.setName(name);
+        user.setProfileImgSrc(picture);
 
         // 항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
         if (googleRefreshToken != null && !googleRefreshToken.isBlank()) {
