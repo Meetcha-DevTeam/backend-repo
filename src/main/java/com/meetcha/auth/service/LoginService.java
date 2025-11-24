@@ -117,6 +117,8 @@ public class LoginService {
         String name = (String) userInfo.get("name");
         String picture = (String) userInfo.get("picture");
 
+        log.info("[OAuth] Google userInfo picture = {}", picture);
+
         // 기존 유저 조회 or 생성
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
