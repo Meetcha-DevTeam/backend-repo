@@ -73,12 +73,11 @@ public class JoinMeetingService {
         }
 
         // 참가자 저장
-        MeetingParticipant participant = MeetingParticipant.create(
+        MeetingParticipant participant = participantRepository.save(MeetingParticipant.create(
                 userId,
                 meeting,
                 nickname
-        );
-        participantRepository.save(participant);
+        ));
 
         //  선택 시간 저장
         List<ParticipantAvailability> availabilities = request.getSelectedTimes().stream()
