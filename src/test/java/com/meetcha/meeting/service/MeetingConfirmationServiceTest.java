@@ -7,7 +7,6 @@ import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
 import com.meetcha.meeting.service.algorithm.AlternativeTimeCalculator;
 import com.meetcha.meeting.service.algorithm.Meeting;
-import com.meetcha.meeting.service.MeetingConverter;
 import com.meetcha.meeting.service.algorithm.MeetingTimeCalculator;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
