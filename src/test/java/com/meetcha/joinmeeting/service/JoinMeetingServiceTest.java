@@ -1,3 +1,76 @@
 package com.meetcha.joinmeeting.service;
 
-class JoinMeetingServiceTest {}
+import com.meetcha.joinmeeting.domain.MeetingParticipant;
+import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
+import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
+import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.meeting.domain.MeetingEntity;
+import com.meetcha.meeting.domain.MeetingRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class JoinMeetingServiceTest {
+    @InjectMocks
+    JoinMeetingService joinMeetingService;
+
+    @Mock
+    MeetingRepository meetingRepository;
+
+    @Mock
+    MeetingParticipantRepository meetingParticipantRepository;
+
+    @Mock
+    ParticipantAvailabilityRepository participantAvailabilityRepository;
+
+    @DisplayName("유효한 요청이면 참가자 정보와 참여가능시간을 저장한다")
+    @Test
+    void join_whenValidRequest_saveParticipantAndAvailabilities(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String nickname = "nickname";
+        JoinMeetingRequest request = new JoinMeetingRequest(nickname, List.of(new JoinMeetingRequest.TimeSlot(
+                LocalDateTime.of(2025, 1, 1, 9, 0),
+                LocalDateTime.of(2025, 1, 1, 10, 0)
+        )));
+        UUID userId = UUID.randomUUID();
+
+        MeetingEntity meeting = mock(MeetingEntity.class);
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
+        when(meeting.isDeadlinePassed()).thenReturn(false);
+
+        when(meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(eq(meetingId), eq(userId))).thenReturn(false);
+        UUID participantId = UUID.randomUUID();
+        when(meetingParticipantRepository.save(any(MeetingParticipant.class))).thenReturn(new MeetingParticipant(participantId, nickname, userId, meeting));
+
+        // when
+        JoinMeetingResponse response = joinMeetingService.join(meetingId, request, userId);
+
+        // then
+        Assertions.assertThat(response.getMeetingId()).isEqualTo(meetingId);
+        Assertions.assertThat(response.getParticipantId()).isEqualTo(participantId);
+        verify(meetingParticipantRepository, times(1)).save(any(MeetingParticipant.class));
+        verify(participantAvailabilityRepository, times(1)).saveAll(argThat(list -> {
+            Assertions.assertThat(list).hasSize(1);
+            Assertions.assertThat(list.iterator().next().getParticipantId()).isEqualTo(participantId);
+            Assertions.assertThat(list.iterator().next().getMeetingId()).isEqualTo(meetingId);
+            return true;
+        }));
+    }
+}
