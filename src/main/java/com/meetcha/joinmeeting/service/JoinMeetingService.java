@@ -2,11 +2,8 @@ package com.meetcha.joinmeeting.service;
 
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.auth.domain.UserEntity;
-import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
@@ -23,7 +20,6 @@ import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +41,6 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
-
         log.debug("join 메서드 진입");
         // 미팅 조회
         MeetingEntity meeting = meetingRepository.findById(meetingId)
