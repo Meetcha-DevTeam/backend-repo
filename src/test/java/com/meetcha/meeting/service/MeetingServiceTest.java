@@ -2,9 +2,7 @@ package com.meetcha.meeting.service;
 
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.global.exception.CustomException;
-import com.meetcha.meeting.domain.MeetingCandidateDateEntity;
-import com.meetcha.meeting.domain.MeetingCandidateDateRepository;
-import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.project.domain.ProjectEntity;
@@ -13,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.meetcha.global.exception.ErrorCode.PROJECT_NOT_FOUND;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -48,22 +46,45 @@ class MeetingServiceTest {
     void createMeeting_whenValidRequest_shouldSaveMeetingAndCandidateDates(){
         // given
         UUID projectId = UUID.randomUUID();
-        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", 200, List.of(LocalDate.now().plusDays(5), LocalDate.now().plusDays(6)), LocalDateTime.now().plusDays(2), projectId);
+        LocalDate candidate1 = LocalDate.now().plusDays(5);
+        LocalDate candidate2 = LocalDate.now().plusDays(6);
+        LocalDateTime deadline = LocalDateTime.now().plusDays(2);
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", 200, List.of(candidate1, candidate2), deadline, projectId);
         UUID userId = UUID.randomUUID();
 
         ProjectEntity project = new ProjectEntity(projectId, mock(UserEntity.class), "project", LocalDateTime.now());
         Mockito.when(projectRepository.findById(eq(projectId))).thenReturn(Optional.of(project));
 
+        UUID meetingId = UUID.randomUUID();
+        when(meetingRepository.save(any(MeetingEntity.class))).thenAnswer(invocation -> {
+            // JPA가 PK 세팅해주는 것처럼 흉내
+            MeetingEntity arg = invocation.getArgument(0);
+            arg.setMeetingId(meetingId);
+            return arg;
+        });
+
         // when
         MeetingCreateResponse response = meetingService.createMeeting(request, userId);
 
         // then
+        Assertions.assertThat(response.getMeetingId()).isEqualTo(meetingId);
         verify(projectRepository, times(1)).findById(eq(projectId));
-        verify(meetingRepository, times(1)).save(argThat(meeting -> {
-            assertThat(meeting.getProject()).isNotNull();
+        verify(meetingRepository, times(1)).save(argThat(entity -> {
+            Assertions.assertThat(entity.getProject()).isEqualTo(project);
             return true;
         }));
-        verify(meetingCandidateDateRepository, times(2)).save(any(MeetingCandidateDateEntity.class));
+
+        ArgumentCaptor<List<MeetingCandidateDateEntity>> captor = ArgumentCaptor.forClass((Class) List.class);
+
+        verify(meetingCandidateDateRepository, times(1)).saveAll(captor.capture());
+
+        List<MeetingCandidateDateEntity> savedList = captor.getValue();
+        Assertions.assertThat(savedList)
+                .hasSize(2)
+                .allSatisfy(entity -> Assertions.assertThat(entity.getMeeting().getMeetingId()).isEqualTo(meetingId));
+        Assertions.assertThat(savedList)
+                .extracting(MeetingCandidateDateEntity::getCandidateDate)
+                .containsExactlyInAnyOrderElementsOf(request.getCandidateDates());
     }
 
     @DisplayName("프로젝트가 존재하지 않으면 createMeeting은 예외를 발생시킨다")
@@ -80,5 +101,8 @@ class MeetingServiceTest {
         Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(PROJECT_NOT_FOUND.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
     }
 }
