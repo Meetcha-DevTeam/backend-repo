@@ -24,7 +24,7 @@ public class UserProfileService {
                 .orElseThrow(()->new CustomException(USER_NOT_FOUND));
         return new MyPageResponse(
                 user.getName(),
-                user.getProfileImgUrl()
+                user.getProfileImgSrc()
         );
     }
 }

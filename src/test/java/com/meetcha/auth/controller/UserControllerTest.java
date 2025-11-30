@@ -7,7 +7,6 @@ import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.RefreshTokenRequestDto;
 import com.meetcha.auth.dto.TokenResponseDto;
 import com.meetcha.auth.jwt.JwtProvider;
-import com.meetcha.auth.service.AwsS3Service;
 import com.meetcha.auth.service.LoginService;
 import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.global.util.TestDataFactory;
@@ -49,8 +48,6 @@ class UserControllerTest extends AcceptanceTest {
     @MockitoBean
     private RestTemplate restTemplate;
 
-    @MockitoBean
-    private AwsS3Service awsS3Service;
 
     @MockitoSpyBean
     private LoginService loginService;
@@ -118,7 +115,6 @@ class UserControllerTest extends AcceptanceTest {
         // given
         mockGoogleOAuthServer("email@email.com");
         mockLoginService();
-        mockAwsS3Service("profile image url");
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
@@ -166,12 +162,7 @@ class UserControllerTest extends AcceptanceTest {
         )).thenReturn(userInfoResponse);
     }
 
-    private void mockAwsS3Service(String profileImageUrl) {
-        Mockito.when(awsS3Service.createUniqueFileName(Mockito.anyString())).thenReturn("unique name");
-        Mockito.when(
-                awsS3Service.uploadFromStream(Mockito.any(InputStream.class), Mockito.anyString(), Mockito.anyString())
-        ).thenReturn(profileImageUrl);
-    }
+
 
     private void mockLoginService() throws IOException {
         // 가짜 input stream 생성
@@ -186,11 +177,9 @@ class UserControllerTest extends AcceptanceTest {
     void googleLoginShouldCreateUser_WhenNewComer() throws IOException {
         // given
         String email = "email@email.com";
-        String profileImageUrl = "profile image url";
 
         mockGoogleOAuthServer(email);
         mockLoginService();
-        mockAwsS3Service(profileImageUrl);
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
@@ -208,7 +197,7 @@ class UserControllerTest extends AcceptanceTest {
 
         Optional<UserEntity> userByEmail = userRepository.findByEmail(email);
         assertThat(userByEmail).isPresent();
-        assertThat(userByEmail.get().getProfileImgUrl()).isEqualTo(profileImageUrl);
+        assertThat(userByEmail.get().getProfileImgSrc()).isEqualTo("picture.png");
     }
 
     @DisplayName("기존 사용자가 구글 로그인을 수행하면 유저 정보가 갱신된다")
@@ -216,12 +205,10 @@ class UserControllerTest extends AcceptanceTest {
     void googleLoginShouldUpdateUser_WhenExistingUser() throws IOException {
         // given
         String email = "email@email.com";
-        UserEntity user = testDataFactory.createUser(email);
+        testDataFactory.createUser(email);
 
-        String profileImageUrl = "new profile";
         mockGoogleOAuthServer(email);
         mockLoginService();
-        mockAwsS3Service(profileImageUrl);
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
@@ -239,7 +226,7 @@ class UserControllerTest extends AcceptanceTest {
 
         Optional<UserEntity> userByEmail = userRepository.findByEmail(email);
         assertThat(userByEmail).isPresent();
-        assertThat(userByEmail.get().getProfileImgUrl()).isEqualTo(profileImageUrl);
+        assertThat(userByEmail.get().getProfileImgSrc()).isEqualTo("picture.png");
         assertThat(userByEmail.get().getGoogleToken()).isEqualTo("google access token");
         assertThat(userByEmail.get().getGoogleRefreshToken()).isEqualTo("google refresh token");
     }

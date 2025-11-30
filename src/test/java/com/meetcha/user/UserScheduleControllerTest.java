@@ -295,6 +295,6 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 .body("code", equalTo(200))
                 .body("message", equalTo("요청에 성공하였습니다."))
                 .body("data.nickname", equalTo("테스트유저"))
-                .body("data.profileImgUrl", nullValue()); // TestAuthHelper가 이미지를 설정하지 않았으므로 null
+                .body("data.profileImgSrc", nullValue()); // TestAuthHelper가 이미지를 설정하지 않았으므로 null
     }
 }
