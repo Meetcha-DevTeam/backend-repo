@@ -43,6 +43,22 @@ public class MeetingService {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime deadline = DateTimeUtils.kstToUtc(request.getDeadline());
 
+        MeetingEntity meeting = createMeetingEntity(request, creatorId, deadline, now);
+        MeetingEntity saved = meetingRepository.save(meeting);
+
+        // 후보 날짜 저장
+        List<MeetingCandidateDateEntity> candidateDates = request.getCandidateDates().stream()
+                .map(date -> new MeetingCandidateDateEntity(saved, date))
+                .toList();
+        candidateDateRepository.saveAll(candidateDates);
+
+        return new MeetingCreateResponse(
+                saved.getMeetingId(),
+                DateTimeUtils.utcToKst(saved.getCreatedAt())
+        );
+    }
+
+    private MeetingEntity createMeetingEntity(MeetingCreateRequest request, UUID creatorId, LocalDateTime deadline, LocalDateTime now) {
         // 먼저 meeting 생성(프로젝트는 나중에 세터로)
         MeetingEntity meeting = MeetingEntity.builder()
                 .title(request.getTitle())
@@ -62,21 +78,7 @@ public class MeetingService {
                     .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
             meeting.setProject(project); // ★ 세터로 FK 갱신
         });
-
-        meetingRepository.save(meeting);
-
-        // 후보 날짜 저장
-        List<LocalDate> candidateDates = request.getCandidateDates();
-        if (candidateDates != null && !candidateDates.isEmpty()) {
-            for (LocalDate date : candidateDates) {
-                candidateDateRepository.save(new MeetingCandidateDateEntity(meeting, date));
-            }
-        }
-
-        return new MeetingCreateResponse(
-                meeting.getMeetingId(),
-                DateTimeUtils.utcToKst(meeting.getCreatedAt())
-        );
+        return meeting;
     }
 
     @Transactional
