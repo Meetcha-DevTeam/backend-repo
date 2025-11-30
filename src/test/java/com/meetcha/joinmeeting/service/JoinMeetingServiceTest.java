@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.meetcha.global.exception.ErrorCode.MEETING_DEADLINE_PASSED;
-import static com.meetcha.global.exception.ErrorCode.MEETING_NOT_FOUND;
+import static com.meetcha.global.exception.ErrorCode.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -125,6 +124,59 @@ class JoinMeetingServiceTest {
                 .hasMessage(MEETING_DEADLINE_PASSED.getMessage());
     }
 
+    @DisplayName("중복 요청이라면 join은 예외를 발생시킨다")
+    @Test
+    void join_whenDuplicateRequest_shouldThrowException(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String nickname = "nickname";
+        JoinMeetingRequest request = new JoinMeetingRequest(nickname, List.of(new JoinMeetingRequest.TimeSlot(
+                LocalDateTime.of(2025, 1, 1, 9, 0),
 
+                LocalDateTime.of(2025, 1, 1, 10, 0)
+
+        )));
+        UUID userId = UUID.randomUUID();
+
+        MeetingEntity meeting = mock(MeetingEntity.class);
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
+        when(meeting.isDeadlinePassed()).thenReturn(false);
+
+        when(meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(eq(meetingId), eq(userId))).thenReturn(true);
+
+
+        // when & then
+        assertThatThrownBy(() -> joinMeetingService.join(meetingId, request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ALREADY_JOINED_MEETING.getMessage());
+    }
+
+
+    @DisplayName("타임슬롯이 유효하지 않다면 join은 예외를 발생시킨다")
+    @Test
+    void join_whenInvalidTimeSlot_shouldThrowException(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String nickname = "nickname";
+        JoinMeetingRequest request = new JoinMeetingRequest(nickname, List.of(new JoinMeetingRequest.TimeSlot(
+                LocalDateTime.of(2025, 1, 1, 10, 0),
+
+                LocalDateTime.of(2025, 1, 1, 9, 0)
+
+        )));
+        UUID userId = UUID.randomUUID();
+
+        MeetingEntity meeting = mock(MeetingEntity.class);
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
+        when(meeting.isDeadlinePassed()).thenReturn(false);
+
+        when(meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(eq(meetingId), eq(userId))).thenReturn(false);
+
+
+        // when & then
+        assertThatThrownBy(() -> joinMeetingService.join(meetingId, request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_TIME_SLOT.getMessage());
+    }
 
 }
