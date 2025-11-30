@@ -1,6 +1,7 @@
 package com.meetcha.meeting.service;
 
 import com.meetcha.auth.domain.UserEntity;
+import com.meetcha.global.exception.CustomException;
 import com.meetcha.meeting.domain.MeetingCandidateDateEntity;
 import com.meetcha.meeting.domain.MeetingCandidateDateRepository;
 import com.meetcha.meeting.domain.MeetingRepository;
@@ -8,6 +9,7 @@ import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.meetcha.global.exception.ErrorCode.PROJECT_NOT_FOUND;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -63,4 +66,19 @@ class MeetingServiceTest {
         verify(meetingCandidateDateRepository, times(2)).save(any(MeetingCandidateDateEntity.class));
     }
 
+    @DisplayName("프로젝트가 존재하지 않으면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenProjectDoesNotExist_shouldThrowException(){
+        // given
+        UUID projectId = UUID.randomUUID();
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", 200, List.of(LocalDate.now().plusDays(5), LocalDate.now().plusDays(6)), LocalDateTime.now().plusDays(2), projectId);
+        UUID userId = UUID.randomUUID();
+
+        Mockito.when(projectRepository.findById(eq(projectId))).thenReturn(Optional.empty());
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(PROJECT_NOT_FOUND.getMessage());
+    }
 }
