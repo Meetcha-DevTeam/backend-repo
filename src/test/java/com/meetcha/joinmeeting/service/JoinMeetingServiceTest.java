@@ -2,13 +2,14 @@ package com.meetcha.joinmeeting.service;
 
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.CustomException;
+import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
-import com.meetcha.meeting.domain.MeetingEntity;
-import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.domain.*;
+import com.meetcha.meeting.dto.MeetingInfoResponse;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +47,9 @@ class JoinMeetingServiceTest {
 
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    MeetingCandidateDateRepository meetingCandidateDateRepository;
 
     @DisplayName("유효한 요청이면 참가자 정보와 참여가능시간을 저장한다")
     @Test
@@ -205,6 +210,28 @@ class JoinMeetingServiceTest {
         assertThatThrownBy(() -> joinMeetingService.join(meetingId, request, userId))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(USER_NOT_FOUND.getMessage());
+    }
+
+    @DisplayName("올바른 요청이면 getMeetingInfo는 미팅 정보를 반환한다")
+    @Test
+    void getMeetingInfo_whenValidRequest_returnMeetingInfo(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String meetingCode = UUID.randomUUID().toString().substring(0, 8);
+        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().plusDays(1), LocalDateTime.now(), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null, null);
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
+
+        UUID cadidateDateId = UUID.randomUUID();
+        MeetingCandidateDateEntity meetingCandidateDateEntity = new MeetingCandidateDateEntity(cadidateDateId, LocalDate.now().plusDays(4), meeting);
+        when(meetingCandidateDateRepository.findAllByMeeting_MeetingId(eq(meetingId))).thenReturn(List.of(meetingCandidateDateEntity));
+
+        // when
+        MeetingInfoResponse meetingInfo = joinMeetingService.getMeetingInfo(meetingId);
+
+        // then
+        Assertions.assertThat(meetingInfo.getMeetingId()).isEqualTo(meetingId);
+        Assertions.assertThat(meetingInfo.getCandidateDates()).containsExactly(meetingCandidateDateEntity.getCandidateDate());
+        Assertions.assertThat(meetingInfo.getDeadline()).isEqualTo( DateTimeUtils.utcToKst(meeting.getDeadline()));
     }
 
 }
