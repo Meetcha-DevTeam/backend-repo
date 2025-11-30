@@ -47,7 +47,6 @@ class UserProjectControllerTest {
         databaseCleaner.clear();
 
         RestAssured.baseURI = "http://localhost";
-        RestAssured.basePath = "/api/v2";
         RestAssured.port = port;
     }
 
