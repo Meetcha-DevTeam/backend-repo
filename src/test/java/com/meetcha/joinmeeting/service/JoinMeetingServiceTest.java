@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.service;
 
+import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
@@ -41,6 +42,9 @@ class JoinMeetingServiceTest {
 
     @Mock
     ParticipantAvailabilityRepository participantAvailabilityRepository;
+
+    @Mock
+    UserRepository userRepository;
 
     @DisplayName("유효한 요청이면 참가자 정보와 참여가능시간을 저장한다")
     @Test
@@ -177,6 +181,30 @@ class JoinMeetingServiceTest {
         assertThatThrownBy(() -> joinMeetingService.join(meetingId, request, userId))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(INVALID_TIME_SLOT.getMessage());
+    }
+
+    @DisplayName("요청에 닉네임이 없는데 해당하는 유저가 존재하지 않으면 join은 예외를 발생시킨다")
+    @Test
+    void join_whenNicknameIsEmptyAndUserDoesNotExists(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String nickname = null;
+        JoinMeetingRequest request = new JoinMeetingRequest(nickname, List.of(new JoinMeetingRequest.TimeSlot(
+                LocalDateTime.of(2025, 1, 1, 9, 0),
+                LocalDateTime.of(2025, 1, 1, 10, 0)
+        )));
+        UUID userId = UUID.randomUUID();
+
+        MeetingEntity meeting = mock(MeetingEntity.class);
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
+        when(meeting.isDeadlinePassed()).thenReturn(false);
+
+        when(userRepository.findById(eq(userId))).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> joinMeetingService.join(meetingId, request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(USER_NOT_FOUND.getMessage());
     }
 
 }
