@@ -21,6 +21,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -35,12 +36,11 @@ public class LoginService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final RestTemplate restTemplate;
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri() + "/login-complete";
-        RestTemplate restTemplate = new RestTemplate();
-
 
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
@@ -117,8 +117,6 @@ public class LoginService {
         String name = (String) userInfo.get("name");
         String picture = (String) userInfo.get("picture");
 
-        log.info("[OAuth] Google userInfo picture = {}", picture);
-
         // 기존 유저 조회 or 생성
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
@@ -164,6 +162,9 @@ public class LoginService {
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 
+    public InputStream loadImageAsStream(String pictureUrl) throws IOException {
+        return new URL(pictureUrl).openStream();
+    }
 
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
         UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
