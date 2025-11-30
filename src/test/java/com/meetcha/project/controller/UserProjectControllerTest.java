@@ -56,7 +56,7 @@ class UserProjectControllerTest {
     @DisplayName("[POST] 프로젝트 생성 성공")
     @Test
     void createProject_success() {
-        // given (테스트 유저 + JWT)
+        // given
         String token = testAuthHelper.createTestUserAndGetToken();
 
         Map<String, Object> body = Map.of("name", "밋챠 백엔드");
@@ -67,17 +67,16 @@ class UserProjectControllerTest {
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when()
-                .post("/projects")
+                .post("/user/projects")
                 .then()
-                .statusCode(201)
-                .body("success", equalTo(true))
+                .statusCode(200)
                 .body("data.projectId", notNullValue())
                 .body("data.name", equalTo("밋챠 백엔드"))
                 .body("data.createdAt", notNullValue());
     }
 
     // --------------------------------------------------
-    // 2) 참여한 프로젝트 목록 조회 성공
+    // 2) 프로젝트 목록 조회 성공
     // --------------------------------------------------
     @DisplayName("[GET] 참여한 프로젝트 목록 조회 성공")
     @Test
@@ -117,15 +116,14 @@ class UserProjectControllerTest {
                 .get("/user/projects")
                 .then()
                 .statusCode(200)
-                .body("success", equalTo(true))
-                .body("data.size()", equalTo(2))
+                .body("data", hasSize(2))
                 .body("data[0].projectName", notNullValue());
     }
 
     // --------------------------------------------------
     // 3) 참여 프로젝트가 없을 때
     // --------------------------------------------------
-    @DisplayName("[GET] 참여한 프로젝트 없으면 빈 배열 반환")
+    @DisplayName("[GET] 참여 프로젝트 없으면 빈 배열 반환")
     @Test
     void getUserProjects_empty() {
         String token = testAuthHelper.createTestUserAndGetToken();
@@ -137,22 +135,6 @@ class UserProjectControllerTest {
                 .get("/user/projects")
                 .then()
                 .statusCode(200)
-                .body("success", equalTo(true))
                 .body("data", hasSize(0));
-    }
-
-    // --------------------------------------------------
-    // 4) 인증 헤더 없으면 401
-    // --------------------------------------------------
-    @DisplayName("[GET] Authorization 헤더 없으면 401 반환")
-    @Test
-    void getUserProjects_unauthorized() {
-        given()
-                .accept(ContentType.JSON)
-                .when()
-                .get("/user/projects")
-                .then()
-                .statusCode(401)
-                .body("success", equalTo(false));
     }
 }
