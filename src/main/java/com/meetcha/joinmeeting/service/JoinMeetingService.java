@@ -41,7 +41,7 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
-        log.debug("join 메서드 진입");
+        log.debug("[join] 미팅 참가 진입 meetingId = {} userId = {} request = {} ", meetingId, userId, request);
 
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
@@ -56,6 +56,7 @@ public class JoinMeetingService {
         List<ParticipantAvailability> availabilities = convertTimeSlotsToAvailabilities(request, participant.getParticipantId(), meetingId);
         availabilityRepository.saveAll(availabilities);
 
+        log.info("[join] 미팅 참가 완료 meetingId = {} userId = {} participantId = {} nickname = {}", meetingId, userId, participant.getParticipantId(), nickname);
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
