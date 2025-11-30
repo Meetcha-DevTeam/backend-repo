@@ -8,6 +8,7 @@ import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
+import com.meetcha.joinmeeting.dto.ValidateMeetingCodeResponse;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 import org.assertj.core.api.Assertions;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.meetcha.global.exception.ErrorCode.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -247,5 +249,36 @@ class JoinMeetingServiceTest {
                 .hasMessage(MEETING_NOT_FOUND.getMessage());
 
     }
+
+    @DisplayName("마감시간이 지났다면 validateMeetingCode는 closed라고 응답한다")
+    @Test
+    void validateMeetingCode_whenDeadlineIsPassed_shouldReturnClosedAsTrue(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        String meetingCode = UUID.randomUUID().toString().substring(0, 8);
+        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(2), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null, null);
+        when(meetingRepository.findByMeetingCode(eq(meetingCode))).thenReturn(Optional.of(meeting));
+
+        // when
+        ValidateMeetingCodeResponse response = joinMeetingService.validateMeetingCode(meetingCode);
+
+        // then
+        assertThat(response.getMeetingId()).isEqualTo(meetingId);
+        assertThat(response.getIsClosed()).isEqualTo(true);
+    }
+
+    @DisplayName("validateMeetingCode는 closed라고 응답한다")
+    @Test
+    void validateMeetingCode_whenMeetingDoesNotExist_shouldThrowException(){
+        // given
+        String meetingCode = UUID.randomUUID().toString().substring(0, 8);
+        when(meetingRepository.findByMeetingCode(eq(meetingCode))).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> joinMeetingService.validateMeetingCode(meetingCode))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(MEETING_NOT_FOUND.getMessage());
+    }
+
 
 }
