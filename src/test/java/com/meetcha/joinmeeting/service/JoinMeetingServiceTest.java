@@ -51,7 +51,7 @@ class JoinMeetingServiceTest {
     @Mock
     MeetingCandidateDateRepository meetingCandidateDateRepository;
 
-    @DisplayName("유효한 요청이면 참가자 정보와 참여가능시간을 저장한다")
+    @DisplayName("유효한 요청이면 join은 참가자 정보와 참여가능시간을 저장한다")
     @Test
     void join_whenValidRequest_saveParticipantAndAvailabilities(){
         // given
@@ -190,7 +190,7 @@ class JoinMeetingServiceTest {
 
     @DisplayName("요청에 닉네임이 없는데 해당하는 유저가 존재하지 않으면 join은 예외를 발생시킨다")
     @Test
-    void join_whenNicknameIsEmptyAndUserDoesNotExists(){
+    void join_whenNicknameIsEmptyAndUserDoesNotExists_shouldThrowException(){
         // given
         UUID meetingId = UUID.randomUUID();
         String nickname = null;
@@ -214,7 +214,7 @@ class JoinMeetingServiceTest {
 
     @DisplayName("올바른 요청이면 getMeetingInfo는 미팅 정보를 반환한다")
     @Test
-    void getMeetingInfo_whenValidRequest_returnMeetingInfo(){
+    void getMeetingInfo_whenValidRequest_shouldReturnMeetingInfo(){
         // given
         UUID meetingId = UUID.randomUUID();
         String meetingCode = UUID.randomUUID().toString().substring(0, 8);
@@ -232,6 +232,20 @@ class JoinMeetingServiceTest {
         Assertions.assertThat(meetingInfo.getMeetingId()).isEqualTo(meetingId);
         Assertions.assertThat(meetingInfo.getCandidateDates()).containsExactly(meetingCandidateDateEntity.getCandidateDate());
         Assertions.assertThat(meetingInfo.getDeadline()).isEqualTo( DateTimeUtils.utcToKst(meeting.getDeadline()));
+    }
+
+    @DisplayName("미팅이 존재하지 않으면 getMeetingInfo는 예외를 발생시킨다")
+    @Test
+    void getMeetingInfo_whenMeetingDoesNotExist_shouldThrowException(){
+        // given
+        UUID meetingId = UUID.randomUUID();
+        when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> joinMeetingService.getMeetingInfo(meetingId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(MEETING_NOT_FOUND.getMessage());
+
     }
 
 }
