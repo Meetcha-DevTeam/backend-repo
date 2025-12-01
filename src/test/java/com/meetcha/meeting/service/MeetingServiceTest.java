@@ -22,7 +22,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
+import static com.meetcha.global.exception.ErrorCode.INVALID_MEETING_REQUEST;
 import static com.meetcha.global.exception.ErrorCode.PROJECT_NOT_FOUND;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -105,4 +107,100 @@ class MeetingServiceTest {
         verify(meetingRepository, never()).save(any());
         verify(meetingCandidateDateRepository, never()).saveAll(any());
     }
+
+    @DisplayName("진행시간(분)이 범위를 벗어나면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenDurationMinuteIsOutOfRange_shouldThrowException(){
+        // given
+        int invalidDurationMinutes = 0;
+        UUID projectId = UUID.randomUUID();
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", invalidDurationMinutes, List.of(LocalDate.now().plusDays(5), LocalDate.now().plusDays(6)), LocalDateTime.now().plusDays(2), projectId);
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_MEETING_REQUEST.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
+    }
+
+    @DisplayName("후보날짜가 비어있으면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenCandidateDatesIsEmpty_shouldThrowException(){
+        // given
+        int invalidDurationMinutes = 0;
+        UUID projectId = UUID.randomUUID();
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", invalidDurationMinutes, List.of(), LocalDateTime.now().plusDays(2), projectId);
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_MEETING_REQUEST.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
+    }
+
+    @DisplayName("후보날짜가 최대개수를 넘어서면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenCandidateDatesLengthIsOutOfRange_shouldThrowException(){
+        // given
+        int invalidDurationMinutes = 0;
+        UUID projectId = UUID.randomUUID();
+        List<LocalDate> candidateDates = IntStream.rangeClosed(1, 20).mapToObj(i -> LocalDate.now().plusDays(i)).toList();
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", invalidDurationMinutes, candidateDates, LocalDateTime.now().plusDays(2), projectId);
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_MEETING_REQUEST.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
+    }
+
+    @DisplayName("후보날짜가 현재보다 시간상 앞서면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenAnyCandidateDateIsBeforeNow_shouldThrowException(){
+        // given
+        int invalidDurationMinutes = 0;
+        UUID projectId = UUID.randomUUID();
+        List<LocalDate> candidateDates = List.of(LocalDate.of(2001, 1, 1));
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", invalidDurationMinutes, candidateDates, LocalDateTime.now().plusDays(2), projectId);
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_MEETING_REQUEST.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
+    }
+
+    @DisplayName("마감날짜가 제일 빠른 후보날짜보다 시간상 앞서지 않으면 createMeeting은 예외를 발생시킨다")
+    @Test
+    void createMeeting_whenDeadlineIsAfter_shouldThrowException(){
+        // given
+        int invalidDurationMinutes = 0;
+        UUID projectId = UUID.randomUUID();
+        LocalDateTime deadline = LocalDateTime.now().plusDays(2);
+        List<LocalDate> candidateDates = List.of(deadline.toLocalDate());
+        MeetingCreateRequest request = new MeetingCreateRequest("title", "desc", invalidDurationMinutes, candidateDates, deadline, projectId);
+        UUID userId = UUID.randomUUID();
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> meetingService.createMeeting(request, userId))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(INVALID_MEETING_REQUEST.getMessage());
+
+        verify(meetingRepository, never()).save(any());
+        verify(meetingCandidateDateRepository, never()).saveAll(any());
+    }
+
+
 }
