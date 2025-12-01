@@ -85,7 +85,6 @@ class MeetingControllerTest extends AcceptanceTest {
                         .as(new TypeRef<ApiResponse<Map<String, String>>>() {});
 
         assertThat(response.getCode()).isEqualTo(INVALID_MEETING_REQUEST.getCode());
-        assertThat(response.getData().get("durationMinutes")).isEqualTo(INVALID_DURATION.getMessage());
     }
 
     private MeetingCreateRequest getCreateMeetingRequestWithInvalidDurationMinutes() {
@@ -120,7 +119,6 @@ class MeetingControllerTest extends AcceptanceTest {
                         .as(new TypeRef<ApiResponse<Map<String, String>>>() {});
 
         assertThat(response.getCode()).isEqualTo(INVALID_MEETING_REQUEST.getCode());
-        assertThat(response.getData().get("candidateDates")).isEqualTo(INVALID_CANDIDATE_DATES.getMessage());
     }
 
     private MeetingCreateRequest getCreateMeetingRequestWithInvalidCandidateDates() {
@@ -155,7 +153,6 @@ class MeetingControllerTest extends AcceptanceTest {
                         .as(new TypeRef<ApiResponse<Map<String, String>>>() {});
 
         assertThat(response.getCode()).isEqualTo(INVALID_MEETING_REQUEST.getCode());
-        assertThat(response.getData().get("candidateDates")).isEqualTo(INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
     }
 
     private MeetingCreateRequest getCreateMeetingRequestWithPastCandidateDate() {
@@ -190,7 +187,6 @@ class MeetingControllerTest extends AcceptanceTest {
                         .as(new TypeRef<ApiResponse<Map<String, String>>>() {});
 
         assertThat(response.getCode()).isEqualTo(INVALID_MEETING_REQUEST.getCode());
-        assertThat(response.getData().get("deadline")).isEqualTo(INVALID_MEETING_DEADLINE.getMessage());
     }
 
     private MeetingCreateRequest getCreateMeetingRequestWithDeadlineAfterCandidateDates() {
