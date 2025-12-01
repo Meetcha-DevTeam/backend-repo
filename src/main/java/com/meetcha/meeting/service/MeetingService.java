@@ -3,10 +3,14 @@ package com.meetcha.meeting.service;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.util.DateTimeUtils;
+import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.meeting.dto.MeetingDeleteResponse;
+import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
+import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +29,10 @@ public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final MeetingCandidateDateRepository candidateDateRepository;
     private final ProjectRepository projectRepository;
+    private final MeetingParticipantRepository participantRepository;
+    private final ParticipantAvailabilityRepository availabilityRepository;
+    private final AlternativeTimeRepository alternativeTimeRepository;
+    private final AlternativeVoteRepository alternativeVoteRepository;
 
     private final Clock clock = Clock.systemDefaultZone();
 
@@ -86,6 +94,18 @@ public class MeetingService {
         if (meeting.getMeetingStatus() != MeetingStatus.MATCH_FAILED) {
             throw new CustomException(ErrorCode.CANNOT_DELETE_MEETING);
         }
+
+        // 투표 삭제 (대안 시간을 참조하므로 먼저 삭제)
+        alternativeVoteRepository.deleteByAlternativeTime_MeetingId(meetingId);
+
+        // 대안 시간 삭제
+        alternativeTimeRepository.deleteByMeetingId(meetingId);
+
+        // 참여자 가용 시간 삭제
+        availabilityRepository.deleteByMeetingId(meetingId);
+
+        // 참여자 삭제 (미팅을 참조하므로 미팅보다 먼저 삭제)
+        participantRepository.deleteByMeeting_MeetingId(meetingId);
 
         // 미팅 삭제 (cascade로 후보 날짜도 함께 삭제됨)
         meetingRepository.delete(meeting);

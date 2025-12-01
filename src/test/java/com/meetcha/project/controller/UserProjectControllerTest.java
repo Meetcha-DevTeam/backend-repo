@@ -1,11 +1,11 @@
 package com.meetcha.project.controller;
-
 import com.meetcha.auth.TestAuthHelper;
 import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.util.DatabaseCleaner;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
+import com.meetcha.AcceptanceTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,9 +23,7 @@ import java.util.UUID;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class UserProjectControllerTest {
+class UserProjectControllerTest extends AcceptanceTest {
 
     @LocalServerPort
     int port;
@@ -41,14 +39,6 @@ class UserProjectControllerTest {
 
     @Autowired
     private ProjectRepository projectRepository;
-
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.clear();
-
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-    }
 
     // --------------------------------------------------
     // 1) 프로젝트 생성 테스트
