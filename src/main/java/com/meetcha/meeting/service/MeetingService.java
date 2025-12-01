@@ -34,7 +34,6 @@ public class MeetingService {
     private final AlternativeVoteRepository alternativeVoteRepository;
 
     private final Clock clock = Clock.systemDefaultZone();
-    private Map<String, String> errors;
 
     @Transactional
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, UUID creatorId) {
@@ -59,23 +58,23 @@ public class MeetingService {
     }
 
     private void validateRequest(MeetingCreateRequest request) {
-        errors = new HashMap<>();
+        Map<String, String> errors = new HashMap<>();
 
-        validateDuration(request);
-        validateCandidateDates(request);
+        validateDuration(request, errors);
+        validateCandidateDates(request, errors);
 
         if (!errors.isEmpty()) {
             throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
         }
     }
 
-    private void validateDuration(MeetingCreateRequest request) {
+    private void validateDuration(MeetingCreateRequest request, Map<String, String> errors) {
         if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
             errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
         }
     }
 
-    private void validateCandidateDates(MeetingCreateRequest request) {
+    private void validateCandidateDates(MeetingCreateRequest request, Map<String, String> errors) {
         List<LocalDate> dates = request.getCandidateDates();
         if (dates == null || dates.isEmpty() || dates.size() > 10) {
             errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
