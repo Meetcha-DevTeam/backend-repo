@@ -34,4 +34,6 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
     @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meeting.meetingId = :meetingId")
     List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
+
+    void deleteByMeeting_MeetingId(UUID meetingId);
 }

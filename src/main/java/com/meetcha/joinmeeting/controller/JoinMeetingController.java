@@ -31,10 +31,10 @@ public class JoinMeetingController {
     public JoinMeetingResponse joinMeeting(
             @PathVariable UUID meetingId,
             @RequestBody @Valid JoinMeetingRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
         log.debug("joinMeeting 메서드 진입");
-        return joinMeetingService.join(meetingId, request, authorizationHeader);
+        return joinMeetingService.join(meetingId, request, userId);
     }
 
     // 미팅 코드 유효성 검사

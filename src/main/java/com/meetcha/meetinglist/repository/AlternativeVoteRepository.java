@@ -21,4 +21,6 @@ public interface AlternativeVoteRepository extends JpaRepository<AlternativeVote
     boolean existsByUserIdAndCheckedTrue(UUID userId);
 
     boolean existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(UUID meetingId, UUID userId);
+
+    void deleteByAlternativeTime_MeetingId(UUID meetingId);
 }
