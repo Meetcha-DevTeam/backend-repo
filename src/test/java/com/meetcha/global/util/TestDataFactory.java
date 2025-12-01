@@ -31,7 +31,7 @@ public class TestDataFactory {
 
     public UserEntity createUser(String email) {
         LocalDateTime now = LocalDateTime.now();
-        UserEntity user = new UserEntity(null, "사용자1", email, "token", now, null, "refresh", now.plusDays(3));
+        UserEntity user = new UserEntity(null, "사용자1", email, "existing google token", now, "existing profile image", "existing refresh token", now.plusDays(3));
         return userRepository.save(user);
     }
 
