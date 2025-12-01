@@ -105,10 +105,14 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
+            log.error("[OAuth] Google userinfo request ERROR: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
+            log.error("[OAuth] Google userinfo non-2xx or empty body. status={}, body={}",
+                    userInfoResponse.getStatusCodeValue(),
+                    userInfoResponse.getBody());
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
@@ -135,7 +139,10 @@ public class LoginService {
 
         // 항상 이름/프로필사진 업데이트
         user.setName(name);
-        user.setProfileImgSrc(picture);
+        if (picture != null && !picture.isBlank()) {
+            user.setProfileImgSrc(picture);
+        }
+
 
         // 항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
         if (googleRefreshToken != null && !googleRefreshToken.isBlank()) {
