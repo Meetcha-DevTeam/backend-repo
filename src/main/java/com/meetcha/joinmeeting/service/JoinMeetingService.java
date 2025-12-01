@@ -40,13 +40,11 @@ public class JoinMeetingService {
     private final MeetingParticipantRepository participantRepository;
     private final ParticipantAvailabilityRepository availabilityRepository;
     private final MeetingRepository meetingRepository;
-    private final JwtProvider jwtProvider;
     private final MeetingCandidateDateRepository meetingCandidateDateRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
-        UUID userId = extractUserId(authorizationHeader);
+    public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
 
         log.debug("join 메서드 진입");
         // 미팅 조회
@@ -146,7 +144,7 @@ public class JoinMeetingService {
 
     //미팅정보 수정 로직
     @Transactional
-    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, String authorizationHeader) {
+    public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, UUID userId) {
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
@@ -154,8 +152,6 @@ public class JoinMeetingService {
         if (meeting.isDeadlinePassed()) {
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
-
-        UUID userId = extractUserId(authorizationHeader);
 
 
         // 3. 기존 참여자 존재 확인
@@ -208,12 +204,5 @@ public class JoinMeetingService {
     }
 
 
-    private UUID extractUserId(String authorizationHeader) {
-        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
-        if (!jwtProvider.validateToken(token)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        }
-        return jwtProvider.getUserId(token);
-    }
 }
 

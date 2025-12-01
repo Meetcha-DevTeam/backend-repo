@@ -200,4 +200,10 @@ public class LoginService {
         log.info("[OAuth] Saved profileImgSrc = {}", user.getProfileImgSrc());
         return new TestLoginResponse(token);
     }
+
+    /* ========== 테스트용 더미 메서드(loadImageAsStream) ========== */
+    // 테스트 충돌나는것때문에 임시로 추가 추후에 지울게요
+    public InputStream loadImageAsStream(String url) throws IOException {
+        return InputStream.nullInputStream();
+    }
 }
