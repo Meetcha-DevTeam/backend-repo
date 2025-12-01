@@ -76,10 +76,7 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 .body("code", equalTo(201))
                 .body("message", equalTo("요청에 성공하였습니다."))
 
-                .body("data.code", equalTo(201))
-                .body("data.message", equalTo("CREATED"))
-
-                .body("data.data.eventId", equalTo(mockGoogleEventId));
+                .body("data.eventId", equalTo(mockGoogleEventId));
     }
 
     @DisplayName("인증된 사용자가 일정 조회를 요청하면 200 OK와 일정 목록을 반환한다.(GET /user/schedule)")
@@ -298,6 +295,6 @@ class UserScheduleControllerTest extends AcceptanceTest {
                 .body("code", equalTo(200))
                 .body("message", equalTo("요청에 성공하였습니다."))
                 .body("data.nickname", equalTo("테스트유저"))
-                .body("data.profileImgUrl", nullValue()); // TestAuthHelper가 이미지를 설정하지 않았으므로 null
+                .body("data.profileImgSrc", nullValue()); // TestAuthHelper가 이미지를 설정하지 않았으므로 null
     }
 }

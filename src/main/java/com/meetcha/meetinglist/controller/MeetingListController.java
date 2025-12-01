@@ -79,9 +79,9 @@ public class MeetingListController {
     public JoinMeetingResponse updateParticipation(
             @PathVariable UUID meetingId,
             @RequestBody JoinMeetingRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-       return joinMeetingService.updateParticipation(meetingId, request, authorizationHeader);
+       return joinMeetingService.updateParticipation(meetingId, request, userId);
     }
 
         //작성이 필요한 미팅 조회
