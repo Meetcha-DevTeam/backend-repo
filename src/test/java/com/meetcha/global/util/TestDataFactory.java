@@ -36,7 +36,7 @@ public class TestDataFactory {
     }
 
     public MeetingEntity createMeeting(UUID userId, LocalDateTime createdAt, LocalDateTime deadline) {
-        List<LocalDate> candDates = List.of(LocalDate.of(createdAt.getYear(), createdAt.getMonth(), createdAt.getDayOfMonth() + 5), LocalDate.of(createdAt.getYear(), createdAt.getMonth(), createdAt.getDayOfMonth() + 6));
+        List<LocalDate> candDates = List.of(createdAt.plusDays(5).toLocalDate(), createdAt.plusDays(6).toLocalDate());
 
         MeetingEntity meeting = MeetingEntity.builder()
                 .title("미팅1")
