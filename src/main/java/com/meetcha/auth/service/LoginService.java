@@ -20,7 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
@@ -43,7 +44,6 @@ public class LoginService {
 
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri();
-
         RestTemplate restTemplate = new RestTemplate();
 
         /* ========== 1) 구글 토큰 요청 ========== */
@@ -176,7 +176,6 @@ public class LoginService {
 
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
-
 
     /* ========== id_token에서 picture 추출 ========== */
     private String extractPictureFromIdToken(String idToken) {

@@ -75,4 +75,6 @@ public class GlobalExceptionHandler {
                 .status(ErrorCode.INVALID_REQUEST_BODY.getHttpStatus())
                 .body(ApiResponse.error(path, ErrorCode.INVALID_REQUEST_BODY));
     }
+
+
 }

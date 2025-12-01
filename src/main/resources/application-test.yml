@@ -21,11 +21,11 @@ jwt:
 cloud:
   aws:
     credentials:
-      access-key: access_key
-      secret-key: secret_key
+      access-key: test-access-key-dummy
+      secret-key: test-secret-key-dummy
     region:
       static: ap-northeast-2
     s3:
-      bucket: bucket-name
+      bucket: test-bucket-dummy
     stack:
       auto: false
