@@ -1,7 +1,6 @@
 package com.meetcha.joinmeeting.controller;
 
 import com.meetcha.global.annotation.AuthUser;
-import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.GetSelectedTime;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
@@ -10,8 +9,6 @@ import com.meetcha.joinmeeting.service.JoinMeetingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.meetcha.meeting.dto.MeetingInfoResponse;
 
@@ -29,7 +26,7 @@ public class JoinMeetingController {
     //미팅 참여
     @PostMapping("/id/{meetingId}/join")
     public JoinMeetingResponse joinMeeting(
-            @PathVariable UUID meetingId,
+            @PathVariable("meetingId") UUID meetingId,
             @RequestBody @Valid JoinMeetingRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -47,7 +44,7 @@ public class JoinMeetingController {
 
     // 미팅 정보 조회
     @GetMapping("/id/{meetingId}")
-    public MeetingInfoResponse getMeetingInfo(@PathVariable UUID meetingId) {
+    public MeetingInfoResponse getMeetingInfo(@PathVariable("meetingId") UUID meetingId) {
         return joinMeetingService.getMeetingInfo(meetingId);
     }
 
