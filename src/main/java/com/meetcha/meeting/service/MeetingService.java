@@ -25,7 +25,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class MeetingService {
-
     private final MeetingRepository meetingRepository;
     private final MeetingCandidateDateRepository candidateDateRepository;
     private final ProjectRepository projectRepository;
@@ -35,6 +34,7 @@ public class MeetingService {
     private final AlternativeVoteRepository alternativeVoteRepository;
 
     private final Clock clock = Clock.systemDefaultZone();
+    private Map<String, String> errors;
 
     @Transactional
     public MeetingCreateResponse createMeeting(MeetingCreateRequest request, UUID creatorId) {
@@ -56,6 +56,43 @@ public class MeetingService {
                 saved.getMeetingId(),
                 DateTimeUtils.utcToKst(saved.getCreatedAt())
         );
+    }
+
+    private void validateRequest(MeetingCreateRequest request) {
+        errors = new HashMap<>();
+
+        validateDuration(request);
+        validateCandidateDates(request);
+
+        if (!errors.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
+        }
+    }
+
+    private void validateDuration(MeetingCreateRequest request) {
+        if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
+            errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
+        }
+    }
+
+    private void validateCandidateDates(MeetingCreateRequest request) {
+        List<LocalDate> dates = request.getCandidateDates();
+        if (dates == null || dates.isEmpty() || dates.size() > 10) {
+            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
+            return;
+        }
+
+        LocalDate today = LocalDate.now(clock);
+        boolean anyPastOrToday = dates.stream().anyMatch(d -> !d.isAfter(today));
+        if (anyPastOrToday) {
+            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
+        }
+
+        LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
+        LocalDateTime deadline = request.getDeadline();
+        if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
+            errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
+        }
     }
 
     private MeetingEntity createMeetingEntity(MeetingCreateRequest request, UUID creatorId, LocalDateTime deadline, LocalDateTime now) {
@@ -116,35 +153,5 @@ public class MeetingService {
                 .meetingId(meetingId)
                 .message("매칭 실패된 미팅이 삭제되었습니다.")
                 .build();
-    }
-
-    private void validateRequest(MeetingCreateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
-            errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
-        }
-
-        List<LocalDate> dates = request.getCandidateDates();
-        if (dates == null || dates.isEmpty() || dates.size() > 10) {
-            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
-        } else {
-            LocalDate today = LocalDate.now(clock);
-
-            boolean anyPastOrToday = dates.stream().anyMatch(d -> !d.isAfter(today));
-            if (anyPastOrToday) {
-                errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
-            }
-
-            LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
-            LocalDateTime deadline = request.getDeadline();
-            if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
-                errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
-            }
-        }
-
-        if (!errors.isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
-        }
     }
 }
