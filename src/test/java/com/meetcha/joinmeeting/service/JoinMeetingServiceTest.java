@@ -267,7 +267,7 @@ class JoinMeetingServiceTest {
         assertThat(response.getIsClosed()).isEqualTo(true);
     }
 
-    @DisplayName("validateMeetingCode는 closed라고 응답한다")
+    @DisplayName("미팅이 존재하지 않으면 validateMeetingCode는 예외를 발생시킨다")
     @Test
     void validateMeetingCode_whenMeetingDoesNotExist_shouldThrowException(){
         // given
