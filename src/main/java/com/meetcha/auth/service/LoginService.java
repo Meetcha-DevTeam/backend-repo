@@ -1,5 +1,6 @@
 package com.meetcha.auth.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meetcha.auth.config.GoogleOAuthProperties;
 import com.meetcha.auth.dto.LoginRequestDto;
 import com.meetcha.auth.dto.TestLoginRequest;
@@ -19,12 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Map;
-import java.net.URL;
 
 @Slf4j
 @Service
@@ -35,73 +35,65 @@ public class LoginService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final String DEFAULT_PROFILE_IMG =
+            "https://lh3.googleusercontent.com/a/ACg8ocLqlP1MkWIf-XdpRmZc6CILZLIomiOQ88KoZFHTilcFtGYgrA=s96-c"; // 임시로..
 
     public TokenResponseDto googleLogin(LoginRequestDto request) {
+
         String code = request.getCode();
-        String redirectUrl = request.getRedirectUri() + "/login-complete";
+        String redirectUrl = request.getRedirectUri();
         RestTemplate restTemplate = new RestTemplate();
 
-
-        // 구글 토큰 교환
+        /* ========== 1) 구글 토큰 요청 ========== */
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
-        tokenParams.add("code", code);
-        tokenParams.add("client_id", googleProps.getClientId());
-        tokenParams.add("client_secret", googleProps.getClientSecret());
-        tokenParams.add("redirect_uri", redirectUrl);
-        tokenParams.add("grant_type", "authorization_code");
-
-        HttpEntity<MultiValueMap<String, String>> tokenRequest =
-                new HttpEntity<>(tokenParams, tokenHeaders);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("code", code);
+        params.add("client_id", googleProps.getClientId());
+        params.add("client_secret", googleProps.getClientSecret());
+        params.add("redirect_uri", redirectUrl);
+        params.add("grant_type", "authorization_code");
 
         ResponseEntity<Map> tokenResponse;
         try {
             tokenResponse = restTemplate.exchange(
                     "https://oauth2.googleapis.com/token",
                     HttpMethod.POST,
-                    tokenRequest,
+                    new HttpEntity<>(params, tokenHeaders),
                     Map.class
             );
         } catch (Exception e) {
-            log.error("[OAuth] token exchange ERROR: {}", e.toString(), e);
+            log.error("[OAuth] token exchange ERROR: {}", e.getMessage(), e);
             throw new CustomException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
-        if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
-            log.error("[OAuth] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
+        if (tokenResponse.getBody() == null) {
+            log.error("[OAuth] Token response body NULL");
             throw new CustomException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
         Map<String, Object> tokenBody = tokenResponse.getBody();
         String googleAccessToken = (String) tokenBody.get("access_token");
-        String googleRefreshToken = (String) tokenBody.get("refresh_token"); // 최초 로그인시에만 내려올 수 있음
+        String googleRefreshToken = (String) tokenBody.get("refresh_token");
+        String idToken = (String) tokenBody.get("id_token");
 
-        // expires_in 값을 LocalDateTime으로 변환
-        long expiresInSec = 3600L;
-        Object expiresInObj = tokenBody.get("expires_in");
-        if (expiresInObj instanceof Number n) {
-            expiresInSec = n.longValue();
-        } else if (expiresInObj != null) {
-            try {
-                expiresInSec = Long.parseLong(String.valueOf(expiresInObj));
-            } catch (NumberFormatException ignored) {
-            }
-        }
+        long expiresInSec = ((Number) tokenBody.getOrDefault("expires_in", 3600)).longValue();
         LocalDateTime accessTokenExpiry = LocalDateTime.now().plusSeconds(expiresInSec);
 
-        // 구글 사용자 정보
+
+        /* ========== 2) userinfo 호출 ========== */
         HttpHeaders userInfoHeaders = new HttpHeaders();
         userInfoHeaders.setBearerAuth(googleAccessToken);
-        HttpEntity<Void> userInfoRequest = new HttpEntity<>(userInfoHeaders);
 
         ResponseEntity<Map> userInfoResponse;
         try {
             userInfoResponse = restTemplate.exchange(
                     "https://www.googleapis.com/oauth2/v3/userinfo",
                     HttpMethod.GET,
-                    userInfoRequest,
+                    new HttpEntity<>(userInfoHeaders),
                     Map.class
             );
         } catch (Exception e) {
@@ -109,21 +101,33 @@ public class LoginService {
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
-        if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
-            log.error("[OAuth] Google userinfo non-2xx or empty body. status={}, body={}",
-                    userInfoResponse.getStatusCodeValue(),
-                    userInfoResponse.getBody());
+        if (userInfoResponse.getBody() == null) {
+            log.error("[OAuth] userinfo body NULL");
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         Map<String, Object> userInfo = userInfoResponse.getBody();
         String email = (String) userInfo.get("email");
         String name = (String) userInfo.get("name");
+
+        /* ========== 3) picture 결정 (userinfo → id_token → fallback) ========== */
         String picture = (String) userInfo.get("picture");
+        log.info("[OAuth] userinfo.picture = {}", picture);
 
-        log.info("[OAuth] Google userInfo picture = {}", picture);
+        if (picture == null || picture.isBlank()) {
+            picture = extractPictureFromIdToken(idToken);
+            log.info("[OAuth] id_token.picture = {}", picture);
+        }
 
-        // 기존 유저 조회 or 생성
+        if (picture == null || picture.isBlank()) {
+            picture = DEFAULT_PROFILE_IMG;
+            log.info("[OAuth] FALLBACK picture = {}", picture);
+        }
+
+        final String finalPicture = picture; // 🔥 람다에서 사용하려면 final 필요
+
+
+        /* ========== 4) 유저 조회 or 생성 ========== */
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
             UserEntity newUser = UserEntity.builder()
                     .email(email)
@@ -131,20 +135,16 @@ public class LoginService {
                     .googleToken(googleAccessToken)
                     .googleRefreshToken(googleRefreshToken)
                     .googleTokenExpiresAt(accessTokenExpiry)
-                    .profileImgSrc(picture)
+                    .profileImgSrc(finalPicture) // ✔ 람다 내부에서도 문제 없음
                     .createdAt(LocalDateTime.now())
                     .build();
             return userRepository.save(newUser);
         });
 
-        // 항상 이름/프로필사진 업데이트
+        /* ========== 로그인 때마다 필드 업데이트 ========== */
         user.setName(name);
-        if (picture != null && !picture.isBlank()) {
-            user.setProfileImgSrc(picture);
-        }
+        user.setProfileImgSrc(finalPicture);
 
-
-        // 항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
         if (googleRefreshToken != null && !googleRefreshToken.isBlank()) {
             user.updateGoogleAllTokens(googleAccessToken, googleRefreshToken, accessTokenExpiry);
         } else {
@@ -152,11 +152,13 @@ public class LoginService {
         }
 
         userRepository.save(user);
+        log.info("[OAuth] FINAL SAVED PICTURE IN DB = {}", user.getProfileImgSrc());
 
+
+        /* ========== 5) JWT 발급 ========== */
         String jwtAccessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
         String jwtRefreshToken = jwtProvider.createRefreshToken(user.getUserId(), user.getEmail());
 
-        // RefreshToken 저장(있으면 갱신, 없으면 생성)
         refreshTokenRepository.findByUserId(user.getUserId())
                 .ifPresentOrElse(
                         existing -> {
@@ -164,21 +166,38 @@ public class LoginService {
                             refreshTokenRepository.save(existing);
                         },
                         () -> refreshTokenRepository.save(
-                                new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14))
+                                new RefreshTokenEntity(
+                                        user.getUserId(),
+                                        jwtRefreshToken,
+                                        LocalDateTime.now().plusDays(14)
+                                )
                         )
                 );
 
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 
+    /* ========== id_token에서 picture 추출 ========== */
+    private String extractPictureFromIdToken(String idToken) {
+        try {
+            String[] parts = idToken.split("\\.");
+            String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
 
-    public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
-        UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
+            Map<String, Object> map = objectMapper.readValue(payloadJson, Map.class);
+            return (String) map.get("picture");
+        } catch (Exception e) {
+            log.warn("[OAuth] Failed to parse id_token picture: {}", e.getMessage());
+            return null;
+        }
+    }
+
+    /* ========== 테스트 로그인 ========== */
+    public TestLoginResponse testLogin(TestLoginRequest req) {
+        UserEntity user = userRepository.findByEmail(req.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String accessToken = jwtProvider.createAccessToken(user.getUserId(),
-                user.getEmail());
-
-        return new TestLoginResponse(accessToken);
+        String token = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
+        log.info("[OAuth] Saved profileImgSrc = {}", user.getProfileImgSrc());
+        return new TestLoginResponse(token);
     }
 }
