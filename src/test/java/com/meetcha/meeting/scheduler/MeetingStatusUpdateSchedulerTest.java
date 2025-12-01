@@ -48,7 +48,7 @@ class MeetingStatusUpdateSchedulerTest {
                 .durationAdjustedMinutes(60)
                 .build();
 
-        when(meetingRepository.findMeetingsToConfirmFromAlternative())
+        when(meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(any(LocalDateTime.class)))
                 .thenReturn(List.of(meeting));
         when(alternativeTimeRepository.findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(meetingId))
                 .thenReturn(Optional.of(alt));
@@ -79,7 +79,7 @@ class MeetingStatusUpdateSchedulerTest {
         MeetingEntity meeting = mock(MeetingEntity.class);
         when(meeting.getMeetingId()).thenReturn(meetingId);
 
-        when(meetingRepository.findMeetingsToConfirmFromAlternative())
+        when(meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(any(LocalDateTime.class)))
                 .thenReturn(List.of(meeting));
         when(alternativeTimeRepository.findTopByMeetingIdOrderByVoteCountDescStartTimeAsc(meetingId))
                 .thenReturn(Optional.empty()); ///투표 결과 없는 경우
@@ -104,9 +104,8 @@ class MeetingStatusUpdateSchedulerTest {
     void confirmFromAlternativeTimes_whenNoTargetMeetings_doesNothing() {
 
         // given
-        when(meetingRepository.findMeetingsToConfirmFromAlternative())
+        when(meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(any(LocalDateTime.class)))
                 .thenReturn(Collections.emptyList());
-
         // when
         scheduler.confirmFromAlternativeTimes();
 
