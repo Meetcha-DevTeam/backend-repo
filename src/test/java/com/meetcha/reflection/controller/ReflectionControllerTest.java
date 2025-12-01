@@ -6,8 +6,8 @@ import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.global.util.DatabaseCleaner;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
-import com.meetcha.project.domain.ProjectEntity;
-import com.meetcha.project.domain.ProjectRepository;
+import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meeting.scheduler.MeetingStatusUpdateScheduler;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,72 +15,74 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "spring.task.scheduling.enabled=false"
+)
 @ActiveProfiles("test")
 class ReflectionControllerTest {
 
     @LocalServerPort
     int port;
 
-    @Autowired
-    private DatabaseCleaner databaseCleaner;
+    @Autowired DatabaseCleaner databaseCleaner;
+    @Autowired TestAuthHelper testAuthHelper;
+    @Autowired UserRepository userRepository;
+    @Autowired MeetingRepository meetingRepository;
 
-    @Autowired
-    private TestAuthHelper testAuthHelper;
+    @MockBean // 테스트에서 스케줄러 비활성화
+    MeetingStatusUpdateScheduler meetingStatusUpdateScheduler;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private MeetingRepository meetingRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
+    private UserEntity user;
+    private String token;
 
     @BeforeEach
     void setUp() {
         databaseCleaner.clear();
+
         RestAssured.baseURI = "http://localhost";
-        RestAssured.basePath = "/api/v2";
         RestAssured.port = port;
+
+        token = testAuthHelper.createTestUserAndGetToken();
+        user = userRepository.findByEmail("testuser@meetcha.com").orElseThrow();
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // 1) 회고 생성 API 테스트
-    // ───────────────────────────────────────────────────────────────
+    /** 공통 Meeting 저장 함수 */
+    private MeetingEntity persistMeeting(MeetingEntity meeting) {
+        var saved = meetingRepository.saveAndFlush(meeting);
+        return meetingRepository.findById(saved.getMeetingId()).orElseThrow();
+    }
+
+    // -------------------------------------------------------
+    // 회고 생성
+    // -------------------------------------------------------
     @DisplayName("[POST] 회고 생성 성공")
     @Test
     void createReflection_success() {
-        // 사용자 + 토큰 생성
-        String token = testAuthHelper.createTestUserAndGetToken();
-        UserEntity user = userRepository.findByEmail("testuser@meetcha.com").orElseThrow();
 
-        // 미팅 생성
-        MeetingEntity meeting = MeetingEntity.builder()
-                .meetingId(UUID.randomUUID())
-                .title("테스트 미팅")
-                .description("설명")
-                .durationMinutes(60)
-                .deadline(LocalDateTime.now().plusDays(1))
-                .createdBy(user.getUserId())
-                .meetingStatus(com.meetcha.meeting.domain.MeetingStatus.DONE)
-                .createdAt(LocalDateTime.now())
-                .meetingCode("ABC12345")
-                .build();
+        MeetingEntity meeting = persistMeeting(
+                MeetingEntity.builder()
+                        .title("테스트 미팅")
+                        .description("설명")
+                        .durationMinutes(60)
+                        .deadline(LocalDateTime.now().plusDays(1))
+                        .createdBy(user.getUserId())
+                        .meetingStatus(MeetingStatus.DONE)
+                        .createdAt(LocalDateTime.now())
+                        .meetingCode("ABC12345")
+                        .build()
+        );
 
-        meetingRepository.save(meeting);
-
-        // Body 정의
         Map<String, Object> body = Map.of(
                 "contribution", 75,
                 "role", "백엔드",
@@ -96,55 +98,45 @@ class ReflectionControllerTest {
                 .when()
                 .post("/meeting/" + meeting.getMeetingId() + "/reflection/create")
                 .then()
-                .statusCode(201)
-                .body("success", equalTo(true))
+                .statusCode(200)
                 .body("data.reflectionId", notNullValue());
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // 2) 회고 요약 목록 조회 API 테스트
-    // ───────────────────────────────────────────────────────────────
+    // -------------------------------------------------------
+    // 회고 목록 요약
+    // -------------------------------------------------------
     @DisplayName("[GET] 사용자 회고 요약 목록 조회 성공")
     @Test
     void getMyReflections_success() {
-        String token = testAuthHelper.createTestUserAndGetToken();
-
         given()
                 .header("Authorization", "Bearer " + token)
                 .when()
-                .get("/reflection/list")
+                .get("/meeting/reflections")
                 .then()
                 .statusCode(200)
-                .body("success", equalTo(true))
-                .body("data", anyOf(notNullValue(), hasSize(0)));
+                .body("data", notNullValue());
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // 3) 회고 상세 조회 API 테스트
-    // ───────────────────────────────────────────────────────────────
+    // -------------------------------------------------------
+    // 특정 회고 상세 조회
+    // -------------------------------------------------------
     @DisplayName("[GET] 특정 미팅 회고 상세 조회 성공")
     @Test
     void getReflectionDetail_success() {
-        String token = testAuthHelper.createTestUserAndGetToken();
-        UserEntity user = userRepository.findByEmail("testuser@meetcha.com").orElseThrow();
 
-        // 미팅 생성 (DONE 상태)
-        MeetingEntity meeting = MeetingEntity.builder()
-                .meetingId(UUID.randomUUID())
-                .title("데이터 미팅")
-                .description("설명입니다")
-                .durationMinutes(60)
-                .deadline(LocalDateTime.now().plusDays(1))
-                .createdBy(user.getUserId())
-                .meetingStatus(com.meetcha.meeting.domain.MeetingStatus.DONE)
-                .createdAt(LocalDateTime.now())
-                .meetingCode("ABCDEFGH")
-                .build();
-
-        meetingRepository.save(meeting);
-
-        // (테스트 간편화를 위해 회고는 직접 DB에 삽입해도 됨)
-        // 하지만 여기서는 API를 이용해 생성 후 조회하는 흐름 유지
+        MeetingEntity meeting = persistMeeting(
+                MeetingEntity.builder()
+                        .title("데이터 미팅")
+                        .description("설명입니다")
+                        .durationMinutes(60)
+                        .deadline(LocalDateTime.now().plusDays(1))
+                        .createdBy(user.getUserId())
+                        .meetingStatus(MeetingStatus.DONE)
+                        .createdAt(LocalDateTime.now())
+                        .confirmedTime(LocalDateTime.now())
+                        .meetingCode("ABCDEFGH")
+                        .build()
+        );
 
         Map<String, Object> body = Map.of(
                 "contribution", 80,
@@ -152,7 +144,6 @@ class ReflectionControllerTest {
                 "thought", "좋았음"
         );
 
-        // 회고 생성
         given()
                 .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
@@ -160,27 +151,102 @@ class ReflectionControllerTest {
                 .when()
                 .post("/meeting/" + meeting.getMeetingId() + "/reflection/create")
                 .then()
-                .statusCode(201);
+                .statusCode(200);
 
-        // 상세 조회
         given()
                 .header("Authorization", "Bearer " + token)
                 .when()
                 .get("/meeting/" + meeting.getMeetingId() + "/reflection")
                 .then()
                 .statusCode(200)
-                .body("success", equalTo(true))
                 .body("data.meetingId", equalTo(meeting.getMeetingId().toString()))
                 .body("data.contribution", equalTo(80));
     }
 
-    // ───────────────────────────────────────────────────────────────
-    // 4) 회고 통계 API 테스트
-    // ───────────────────────────────────────────────────────────────
+    // -------------------------------------------------------
+    // 회고 Summary 조회
+    // -------------------------------------------------------
     @DisplayName("[GET] 회고 통계 조회 성공")
     @Test
     void getReflectionSummary_success() {
-        String token = testAuthHelper.createTestUserAndGetToken();
+        MeetingEntity m1 = persistMeeting(
+                MeetingEntity.builder()
+                        .title("미팅1")
+                        .description("설명1")
+                        .durationMinutes(30)
+                        .deadline(LocalDateTime.now().plusDays(1))
+                        .createdBy(user.getUserId())
+                        .meetingStatus(MeetingStatus.DONE)
+                        .createdAt(LocalDateTime.now())
+                        .meetingCode("MMM001")
+                        .build()
+        );
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "contribution", 70,
+                        "role", "백엔드",
+                        "thought", "좋았음"
+                ))
+                .when()
+                .post("/meeting/" + m1.getMeetingId() + "/reflection/create")
+                .then()
+                .statusCode(200);
+
+        MeetingEntity m2 = persistMeeting(
+                MeetingEntity.builder()
+                        .title("미팅2")
+                        .description("설명2")
+                        .durationMinutes(30)
+                        .deadline(LocalDateTime.now().plusDays(1))
+                        .createdBy(user.getUserId())
+                        .meetingStatus(MeetingStatus.DONE)
+                        .createdAt(LocalDateTime.now())
+                        .meetingCode("MMM002")
+                        .build()
+        );
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "contribution", 90,
+                        "role", "프론트엔드",
+                        "thought", "좋았음"
+                ))
+                .when()
+                .post("/meeting/" + m2.getMeetingId() + "/reflection/create")
+                .then()
+                .statusCode(200);
+
+        MeetingEntity m3 = persistMeeting(
+                MeetingEntity.builder()
+                        .title("미팅3")
+                        .description("설명3")
+                        .durationMinutes(30)
+                        .deadline(LocalDateTime.now().plusDays(1))
+                        .createdBy(user.getUserId())
+                        .meetingStatus(MeetingStatus.DONE)
+                        .createdAt(LocalDateTime.now())
+                        .meetingCode("MMM003")
+                        .build()
+        );
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .contentType(ContentType.JSON)
+                .body(Map.of(
+                        "contribution", 50,
+                        "role", "백엔드",
+                        "thought", "보통"
+                ))
+                .when()
+                .post("/meeting/" + m3.getMeetingId() + "/reflection/create")
+                .then()
+                .statusCode(200);
+
 
         given()
                 .header("Authorization", "Bearer " + token)
@@ -188,9 +254,26 @@ class ReflectionControllerTest {
                 .get("/reflection/summary")
                 .then()
                 .statusCode(200)
-                .body("success", equalTo(true))
-                .body("data.totalReflections", notNullValue())
-                .body("data.averageContribution", notNullValue())
-                .body("data.mostFrequentRole", notNullValue());
+                .body("data.totalReflections", equalTo(3))
+                .body("data.averageContribution", equalTo(70))  // (70 + 90 + 50) / 3
+                .body("data.mostFrequentRole", equalTo("백엔드")); // 백엔드 2회 → 최다
     }
+
+    @DisplayName("[GET] 회고 0개일 때 summary 조회 성공")
+    @Test
+    void getReflectionSummary_empty_success() {
+
+        // 회고 0개 상태에서 호출
+
+        given()
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get("/reflection/summary")
+                .then()
+                .statusCode(200)
+                .body("data.totalReflections", equalTo(0))
+                .body("data.averageContribution", equalTo(0))
+                .body("data.mostFrequentRole", nullValue());
+    }
+
 }
