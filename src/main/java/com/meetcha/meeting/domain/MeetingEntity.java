@@ -3,7 +3,6 @@ package com.meetcha.meeting.domain;
 import com.meetcha.project.domain.ProjectEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.JdbcType;
 import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
@@ -79,8 +78,6 @@ public class MeetingEntity {
 
     public boolean isDeadlinePassed() {
 
-//        log.info("{}",deadline);
-//        log.info("{}",LocalDateTime.now());
         return deadline != null && deadline.isBefore(LocalDateTime.now());
     }
 
