@@ -11,11 +11,9 @@ import java.util.stream.Collectors;
 
 /**
  * 대안 시간 산출 알고리즘
- *
  * - 1차 알고리즘 실패 시 fallback 용도로 사용
- * - 두 가지 전략 제공:
- *   1. 진행 시간을 줄여 가능한 시간 확보
- *   2. 일부 참여자를 줄여 가능한 시간 확보
+ * - 현재 전략:
+ *   1. 진행 시간을 줄이되, 모든 참여자가 동시에 참석 가능한 시간대만 후보로 사용
  */
 @Slf4j
 public class AlternativeTimeCalculator {
@@ -51,6 +49,7 @@ public class AlternativeTimeCalculator {
             }
         }
 
+        /*
         // 전략 2: 참여자 줄이기
         int total = meeting.getParticipants().size();
         int left = (int) Math.ceil((2.0 * total) / 3);
@@ -91,7 +90,7 @@ public class AlternativeTimeCalculator {
                     .excludedParticipants(String.join(",", excluded))
                     .build());
         }
-
+*/
         return results;
     }
 
@@ -137,9 +136,9 @@ public class AlternativeTimeCalculator {
         return SortUtils.sortByTimePriority(earlyCandidates);
     }
 
-    /**
+    /*
      * [전략 2] 참여자를 줄여 가능한 시간 후보를 찾는다.
-     */
+
     private static List<Integer> getLessParticipantMeetingTimes(Meeting meeting) {
         int total = meeting.getParticipants().size();
         int left = (int) Math.ceil((2.0 * total) / 3);
@@ -178,7 +177,7 @@ public class AlternativeTimeCalculator {
         if (early.isEmpty()) return Collections.emptyList();
         return SortUtils.sortByTimePriority(early);
     }
-
+*/
     /**
      * 공통 시퀀스 계산
      */
