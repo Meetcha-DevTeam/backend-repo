@@ -1,5 +1,6 @@
 package com.meetcha.joinmeeting.domain;
 
+import com.meetcha.meetinglist.domain.ParticipantAvailabilityEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,5 +14,7 @@ public interface ParticipantAvailabilityRepository extends JpaRepository<Partici
     List<ParticipantAvailability> findByMeetingIdAndParticipantId(UUID meetingId, UUID participantId);
 
     void deleteByMeetingId(UUID meetingId);
+
+    List<ParticipantAvailabilityEntity> findAllByMeetingId(UUID meetingId);
 
 }
