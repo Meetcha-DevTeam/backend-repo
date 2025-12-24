@@ -1,6 +1,7 @@
 package com.meetcha.joinmeeting.domain;
 
 import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
+import com.meetcha.meetinglist.domain.ParticipantAvailabilityEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,7 +18,7 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
     List<MeetingParticipant> findAllByMeeting_MeetingId(UUID meetingId);
 
-    List<MeetingParticipant> findByUserId(UUID userId);
+    List<UUID> findParticipantIdsByMeetingId(UUID userId);
 
     @Query("""
        SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
