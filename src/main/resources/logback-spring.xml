@@ -20,8 +20,16 @@
         <!-- 기본 파일 경로 -->
         <file>${LOG_PATH}/application.log</file>
 
-        <encoder>
-            <pattern>${FILE_LOG_PATTERN}</pattern>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <logLevel />
+                <threadName />
+                <loggerName />
+                <message />
+                <mdc />          <!-- requestId 자동 포함 -->
+                <stackTrace />
+            </providers>
         </encoder>
 
         <!-- 롤링 정책 설정 (파일명, 파일 최대 크기, 최대 보관 기간, 로그 총 용량) -->
@@ -44,8 +52,16 @@
         <!-- 기본 파일 경로 -->
         <file>${LOG_PATH}/application_error.log</file>
 
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>${FILE_LOG_PATTERN}</pattern>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp />
+                <logLevel />
+                <threadName />
+                <loggerName />
+                <message />
+                <mdc />          <!-- requestId 자동 포함 -->
+                <stackTrace />
+            </providers>
         </encoder>
 
         <!-- 롤링 정책 설정 (파일명, 파일 최대 크기, 최대 보관 기간, 로그 총 용량) -->
