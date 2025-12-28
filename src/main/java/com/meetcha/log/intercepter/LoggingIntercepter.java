@@ -23,12 +23,6 @@ public class LoggingIntercepter implements HandlerInterceptor {
     private static final int MAX_LOG_BYTES = 8 * 1024;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        // 요청 계속 진행
-        return true;
-    }
-
-    @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         logBasicRequestInfo(request);
         ContentCachingRequestWrapper requestWrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
