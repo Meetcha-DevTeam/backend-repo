@@ -15,8 +15,16 @@ import java.util.Map;
 public class LoggingIntercepter implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        log.info("API Request : method = [{}] URL = [{}] params = [{}]", request.getMethod(), request.getRequestURL(), getRequestParams(request));
+        log.info("API Request : clientIP = [{}] method = [{}] URL = [{}] params = [{}]", getClientIP(request), request.getMethod(), request.getRequestURL(), getRequestParams(request));
         return true;
+    }
+
+    private String getClientIP(HttpServletRequest request) {
+        String clientIP = request.getHeader("X-Real-IP");
+        if(clientIP == null || clientIP.isEmpty()){
+            clientIP = request.getRemoteAddr();
+        }
+        return clientIP;
     }
 
     private Map<String, String> getRequestParams(HttpServletRequest request) {
