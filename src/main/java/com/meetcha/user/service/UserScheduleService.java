@@ -194,6 +194,7 @@ public class UserScheduleService {
 
     // 유저 일정 수정
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
+        log.info("[일정 수정 요청] User ID: {}, Event ID: {}", userId, request.getEventId());
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
@@ -205,6 +206,7 @@ public class UserScheduleService {
                 request.getEndAt(),
                 request.getRecurrence()
         );
+        log.info("[일정 수정 성공] User ID: {}, Event ID: {}", userId, request.getEventId());
     }
 
     // 유저 일정 삭제
