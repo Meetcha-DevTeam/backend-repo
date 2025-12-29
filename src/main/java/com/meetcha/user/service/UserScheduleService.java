@@ -180,20 +180,16 @@ public class UserScheduleService {
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
 
-        try {
-            String eventId = googleCalendarClient.createEvent(
-                    accessToken,
-                    request.getTitle(),
-                    request.getStartAt(),
-                    request.getEndAt(),
-                    rrule
-            );
-            log.info("[일정 생성 성공] User ID: {}, Event ID: {}", userId, eventId); // 성공 로그
-            return eventId;
-        } catch (Exception e) {
-            log.error("[일정 생성 실패] User ID: {}, Error: {}", userId, e.getMessage()); // 에러 로그
-            throw e;
-        }
+        String eventId = googleCalendarClient.createEvent(
+                accessToken,
+                request.getTitle(),
+                request.getStartAt(),
+                request.getEndAt(),
+                rrule
+        );
+
+        log.info("[일정 생성 성공] User ID: {}, Event ID: {}", userId, eventId);
+        return eventId;
     }
 
     // 유저 일정 수정
