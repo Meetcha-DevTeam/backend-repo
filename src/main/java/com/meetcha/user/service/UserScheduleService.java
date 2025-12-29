@@ -153,13 +153,18 @@ public class UserScheduleService {
 
     // 유저 일정 조회
     public List<ScheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
+        log.info("[일정 조회 요청] User ID: {}, From: {}, To: {}", userId, from, to);
         // 명세: 유효하지 않은 날짜 범위 → 400
         if (from == null || to == null || to.isBefore(from)) {
+            log.warn("[일정 조회 실패] User ID: {}, 유효하지 않은 날짜 범위: {} ~ {}", userId, from, to);
             throw new CustomException(ErrorCode.INVALID_DATE_RANGE); // 없으면 제거하거나 enum에 추가
         }
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        return googleCalendarClient.getEvents(accessToken, from, to);
+        List<ScheduleResponse> result = googleCalendarClient.getEvents(accessToken, from, to);
+
+        log.info("[일정 조회 성공] User ID: {}, 조회된 일정 수: {}", userId, result.size());
+        return result;
     }
 
     // 유저 일정 생성
