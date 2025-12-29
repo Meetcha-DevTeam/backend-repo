@@ -1,6 +1,6 @@
 package com.meetcha.log.intercepter;
 
-import com.meetcha.log.util.LoggedJsonMasker;
+import com.meetcha.log.util.JsonMasker;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -62,8 +62,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         }
         return params;
     }
-
-
+    
     private static boolean hasLoggableBody(HttpServletRequest request) {
         String contentType = request.getContentType();
         return contentType != null && contentType.startsWith(MediaType.APPLICATION_JSON_VALUE);
@@ -77,7 +76,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         Charset charset = (request.getCharacterEncoding() != null)
                 ? Charset.forName(request.getCharacterEncoding()) : StandardCharsets.UTF_8;
         String body = new String(bytes, charset);
-        String masked = LoggedJsonMasker.mask(body);
+        String masked = JsonMasker.mask(body);
         log.info("API Request : body = [{}]", abbreviate(masked));
     }
 
@@ -108,7 +107,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         Charset charset = (response.getCharacterEncoding() != null)
                 ? Charset.forName(response.getCharacterEncoding()) : StandardCharsets.UTF_8;
         String body = new String(bytes, charset);
-        String masked = LoggedJsonMasker.mask(body);
+        String masked = JsonMasker.mask(body);
         log.info("API Response : body = [{}]", abbreviate(masked));
     }
 }

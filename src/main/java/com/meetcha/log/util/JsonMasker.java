@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Map;
 
-public class LoggedJsonMasker {
+public class JsonMasker {
 
     private static final ObjectMapper om = new ObjectMapper();
 
