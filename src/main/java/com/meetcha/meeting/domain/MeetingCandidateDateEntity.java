@@ -8,6 +8,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "meeting_candidate_dates")
 @NoArgsConstructor
+@AllArgsConstructor
 public class MeetingCandidateDateEntity {
     @Id
     @GeneratedValue
