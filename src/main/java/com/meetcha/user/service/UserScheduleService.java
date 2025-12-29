@@ -136,6 +136,7 @@ import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -144,6 +145,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserScheduleService {
 
     private final GoogleTokenService googleTokenService;
