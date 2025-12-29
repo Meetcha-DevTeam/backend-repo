@@ -136,6 +136,7 @@ import com.meetcha.user.dto.ScheduleDetailResponse;
 import com.meetcha.user.dto.ScheduleResponse;
 import com.meetcha.user.dto.UpdateScheduleRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -144,6 +145,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserScheduleService {
 
     private final GoogleTokenService googleTokenService;
@@ -151,17 +153,24 @@ public class UserScheduleService {
 
     // 유저 일정 조회
     public List<ScheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
+        log.info("[일정 조회 요청] User ID: {}, From: {}, To: {}", userId, from, to);
         // 명세: 유효하지 않은 날짜 범위 → 400
         if (from == null || to == null || to.isBefore(from)) {
+            log.warn("[일정 조회 실패] User ID: {}, 유효하지 않은 날짜 범위: {} ~ {}", userId, from, to);
             throw new CustomException(ErrorCode.INVALID_DATE_RANGE); // 없으면 제거하거나 enum에 추가
         }
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        return googleCalendarClient.getEvents(accessToken, from, to);
+        List<ScheduleResponse> result = googleCalendarClient.getEvents(accessToken, from, to);
+
+        log.info("[일정 조회 성공] User ID: {}, 조회된 일정 수: {}", userId, result.size());
+        return result;
     }
 
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
+        log.info("[일정 생성 시도] User ID: {}, Title: {}", userId, request.getTitle());
+
         String recurrence = request.getRecurrence();
         if ("NONE".equalsIgnoreCase(recurrence) || recurrence == null || recurrence.isBlank()) {
             recurrence = null; // NONE, 빈 값 모두 null 처리
@@ -170,17 +179,22 @@ public class UserScheduleService {
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
-        return googleCalendarClient.createEvent(
+
+        String eventId = googleCalendarClient.createEvent(
                 accessToken,
                 request.getTitle(),
                 request.getStartAt(),
                 request.getEndAt(),
                 rrule
         );
+
+        log.info("[일정 생성 성공] User ID: {}, Event ID: {}", userId, eventId);
+        return eventId;
     }
 
     // 유저 일정 수정
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
+        log.info("[일정 수정 요청] User ID: {}, Event ID: {}", userId, request.getEventId());
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
@@ -192,17 +206,26 @@ public class UserScheduleService {
                 request.getEndAt(),
                 request.getRecurrence()
         );
+        log.info("[일정 수정 성공] User ID: {}, Event ID: {}", userId, request.getEventId());
     }
 
     // 유저 일정 삭제
     public void deleteSchedule(UUID userId, String eventId) {
+        log.info("[일정 삭제 요청] User ID: {}, Event ID: {}", userId, eventId);
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.deleteEvent(accessToken, eventId);
+
+        log.info("[일정 삭제 성공] User ID: {}, Event ID: {}", userId, eventId);
     }
 
     // 단일 상세 일정 조회
     public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
+        log.info("[일정 상세 조회 요청] User ID: {}, Event ID: {}", userId, eventId);
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
+
+        log.info("[일정 상세 조회 성공] User ID: {}, Event ID: {}", userId, eventId);
         return googleCalendarClient.getEventById(accessToken, eventId);
     }
 
