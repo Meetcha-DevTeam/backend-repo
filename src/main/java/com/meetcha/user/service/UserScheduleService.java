@@ -211,8 +211,12 @@ public class UserScheduleService {
 
     // 유저 일정 삭제
     public void deleteSchedule(UUID userId, String eventId) {
+        log.info("[일정 삭제 요청] User ID: {}, Event ID: {}", userId, eventId);
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.deleteEvent(accessToken, eventId);
+
+        log.info("[일정 삭제 성공] User ID: {}, Event ID: {}", userId, eventId);
     }
 
     // 단일 상세 일정 조회
