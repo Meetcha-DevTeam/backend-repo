@@ -221,7 +221,11 @@ public class UserScheduleService {
 
     // 단일 상세 일정 조회
     public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
+        log.info("[일정 상세 조회 요청] User ID: {}, Event ID: {}", userId, eventId);
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
+
+        log.info("[일정 상세 조회 성공] User ID: {}, Event ID: {}", userId, eventId);
         return googleCalendarClient.getEventById(accessToken, eventId);
     }
 
