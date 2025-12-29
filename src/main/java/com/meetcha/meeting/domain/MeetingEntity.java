@@ -77,6 +77,7 @@ public class MeetingEntity {
     }
 
     public boolean isDeadlinePassed() {
+
         return deadline != null && deadline.isBefore(LocalDateTime.now());
     }
 

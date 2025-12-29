@@ -22,6 +22,9 @@ public class GlobalExceptionHandler {
         String path = request.getRequestURI();
         ErrorCodeBase errorCode = e.getErrorCode();
 
+        log.error("[CustomException] path={}, errorCode={}, message={}",
+                path, errorCode.getCode(), errorCode.getMessage());
+
         // fieldErrors가 있으면 data에 같이
         if (e.getFieldErrors() != null) {
             return ResponseEntity
