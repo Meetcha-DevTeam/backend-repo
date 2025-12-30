@@ -38,7 +38,7 @@ class MeetingListServiceTest {
         when(meetingRepository.findById(meetingId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                meetingListService.getAllParticipantsAvailabilities(meetingId, "Bearer token")
+                meetingListService.getAllParticipantsAvailabilities(meetingId)
         ).isInstanceOf(CustomException.class)
                 .satisfies(ex -> {
                     CustomException ce = (CustomException) ex;
@@ -57,7 +57,7 @@ class MeetingListServiceTest {
         when(meetingParticipantRepository.findParticipantIdsByMeetingId(meetingId)).thenReturn(List.of());
 
         MeetingAllAvailabilitiesResponse res =
-                meetingListService.getAllParticipantsAvailabilities(meetingId, "Bearer token");
+                meetingListService.getAllParticipantsAvailabilities(meetingId);
 
         assertThat(res.getCount()).isZero();
         assertThat(res.getParticipants()).isEmpty();
@@ -103,7 +103,7 @@ class MeetingListServiceTest {
                 .thenReturn(List.of(a1, a2, b1));
 
         MeetingAllAvailabilitiesResponse res =
-                meetingListService.getAllParticipantsAvailabilities(meetingId, "Bearer token");
+                meetingListService.getAllParticipantsAvailabilities(meetingId);
 
         assertThat(res.getCount()).isEqualTo(3);
         assertThat(res.getParticipants()).hasSize(3);

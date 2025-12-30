@@ -60,7 +60,7 @@ class MeetingListControllerTest {
                         .count(1)
                         .build();
 
-        when(meetingListService.getAllParticipantsAvailabilities(eq(meetingId), anyString()))
+        when(meetingListService.getAllParticipantsAvailabilities(eq(meetingId)))
                 .thenReturn(response);
 
         mockMvc.perform(get("/meeting-lists/{meetingId}/availabilities", meetingId)

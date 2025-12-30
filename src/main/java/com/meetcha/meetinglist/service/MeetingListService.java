@@ -97,14 +97,11 @@ public class MeetingListService {
 
 
     @Transactional(readOnly = true)
-    public MeetingAllAvailabilitiesResponse getAllParticipantsAvailabilities(UUID meetingId, String authorizationHeader) {
+    public MeetingAllAvailabilitiesResponse getAllParticipantsAvailabilities(UUID meetingId) {
 
         // 0) 미팅 존재 확인
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
-
-        // 미팅생성자만 확인할 수 있도록 권한 체크가 필요하면 여기서 처리
-        // validateAccess(meetingId, authorizationHeader);
 
         // 1) 미팅 참여자 participantId 전부 조회
         List<UUID> participantIds = meetingParticipantRepository.findParticipantIdsByMeetingId(meetingId);
@@ -119,7 +116,6 @@ public class MeetingListService {
         // 2) 미팅의 모든 참가 가능 시간 조회
         List<ParticipantAvailabilityEntity> availEntities =
                 participantAvailabilityRepository.findAllByMeetingId(meetingId);
-        // 또는 findAllByMeeting_MeetingId(meetingId)
 
         // 3) participantId 기준 그룹핑
         Map<UUID, List<MeetingAllAvailabilitiesResponse.Availability>> availMap =

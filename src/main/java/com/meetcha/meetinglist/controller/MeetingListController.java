@@ -93,9 +93,8 @@ public class MeetingListController {
     // 모든 미팅 참여자의 모든 참가 가능 시간 조회 (매칭 실패 상세 페이지용)
     @GetMapping("/{meetingId}/availabilities")
     public MeetingAllAvailabilitiesResponse getAllAvailabilities(
-            @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @PathVariable UUID meetingId
     ) {
-        return meetingListService.getAllParticipantsAvailabilities(meetingId, authorizationHeader);
+        return meetingListService.getAllParticipantsAvailabilities(meetingId);
     }
 }
