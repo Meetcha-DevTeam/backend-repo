@@ -4,12 +4,12 @@ import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
-import com.meetcha.meetinglist.domain.ParticipantAvailabilityEntity;
 import com.meetcha.meetinglist.dto.NeedReflectionResponse;
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.MeetingListResponse;
@@ -114,14 +114,14 @@ public class MeetingListService {
         }
 
         // 2) 미팅의 모든 참가 가능 시간 조회
-        List<ParticipantAvailabilityEntity> availEntities =
-                participantAvailabilityRepository.findAllByMeetingId(meetingId);
+        List<ParticipantAvailability> availEntities =
+                participantAvailabilityRepository.findByMeetingId(meetingId);
 
         // 3) participantId 기준 그룹핑
         Map<UUID, List<MeetingAllAvailabilitiesResponse.Availability>> availMap =
                 availEntities.stream()
                         .collect(Collectors.groupingBy(
-                                ParticipantAvailabilityEntity::getParticipantId,
+                                ParticipantAvailability::getParticipantId,
                                 Collectors.mapping(a -> MeetingAllAvailabilitiesResponse.Availability.builder()
                                         .availabilityId(a.getAvailabilityId())
                                         .startAt(DateTimeUtils.utcToKst(a.getStartAt()))

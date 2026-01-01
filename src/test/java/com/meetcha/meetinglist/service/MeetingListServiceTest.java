@@ -3,12 +3,11 @@ package com.meetcha.meetinglist.service;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailability;
 import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
-import com.meetcha.meetinglist.domain.ParticipantAvailabilityEntity;
 import com.meetcha.meetinglist.dto.MeetingAllAvailabilitiesResponse;
-import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +25,6 @@ class MeetingListServiceTest {
 
     @Mock MeetingRepository meetingRepository;
     @Mock MeetingParticipantRepository meetingParticipantRepository;
-    @Mock MeetingReflectionRepository reflectionRepository;
     @Mock ParticipantAvailabilityRepository participantAvailabilityRepository;
 
     @InjectMocks MeetingListService meetingListService;
@@ -62,7 +60,7 @@ class MeetingListServiceTest {
         assertThat(res.getCount()).isZero();
         assertThat(res.getParticipants()).isEmpty();
 
-        verify(participantAvailabilityRepository, never()).findAllByMeetingId(any());
+        verify(participantAvailabilityRepository, never()).findByMeetingId(any());
     }
 
     @Test
@@ -78,28 +76,31 @@ class MeetingListServiceTest {
         when(meetingParticipantRepository.findParticipantIdsByMeetingId(meetingId)).thenReturn(List.of(p1, p2, p3));
 
         // p1: 2개, p2: 1개, p3: 0개
-        ParticipantAvailabilityEntity a1 = ParticipantAvailabilityEntity.builder()
+        ParticipantAvailability a1 = ParticipantAvailability.builder()
                 .availabilityId(UUID.randomUUID())
                 .participantId(p1)
+                .meetingId(meetingId)
                 .startAt(LocalDateTime.of(2025, 7, 22, 6, 0))
                 .endAt(LocalDateTime.of(2025, 7, 22, 6, 30))
                 .build();
 
-        ParticipantAvailabilityEntity a2 = ParticipantAvailabilityEntity.builder()
+        ParticipantAvailability a2 = ParticipantAvailability.builder()
                 .availabilityId(UUID.randomUUID())
                 .participantId(p1)
+                .meetingId(meetingId)
                 .startAt(LocalDateTime.of(2025, 7, 22, 7, 0))
                 .endAt(LocalDateTime.of(2025, 7, 22, 7, 30))
                 .build();
 
-        ParticipantAvailabilityEntity b1 = ParticipantAvailabilityEntity.builder()
+        ParticipantAvailability b1 = ParticipantAvailability.builder()
                 .availabilityId(UUID.randomUUID())
                 .participantId(p2)
+                .meetingId(meetingId)
                 .startAt(LocalDateTime.of(2025, 7, 22, 6, 0))
                 .endAt(LocalDateTime.of(2025, 7, 22, 7, 0))
                 .build();
 
-        when(participantAvailabilityRepository.findAllByMeetingId(meetingId))
+        when(participantAvailabilityRepository.findByMeetingId(meetingId))
                 .thenReturn(List.of(a1, a2, b1));
 
         MeetingAllAvailabilitiesResponse res =
