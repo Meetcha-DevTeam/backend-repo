@@ -10,6 +10,8 @@ import java.util.UUID;
 @Table(name = "participant_availabilities")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class ParticipantAvailability {
 
     @Id
