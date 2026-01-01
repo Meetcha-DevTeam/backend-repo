@@ -1,72 +1,75 @@
 package com.meetcha.meetinglist.controller;
 
-import com.meetcha.joinmeeting.service.JoinMeetingService;
+import com.meetcha.AcceptanceTest;
+import com.meetcha.auth.domain.UserEntity;
+import com.meetcha.auth.jwt.JwtProvider;
+import com.meetcha.global.util.TestDataFactory;
+import com.meetcha.joinmeeting.domain.MeetingParticipant;
+import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meetinglist.dto.MeetingAllAvailabilitiesResponse;
-import com.meetcha.meetinglist.service.AlternativeTimeService;
-import com.meetcha.meetinglist.service.MeetingListService;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@WebMvcTest(MeetingListController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@ActiveProfiles("test")
-class MeetingListControllerTest {
+class MeetingListControllerTest extends AcceptanceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired TestDataFactory testDataFactory;
+    @Autowired JwtProvider jwtProvider;
 
-    @MockitoBean
-    private MeetingListService meetingListService;
-
-    @MockitoBean
-    private AlternativeTimeService alternativeTimeService;
-
-    @MockitoBean
-    private JoinMeetingService joinMeetingService;
-
+    @DisplayName("모든 미팅 참여자의 모든 참가 가능 시간을 조회한다")
     @Test
-    void getAllAvailabilities_returnsExpectedJson() throws Exception {
-        UUID meetingId = UUID.randomUUID();
-        UUID participantId = UUID.randomUUID();
+    void getAllAvailabilities() {
+        // given
+        UserEntity user = testDataFactory.createUser("email1");
+        String accessToken = jwtProvider.createAccessToken(user.getUserId(), user.getEmail());
 
+        MeetingEntity meeting = testDataFactory.createMeeting(user.getUserId(), LocalDateTime.now(), LocalDateTime.now().plusDays(3));
+
+        // 2. 미팅 참가자 생성
+        MeetingParticipant participant =
+                testDataFactory.createMeetingParticipant(
+                        "참가자1",
+                        user.getUserId(),
+                        meeting.getMeetingId()
+                );
+
+        // 3. 참가 가능 시간 생성
+        testDataFactory.createParticipantAvailability(
+                participant.getParticipantId(),
+                meeting.getMeetingId(),
+                LocalDateTime.of(2025, 7, 22, 15, 0),
+                LocalDateTime.of(2025, 7, 22, 15, 30)
+        );
+
+
+        // when
         MeetingAllAvailabilitiesResponse response =
-                MeetingAllAvailabilitiesResponse.builder()
-                        .participants(List.of(
-                                MeetingAllAvailabilitiesResponse.ParticipantAvailabilities.builder()
-                                        .participantId(participantId)
-                                        .availabilities(List.of(
-                                                MeetingAllAvailabilitiesResponse.Availability.builder()
-                                                        .availabilityId(UUID.randomUUID())
-                                                        .startAt(LocalDateTime.of(2025, 7, 22, 15, 0))
-                                                        .endAt(LocalDateTime.of(2025, 7, 22, 15, 30))
-                                                        .build()
-                                        ))
-                                        .build()
-                        ))
-                        .count(1)
-                        .build();
+                given()
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON)
+                        .when()
+                        .get("/meeting-lists/{meetingId}/availabilities",
+                                meeting.getMeetingId())
+                        .then()
+                        .statusCode(200)
+                        .extract()
+                        .jsonPath()
+                        .getObject("data", MeetingAllAvailabilitiesResponse.class);
 
-        when(meetingListService.getAllParticipantsAvailabilities(eq(meetingId)))
-                .thenReturn(response);
-
-        mockMvc.perform(get("/meeting-lists/{meetingId}/availabilities", meetingId)
-                        .header("Authorization", "Bearer token"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.count").value(1))
-                .andExpect(jsonPath("$.data.participants[0].participantId").value(participantId.toString()));
+        // then
+        assertThat(response.getCount()).isEqualTo(1);
+        assertThat(response.getParticipants()).hasSize(1);
+        assertThat(response.getParticipants().get(0).getParticipantId())
+                .isEqualTo(participant.getParticipantId());
+        assertThat(response.getParticipants().get(0).getAvailabilities())
+                .hasSize(1);
     }
+
 }
