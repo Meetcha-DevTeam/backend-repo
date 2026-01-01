@@ -1,7 +1,6 @@
 package com.meetcha.meetinglist.controller;
 
 import com.meetcha.global.annotation.AuthUser;
-import com.meetcha.global.dto.ApiResponse;
 import com.meetcha.joinmeeting.dto.JoinMeetingRequest;
 import com.meetcha.joinmeeting.dto.JoinMeetingResponse;
 import com.meetcha.joinmeeting.service.JoinMeetingService;
@@ -11,7 +10,6 @@ import com.meetcha.meetinglist.service.MeetingListService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -91,4 +89,13 @@ public class MeetingListController {
     ) {
       return meetingListService.getMeetingsNeedingReflection(userId);
     }
+
+    // 매칭 실패 상세 페이지용 모든 미팅 참여자의 모든 참가 가능 시간 조회
+    @GetMapping("/{meetingId}/availabilities")
+    public MeetingAllAvailabilitiesResponse getAllAvailabilities(
+            @PathVariable UUID meetingId
+    ) {
+        return meetingListService.getAllParticipantsAvailabilities(meetingId);
+    }
+
 }
