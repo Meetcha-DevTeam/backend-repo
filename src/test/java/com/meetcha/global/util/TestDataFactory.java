@@ -6,6 +6,8 @@ import com.meetcha.auth.domain.UserEntity;
 import com.meetcha.auth.domain.UserRepository;
 import com.meetcha.joinmeeting.domain.MeetingParticipant;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailability;
+import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,9 @@ public class TestDataFactory {
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Autowired
+    private ParticipantAvailabilityRepository participantAvailabilityRepository;
 
     public UserEntity createUser(String email) {
         LocalDateTime now = LocalDateTime.now();
@@ -70,4 +75,18 @@ public class TestDataFactory {
         RefreshTokenEntity refresh = new RefreshTokenEntity(userId, refreshToken, expireAt);
         return refreshTokenRepository.save(refresh);
     }
+
+    public ParticipantAvailability createParticipantAvailability(UUID participantId, UUID meetingId, LocalDateTime startAt, LocalDateTime endAt
+    ) {
+        ParticipantAvailability availability =
+                ParticipantAvailability.create(
+                        participantId,
+                        meetingId,
+                        startAt,
+                        endAt
+                );
+
+        return participantAvailabilityRepository.save(availability);
+    }
+
 }
