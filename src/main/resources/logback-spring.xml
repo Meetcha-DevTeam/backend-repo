@@ -75,6 +75,7 @@
 
     <!-- local 프로파일은 콘솔에서만 출력 -->
     <springProfile name="local">
+        <!-- 로컬에서는 밋챠 서버의 로그를 DEBUG 레벨부터 출력하도록 설정 -->
         <logger name="com.meetcha" level="DEBUG" />
         <root level="INFO">
             <appender-ref ref="consoleAppender" />
