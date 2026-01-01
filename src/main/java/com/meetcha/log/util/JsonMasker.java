@@ -10,17 +10,24 @@ public class JsonMasker {
 
     private static final ObjectMapper om = new ObjectMapper();
 
-    // 키별 마스킹 전략
-    private static final Map<String, UnmaskedArea> MASK_RULES = Map.of(
-            "token", new UnmaskedArea(8, 6),
-            "accessToken", new UnmaskedArea(8, 6),
-            "refreshToken", new UnmaskedArea(6, 4)
+    // 요청 마스킹 전략
+    public static final Map<String, UnmaskedArea> REQUEST_MASK_RULES = Map.of(
+            "code", new UnmaskedArea(6, 6),
+            "accessToken", new UnmaskedArea(6, 6),
+            "refreshToken", new UnmaskedArea(6, 6)
     );
 
-    public static String mask(String json) {
+    // 응답 마스킹 전략
+    public static final Map<String, UnmaskedArea> RESPONSE_MASK_RULES = Map.of(
+            "token", new UnmaskedArea(6, 6),
+            "accessToken", new UnmaskedArea(6, 6),
+            "refreshToken", new UnmaskedArea(6, 6)
+    );
+
+    public static String mask(String json, Map<String, UnmaskedArea> maskingRules) {
         try {
             JsonNode root = om.readTree(json);
-            maskNode(root);
+            maskNode(root, maskingRules);
             return om.writeValueAsString(root);
         }
         catch (Exception e) {
@@ -28,7 +35,7 @@ public class JsonMasker {
         }
     }
 
-    private static void maskNode(JsonNode node) {
+    private static void maskNode(JsonNode node, Map<String, UnmaskedArea> maskingRules) {
         if (node == null) return;
 
         if (node.isObject()) {
@@ -36,18 +43,18 @@ public class JsonMasker {
             obj.fieldNames().forEachRemaining(field -> {
                 JsonNode child = obj.get(field);
 
-                if (MASK_RULES.containsKey(field) && child != null && child.isValueNode()) {
-                    UnmaskedArea rule = MASK_RULES.get(field);
+                if (maskingRules.containsKey(field) && child != null && child.isValueNode()) {
+                    UnmaskedArea rule = maskingRules.get(field);
                     obj.put(field, partialMask(child.asText(), rule.prefix, rule.suffix));
                 }
                 else {
-                    maskNode(child);
+                    maskNode(child, maskingRules);
                 }
             });
         }
         else if (node.isArray()) {
             for (JsonNode child : node) {
-                maskNode(child);
+                maskNode(child, maskingRules);
             }
         }
     }

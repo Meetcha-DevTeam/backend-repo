@@ -76,7 +76,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         Charset charset = (request.getCharacterEncoding() != null)
                 ? Charset.forName(request.getCharacterEncoding()) : StandardCharsets.UTF_8;
         String body = new String(bytes, charset);
-        String masked = JsonMasker.mask(body);
+        String masked = JsonMasker.mask(body, JsonMasker.REQUEST_MASK_RULES);
         log.info("API Request : body = [{}]", abbreviate(masked));
     }
 
@@ -107,7 +107,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         Charset charset = (response.getCharacterEncoding() != null)
                 ? Charset.forName(response.getCharacterEncoding()) : StandardCharsets.UTF_8;
         String body = new String(bytes, charset);
-        String masked = JsonMasker.mask(body);
+        String masked = JsonMasker.mask(body, JsonMasker.RESPONSE_MASK_RULES);
         log.info("API Response : body = [{}]", abbreviate(masked));
     }
 }
