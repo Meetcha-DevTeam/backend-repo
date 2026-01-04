@@ -230,10 +230,17 @@ public class JoinMeetingService {
 
     @Transactional(readOnly = true)
     public List<GetSelectedTime> getMyAvailableTimes(UUID meetingId, UUID userId) {
+
+        long startNs = System.nanoTime();
+        log.info("[MY_AVAILABLE_TIMES] start meetingId={} userId={}", meetingId, userId);
+
         // userId로 participant 조회
         MeetingParticipant participant = participantRepository
                 .findByMeeting_MeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MY_AVAILABLE_TIMES] participant not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND);
+                });
 
         UUID participantId = participant.getParticipantId();
 
@@ -243,12 +250,18 @@ public class JoinMeetingService {
 
 
 
-        return times.stream()
+        List<GetSelectedTime> result = times.stream()
                 .map(t -> new GetSelectedTime(
                         DateTimeUtils.utcToKstString(t.getStartAt()),
                         DateTimeUtils.utcToKstString(t.getEndAt())
                 ))
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MY_AVAILABLE_TIMES] success meetingId={} userId={} participantId={} count={} elapsedMs={}",
+                meetingId, userId, participantId, result.size(), elapsedMs);
+
+        return result;
     }
 
 
