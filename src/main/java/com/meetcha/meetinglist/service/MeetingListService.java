@@ -29,7 +29,7 @@ public class MeetingListService {
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final MeetingReflectionRepository reflectionRepository;
 
-    public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
+    public MeetingDetailResponse getMeetingDetail(UUID meetingId, UUID userId) {
         long startNs = System.nanoTime();
         log.info("[MEETING_DETAIL] start meetingId={}", meetingId);
 

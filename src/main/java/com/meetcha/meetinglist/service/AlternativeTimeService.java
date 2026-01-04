@@ -35,13 +35,13 @@ public class AlternativeTimeService {
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final JwtProvider jwtProvider;
 
-    public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
+    public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, UUID userId) {
         //대안시간 후보 조회 로직
         // 로깅용 타이머
         long startNs = System.nanoTime();
-        // 1. 사용자 식별
-        UUID userId = extractUserId(authorizationHeader);
-        log.info("[ALT_TIME_LIST] start meetingId={} userId={}", meetingId, userId);
+//        // 1. 사용자 식별
+//        UUID userId = extractUserId(authorizationHeader);
+//        log.info("[ALT_TIME_LIST] start meetingId={} userId={}", meetingId, userId);
 
         // 2. 후보 시간 조회
         List<AlternativeTimeEntity> entities = alternativeTimeRepository.findByMeetingId(meetingId);
@@ -88,16 +88,12 @@ public class AlternativeTimeService {
 
 
     @Transactional
-    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
+    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, UUID userId) {
         //대안 시간 투표 제출 로직
         long startNs = System.nanoTime();
 
-        UUID userId = extractUserId(authorizationHeader);
-
         log.info("[ALT_VOTE] start meetingId={} userId={} alternativeTimeKst={}",
                 meetingId, userId, request.getAlternativeTime());
-
-        LocalDateTime utcStartTime = DateTimeUtils.kstToUtc(request.getAlternativeTime());
 
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
