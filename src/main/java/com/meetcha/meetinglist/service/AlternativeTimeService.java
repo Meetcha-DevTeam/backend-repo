@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -126,13 +125,4 @@ public class AlternativeTimeService {
                 .build();
     }
 
-    private UUID extractUserId(String authorizationHeader) {
-        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
-        if (!jwtProvider.validateToken(token)) {
-
-            log.warn("[AUTH] invalid token");
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        }
-        return jwtProvider.getUserId(token);
-    }
 }
