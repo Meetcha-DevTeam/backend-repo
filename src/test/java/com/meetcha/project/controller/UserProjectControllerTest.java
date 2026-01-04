@@ -33,14 +33,6 @@ class UserProjectControllerTest extends AcceptanceTest {
     @Autowired
     private ProjectRepository projectRepository;
 
-    @BeforeEach
-    void setUp() {
-        databaseCleaner.clear();
-
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-    }
-
     // --------------------------------------------------
     // 1) 프로젝트 생성 성공 + DB 검증
     // --------------------------------------------------
