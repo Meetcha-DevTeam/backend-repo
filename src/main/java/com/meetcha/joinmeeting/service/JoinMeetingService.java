@@ -82,32 +82,43 @@ public class JoinMeetingService {
         return availabilities;
     }
 
-    private String resolveNickname(JoinMeetingRequest request, UUID userId) {
-        String nickname = request.getNickname();
+    private String resolveNickname(JoinMeetingRequest request, UUID userId, UUID meetingId) {
+        String nickname = request != null ? request.getNickname() : null;
         if (nickname == null || nickname.isBlank()) {
-            nickname = userRepository.findById(userId)
+            return userRepository.findById(userId)
                     .map(UserEntity::getName)
-                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.warn("[NICKNAME] user not found meetingId={} userId={}", meetingId, userId);
+                        return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    });
         }
         return nickname;
     }
 
-    private void validateTimeSlot(JoinMeetingRequest request) {
+    private void validateTimeSlot(JoinMeetingRequest request, UUID meetingId, UUID userId, String tag) {
+        if (request == null || request.getSelectedTimes() == null) {
+            log.warn("[{}] selectedTimes is null meetingId={} userId={}", tag, meetingId, userId);
+            throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
+        }
         for (JoinMeetingRequest.TimeSlot slot : request.getSelectedTimes()) {
             if (slot.getStartAt().isAfter(slot.getEndAt())) {
+                log.warn("[{}] invalid time slot meetingId={} userId={} startAt={} endAt={}",
+                        tag, meetingId, userId, slot.getStartAt(), slot.getEndAt());
                 throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
             }
         }
     }
 
-    private void validateDuplicateParticipation(UUID meetingId, UUID userId) {
+    private void validateDuplicateParticipation(UUID meetingId, UUID userId, String tag) {
         if (participantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId)) {
+            log.warn("[{}] already joined meetingId={} userId={}", tag, meetingId, userId);
             throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
         }
     }
 
-    private void validateMeetingDeadLine(MeetingEntity meeting) {
+    private void validateMeetingDeadLine(MeetingEntity meeting, UUID meetingId, UUID userId, String tag) {
         if (meeting.isDeadlinePassed()) {
+            log.warn("[{}] meeting deadline passed meetingId={} userId={}", tag, meetingId, userId);
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
     }
@@ -264,6 +275,11 @@ public class JoinMeetingService {
         return result;
     }
 
+    private String safeCode(String code) {
+        if (code == null) return "null";
+        // 코드가 길어도 로그 폭탄 안 나게 제한 (필요하면 조정)
+        return code.length() > 64 ? code.substring(0, 64) + "...(truncated)" : code;
+    }
 
 }
 
