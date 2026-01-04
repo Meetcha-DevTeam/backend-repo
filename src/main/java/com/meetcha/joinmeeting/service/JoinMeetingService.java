@@ -114,10 +114,20 @@ public class JoinMeetingService {
 
     //미팅코드 유효검사
     public ValidateMeetingCodeResponse validateMeetingCode(String code) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_CODE_VALIDATE] start code={}", safeCode(code));
+
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MEETING_CODE_VALIDATE] meeting not found code={}", safeCode(code));
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
         boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_CODE_VALIDATE] success meetingId={} closed={} elapsedMs={}",
+                meeting.getMeetingId(), isClosed, elapsedMs);
 
         return new ValidateMeetingCodeResponse(
                 meeting.getMeetingId(),
@@ -131,8 +141,14 @@ public class JoinMeetingService {
 
     //미팅 참여, 미팅정보확인 시 사용
     public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_INFO] start meetingId={}", meetingId);
+
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MEETING_INFO] meeting not found meetingId={}", meetingId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
         //candidate 조회
         List<LocalDate> candidateDates = meetingCandidateDateRepository
@@ -140,6 +156,10 @@ public class JoinMeetingService {
                 .stream()
                 .map(MeetingCandidateDateEntity::getCandidateDate)
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_INFO] success meetingId={} candidateDates={} elapsedMs={}",
+                meetingId, candidateDates.size(), elapsedMs);
 
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
