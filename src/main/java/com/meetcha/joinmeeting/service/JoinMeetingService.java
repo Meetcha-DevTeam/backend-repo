@@ -176,19 +176,32 @@ public class JoinMeetingService {
     //미팅정보 수정 로직
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, UUID userId) {
+
+        long startNs = System.nanoTime();
+        int slotCount = request != null && request.getSelectedTimes() != null ? request.getSelectedTimes().size() : 0;
+
+        log.info("[PARTICIPATION_UPDATE] start meetingId={} userId={} slotCount={}",
+                meetingId, userId, slotCount);
+
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[PARTICIPATION_UPDATE] meeting not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
-        if (meeting.isDeadlinePassed()) {
-            throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
-        }
+
+        validateMeetingDeadLine(meeting, meetingId, userId, "PARTICIPATION_UPDATE");
+        validateTimeSlot(request, meetingId, userId, "PARTICIPATION_UPDATE" );
 
 
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
                 .findByMeeting_MeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[PARTICIPATION_UPDATE] participant not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND);
+                });
 
         UUID participantId = participant.getParticipantId();
 
@@ -206,6 +219,10 @@ public class JoinMeetingService {
                 .toList();
 
         availabilityRepository.saveAll(availabilities);
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[PARTICIPATION_UPDATE] success meetingId={} userId={} participantId={} slotCount={} elapsedMs={}",
+                meetingId, userId, participantId, availabilities.size(), elapsedMs);
 
         // 6. 응답 반환
         return new JoinMeetingResponse(meetingId, participantId);
