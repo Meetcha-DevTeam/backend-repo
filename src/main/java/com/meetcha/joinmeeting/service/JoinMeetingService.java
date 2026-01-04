@@ -41,22 +41,32 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
-        log.debug("[join] 미팅 참가 진입 meetingId = {} userId = {} request = {} ", meetingId, userId, request);
+        long startNs = System.nanoTime();
+        int slotCount = request != null && request.getSelectedTimes() != null ? request.getSelectedTimes().size() : 0;
+        boolean hasNickname = request != null && request.getNickname() != null && !request.getNickname().isBlank();
+
+        log.info("[JOIN] start meetingId={} userId={} slotCount={} nicknameProvided={}",
+                meetingId, userId, slotCount, hasNickname);
 
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[JOIN] meeting not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
-        validateMeetingDeadLine(meeting);
-        validateDuplicateParticipation(meetingId, userId);
-        validateTimeSlot(request);
+        validateMeetingDeadLine(meeting, meetingId, userId, "JOIN");
+        validateDuplicateParticipation(meetingId, userId, "JOIN");
+        validateTimeSlot(request, meetingId, userId, "JOIN");
 
-        String nickname = resolveNickname(request, userId);
+        String nickname = resolveNickname(request, userId, meetingId);
         MeetingParticipant participant = participantRepository.save(MeetingParticipant.create(userId, meeting, nickname));
 
         List<ParticipantAvailability> availabilities = convertTimeSlotsToAvailabilities(request, participant.getParticipantId(), meetingId);
         availabilityRepository.saveAll(availabilities);
 
-        log.info("[join] 미팅 참가 완료 meetingId = {} userId = {} participantId = {} nickname = {}", meetingId, userId, participant.getParticipantId(), nickname);
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[JOIN] 미팅 참가 완료 meetingId = {} userId = {} participantId = {} slotCount={} elapsedMs={}",
+                meetingId, userId, participant.getParticipantId(), availabilities.size(), elapsedMs);
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
