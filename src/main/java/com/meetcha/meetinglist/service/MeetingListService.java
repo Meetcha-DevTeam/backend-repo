@@ -33,6 +33,13 @@ public class MeetingListService {
         long startNs = System.nanoTime();
         log.info("[MEETING_DETAIL] start meetingId={}", meetingId);
 
+        //todo userID에 해당하는 meetingID 인지 검증하는 로직 필요할 듯
+//        boolean isParticipant = meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId);
+//        if (!isParticipant) {
+//            log.warn("[MEETING_DETAIL] forbidden meetingId={} userId={}", meetingId, userId);
+//            throw new CustomException(ErrorCode.열람_권한이_없습니다);
+//        }
+
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> {
                     log.warn("[MEETING_DETAIL] meeting not found meetingId={}", meetingId);
