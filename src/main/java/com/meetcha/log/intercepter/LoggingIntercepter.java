@@ -63,7 +63,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         return params;
     }
     
-    private static boolean hasLoggableBody(HttpServletRequest request) {
+    private boolean hasLoggableBody(HttpServletRequest request) {
         String contentType = request.getContentType();
         return contentType != null && contentType.startsWith(MediaType.APPLICATION_JSON_VALUE);
     }
@@ -87,7 +87,7 @@ public class LoggingIntercepter implements HandlerInterceptor {
         return new String(b, 0, MAX_LOG_BYTES, StandardCharsets.UTF_8) + "...(truncated)";
     }
 
-    private static void logBasicResponseInfo(HttpServletResponse response) {
+    private void logBasicResponseInfo(HttpServletResponse response) {
         log.info("API Response : Status = [{}]", response.getStatus());
     }
 
