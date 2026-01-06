@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class LoggingIntercepter implements HandlerInterceptor {
+public class LoggingInterceptor implements HandlerInterceptor {
     private static final int MAX_LOG_BYTES = 8 * 1024;
 
     @Override

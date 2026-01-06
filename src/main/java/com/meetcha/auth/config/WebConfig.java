@@ -1,7 +1,7 @@
 package com.meetcha.auth.config;
 
 import com.meetcha.auth.jwt.UserDetailsResolver;
-import com.meetcha.log.intercepter.LoggingIntercepter;
+import com.meetcha.log.intercepter.LoggingInterceptor;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
     private final UserDetailsResolver userDetailsResolver;
-    private final LoggingIntercepter loggingIntercepter;
+    private final LoggingInterceptor loggingIntercepter;
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
