@@ -41,8 +41,6 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
-        log.debug("[join] 미팅 참가 진입 meetingId = {} userId = {} request = {} ", meetingId, userId, request);
-
         MeetingEntity meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
