@@ -13,25 +13,36 @@ public class TestDataFactory {
      테스트용 Meeting 생성 메서드
      **/
 
-     public static MeetingEntity createMeeting(
-     UUID createdBy,
-     String title,
-     int durationMinutes
-     ) {
-     return MeetingEntity.builder()
-     .title(title)
-     .description("테스트용 미팅 설명")
-     .durationMinutes(durationMinutes)
-     .deadline(LocalDateTime.now().plusDays(1))
-     .createdAt(LocalDateTime.now())
-     .meetingStatus(MeetingStatus.DONE)
-     .confirmedTime(LocalDateTime.now())
+    public static MeetingEntity createDoneMeeting(
+            UUID createdBy,
+            String title,
+            int durationMinutes
+    ) {
+        //기준 시간
+        LocalDateTime now = LocalDateTime.now();
 
-     .meetingCode("MEET-" + UUID.randomUUID()) // unique한 값이라 다른 테스트에서의 충돌을 막기위해 uuid를 추가했습니다
-     .createdBy(createdBy)
-     .build();
-     }
+        //테스트 기본값
+        LocalDateTime deadline = now.plusDays(1);
+        String meetingCode = "MEET-" + UUID.randomUUID();
 
+        return MeetingEntity.builder()
+                //입력 파라미터
+                .title(title)
+                .durationMinutes(durationMinutes)
+                .createdBy(createdBy)
+
+                //테스트용 고정 값
+                .description("테스트용 미팅 설명")
+                .meetingStatus(MeetingStatus.DONE)
+                .meetingCode(meetingCode)
+
+                //시간 관련
+                .createdAt(now)
+                .confirmedTime(now)
+                .deadline(deadline)
+
+                .build();
+    }
 
      /**
      회고 생성 요청용 Request Body

@@ -59,7 +59,7 @@ class ReflectionControllerTest extends AcceptanceTest {
         UserEntity user = getUser();
 
         MeetingEntity meeting = persistMeeting(
-                TestDataFactory.createMeeting(user.getUserId(), "테스트 미팅", 60)
+                TestDataFactory.createDoneMeeting(user.getUserId(), "테스트 미팅", 60)
         );
 
         Map<String, Object> body = TestDataFactory.createReflectionRequest(
@@ -99,13 +99,13 @@ class ReflectionControllerTest extends AcceptanceTest {
         UserEntity user = getUser();
 
         MeetingEntity m1 = persistMeeting(
-                TestDataFactory.createMeeting(user.getUserId(), "미팅1", 30)
+                TestDataFactory.createDoneMeeting(user.getUserId(), "미팅1", 30)
         );
         MeetingEntity m2 = persistMeeting(
-                TestDataFactory.createMeeting(user.getUserId(), "미팅2", 30)
+                TestDataFactory.createDoneMeeting(user.getUserId(), "미팅2", 30)
         );
         MeetingEntity m3 = persistMeeting(
-                TestDataFactory.createMeeting(user.getUserId(), "미팅3", 30)
+                TestDataFactory.createDoneMeeting(user.getUserId(), "미팅3", 30)
         );
 
         // ---- 회고 3개 생성 ----
