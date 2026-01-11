@@ -65,12 +65,12 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
-            log.error("[OAuth] token exchange ERROR: {}", e.toString(), e);
+            log.error("[googleLogin] google oauth token exchange ERROR: {}", e.toString(), e);
             throw new CustomException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
-            log.error("[OAuth] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
+            log.error("[googleLogin] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
             throw new CustomException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
@@ -105,10 +105,12 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
+            log.error("[googleLogin] error occurred during fetching user info form Google API");
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
         if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
+            log.error("[googleLogin] not received 2xx response or received empty response : status code = {}", userInfoResponse.getStatusCodeValue());
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
@@ -119,6 +121,7 @@ public class LoginService {
 
         // 기존 유저 조회 or 생성
         UserEntity user = userRepository.findByEmail(email).orElseGet(() -> {
+            log.info("[googleLogin] created new user");
             UserEntity newUser = UserEntity.builder()
                     .email(email)
                     .name(name)
@@ -137,6 +140,7 @@ public class LoginService {
 
         // 항상 access_token 갱신, refresh_token은 새로 내려온 경우에만 교체
         if (googleRefreshToken != null && !googleRefreshToken.isBlank()) {
+            log.info("[googleLogin] received new refresh token from Google API");
             user.updateGoogleAllTokens(googleAccessToken, googleRefreshToken, accessTokenExpiry);
         } else {
             user.updateGoogleAccessToken(googleAccessToken, accessTokenExpiry);
@@ -151,12 +155,16 @@ public class LoginService {
         refreshTokenRepository.findByUserId(user.getUserId())
                 .ifPresentOrElse(
                         existing -> {
+                            log.info("[googleLogin] update meetcha refresh token");
                             existing.update(jwtRefreshToken, LocalDateTime.now().plusDays(14));
                             refreshTokenRepository.save(existing);
                         },
-                        () -> refreshTokenRepository.save(
-                                new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14))
-                        )
+                        () -> {
+                            log.info("[googleLogin] create new meetcha refresh token");
+                            refreshTokenRepository.save(
+                                    new RefreshTokenEntity(user.getUserId(), jwtRefreshToken, LocalDateTime.now().plusDays(14))
+                            );
+                        }
                 );
 
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
