@@ -65,12 +65,12 @@ public class LoginService {
                     Map.class
             );
         } catch (Exception e) {
-            log.error("[googleLogin] google oauth token exchange ERROR: {}", e.toString(), e);
+            log.error("[googleLogin] Error occurred during fetching token from Google API : {}", e.toString(), e);
             throw new CustomException(ErrorCode.INVALID_GOOGLE_CODE);
         }
 
         if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null) {
-            log.error("[googleLogin] token exchange non-2xx or empty body: status={}", tokenResponse.getStatusCodeValue());
+            log.error("[googleLogin] received non-2xx or empty body : status={}", tokenResponse.getStatusCodeValue());
             throw new CustomException(ErrorCode.GOOGLE_TOKEN_REQUEST_FAILED);
         }
 
@@ -110,7 +110,7 @@ public class LoginService {
         }
 
         if (!userInfoResponse.getStatusCode().is2xxSuccessful() || userInfoResponse.getBody() == null) {
-            log.error("[googleLogin] not received 2xx response or received empty response : status code = {}", userInfoResponse.getStatusCodeValue());
+            log.error("[googleLogin] received non-2xx or empty body : status code = {}", userInfoResponse.getStatusCodeValue());
             throw new CustomException(ErrorCode.GOOGLE_USERINFO_REQUEST_FAILED);
         }
 
