@@ -35,12 +35,29 @@ public class MeetingListService {
     private final MeetingReflectionRepository reflectionRepository;
     private final ParticipantAvailabilityRepository participantAvailabilityRepository;
 
-    public MeetingDetailResponse getMeetingDetail(UUID meetingId, String authorizationHeader) {
+    public MeetingDetailResponse getMeetingDetail(UUID meetingId, UUID userId) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_DETAIL] start meetingId={}", meetingId);
+
+        //todo userID에 해당하는 meetingID 인지 검증하는 로직 필요할 듯
+//        boolean isParticipant = meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId);
+//        if (!isParticipant) {
+//            log.warn("[MEETING_DETAIL] forbidden meetingId={} userId={}", meetingId, userId);
+//            throw new CustomException(ErrorCode.열람_권한이_없습니다);
+//        }
+
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MEETING_DETAIL] meeting not found meetingId={}", meetingId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
         List<MeetingParticipantDto> participantDtos =
                 meetingParticipantRepository.findParticipantDtosByMeetingId(meetingId);
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_DETAIL] success meetingId={} status={} participants={} elapsedMs={}",
+                meetingId, meeting.getMeetingStatus(), participantDtos.size(), elapsedMs);
 
         return new MeetingDetailResponse(
                 meeting.getMeetingId(),
@@ -57,8 +74,12 @@ public class MeetingListService {
 
     @Transactional(readOnly = true)
     public List<MeetingListResponse> getMyMeetings(UUID userId) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_LIST] start userId={}", userId);
+
         List<MeetingEntity> meetings = meetingRepository.findMyMeetings(userId);
-        return meetings.stream()
+
+        List<MeetingListResponse> result = meetings.stream()
                 .map(m -> new MeetingListResponse(
                         m.getMeetingId(),
                         m.getTitle(),
@@ -68,17 +89,26 @@ public class MeetingListService {
                         m.getMeetingStatus()
                 ))
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_LIST] success userId={} count={} elapsedMs={}",
+                userId, result.size(), elapsedMs);
+
+        return result;
     }
 
     // 작성이 필요한 미팅 조회
     @Transactional(readOnly = true)
     public List<NeedReflectionResponse> getMeetingsNeedingReflection(UUID userId) {
+        long startNs = System.nanoTime();
+        log.info("[NEED_REFLECTION] start userId={}", userId);
+
         List<MeetingEntity> meetings = meetingRepository.getMeetingsNeedReflection(userId, MeetingStatus.DONE);
 
-        return meetings.stream()
+        List<NeedReflectionResponse> result = meetings.stream()
                 .filter(m -> !reflectionRepository.existsByMeeting_MeetingIdAndUser_UserId(m.getMeetingId(), userId))
                 .map(m -> {
-                    var project = m.getProject(); // ManyToOne ProjectEntity (nullable 가능)
+                    var project = m.getProject();
                     UUID projectId = project != null ? project.getProjectId() : null;
                     String projectName = project != null ? project.getName() : null;
 
@@ -93,6 +123,12 @@ public class MeetingListService {
                     );
                 })
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[NEED_REFLECTION] success userId={} fetched={} result={} elapsedMs={}",
+                userId, meetings.size(), result.size(), elapsedMs);
+
+        return result;
     }
 
     @Transactional(readOnly = true)

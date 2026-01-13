@@ -41,22 +41,32 @@ public class JoinMeetingService {
 
     @Transactional
     public JoinMeetingResponse join(UUID meetingId, JoinMeetingRequest request, UUID userId) {
-        log.debug("[join] 미팅 참가 진입 meetingId = {} userId = {} request = {} ", meetingId, userId, request);
+        long startNs = System.nanoTime();
+        int slotCount = request != null && request.getSelectedTimes() != null ? request.getSelectedTimes().size() : 0;
+        boolean hasNickname = request != null && request.getNickname() != null && !request.getNickname().isBlank();
+
+        log.info("[JOIN] start meetingId={} userId={} slotCount={} nicknameProvided={}",
+                meetingId, userId, slotCount, hasNickname);
 
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[JOIN] meeting not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
-        validateMeetingDeadLine(meeting);
-        validateDuplicateParticipation(meetingId, userId);
-        validateTimeSlot(request);
+        validateMeetingDeadLine(meeting, meetingId, userId, "JOIN");
+        validateDuplicateParticipation(meetingId, userId, "JOIN");
+        validateTimeSlot(request, meetingId, userId, "JOIN");
 
-        String nickname = resolveNickname(request, userId);
+        String nickname = resolveNickname(request, userId, meetingId);
         MeetingParticipant participant = participantRepository.save(MeetingParticipant.create(userId, meeting, nickname));
 
         List<ParticipantAvailability> availabilities = convertTimeSlotsToAvailabilities(request, participant.getParticipantId(), meetingId);
         availabilityRepository.saveAll(availabilities);
 
-        log.info("[join] 미팅 참가 완료 meetingId = {} userId = {} participantId = {} nickname = {}", meetingId, userId, participant.getParticipantId(), nickname);
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[JOIN] 미팅 참가 완료 meetingId = {} userId = {} participantId = {} slotCount={} elapsedMs={}",
+                meetingId, userId, participant.getParticipantId(), availabilities.size(), elapsedMs);
         return new JoinMeetingResponse(meetingId, participant.getParticipantId());
     }
 
@@ -72,42 +82,63 @@ public class JoinMeetingService {
         return availabilities;
     }
 
-    private String resolveNickname(JoinMeetingRequest request, UUID userId) {
-        String nickname = request.getNickname();
+    private String resolveNickname(JoinMeetingRequest request, UUID userId, UUID meetingId) {
+        String nickname = request != null ? request.getNickname() : null;
         if (nickname == null || nickname.isBlank()) {
-            nickname = userRepository.findById(userId)
+            return userRepository.findById(userId)
                     .map(UserEntity::getName)
-                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                    .orElseThrow(() -> {
+                        log.warn("[NICKNAME] user not found meetingId={} userId={}", meetingId, userId);
+                        return new CustomException(ErrorCode.USER_NOT_FOUND);
+                    });
         }
         return nickname;
     }
 
-    private void validateTimeSlot(JoinMeetingRequest request) {
+    private void validateTimeSlot(JoinMeetingRequest request, UUID meetingId, UUID userId, String tag) {
+        if (request == null || request.getSelectedTimes() == null) {
+            log.warn("[{}] selectedTimes is null meetingId={} userId={}", tag, meetingId, userId);
+            throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
+        }
         for (JoinMeetingRequest.TimeSlot slot : request.getSelectedTimes()) {
             if (slot.getStartAt().isAfter(slot.getEndAt())) {
+                log.warn("[{}] invalid time slot meetingId={} userId={} startAt={} endAt={}",
+                        tag, meetingId, userId, slot.getStartAt(), slot.getEndAt());
                 throw new CustomException(ErrorCode.INVALID_TIME_SLOT);
             }
         }
     }
 
-    private void validateDuplicateParticipation(UUID meetingId, UUID userId) {
+    private void validateDuplicateParticipation(UUID meetingId, UUID userId, String tag) {
         if (participantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId)) {
+            log.warn("[{}] already joined meetingId={} userId={}", tag, meetingId, userId);
             throw new CustomException(ErrorCode.ALREADY_JOINED_MEETING);
         }
     }
 
-    private void validateMeetingDeadLine(MeetingEntity meeting) {
+    private void validateMeetingDeadLine(MeetingEntity meeting, UUID meetingId, UUID userId, String tag) {
         if (meeting.isDeadlinePassed()) {
+            log.warn("[{}] meeting deadline passed meetingId={} userId={}", tag, meetingId, userId);
             throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
         }
     }
 
     //미팅코드 유효검사
     public ValidateMeetingCodeResponse validateMeetingCode(String code) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_CODE_VALIDATE] start code={}", safeCode(code));
+
         MeetingEntity meeting = meetingRepository.findByMeetingCode(code)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MEETING_CODE_VALIDATE] meeting not found code={}", safeCode(code));
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
         boolean isClosed = meeting.getDeadline().isBefore(LocalDateTime.now());
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_CODE_VALIDATE] success meetingId={} closed={} elapsedMs={}",
+                meeting.getMeetingId(), isClosed, elapsedMs);
 
         return new ValidateMeetingCodeResponse(
                 meeting.getMeetingId(),
@@ -121,8 +152,14 @@ public class JoinMeetingService {
 
     //미팅 참여, 미팅정보확인 시 사용
     public MeetingInfoResponse getMeetingInfo(UUID meetingId) {
+        long startNs = System.nanoTime();
+        log.info("[MEETING_INFO] start meetingId={}", meetingId);
+
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MEETING_INFO] meeting not found meetingId={}", meetingId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
         //candidate 조회
         List<LocalDate> candidateDates = meetingCandidateDateRepository
@@ -130,6 +167,10 @@ public class JoinMeetingService {
                 .stream()
                 .map(MeetingCandidateDateEntity::getCandidateDate)
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MEETING_INFO] success meetingId={} candidateDates={} elapsedMs={}",
+                meetingId, candidateDates.size(), elapsedMs);
 
         return new MeetingInfoResponse(
                 meeting.getMeetingId(),
@@ -146,19 +187,32 @@ public class JoinMeetingService {
     //미팅정보 수정 로직
     @Transactional
     public JoinMeetingResponse updateParticipation(UUID meetingId, JoinMeetingRequest request, UUID userId) {
+
+        long startNs = System.nanoTime();
+        int slotCount = request != null && request.getSelectedTimes() != null ? request.getSelectedTimes().size() : 0;
+
+        log.info("[PARTICIPATION_UPDATE] start meetingId={} userId={} slotCount={}",
+                meetingId, userId, slotCount);
+
         // 1. 미팅 유효성 체크
         MeetingEntity meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[PARTICIPATION_UPDATE] meeting not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.MEETING_NOT_FOUND);
+                });
 
-        if (meeting.isDeadlinePassed()) {
-            throw new CustomException(ErrorCode.MEETING_DEADLINE_PASSED);
-        }
+
+        validateMeetingDeadLine(meeting, meetingId, userId, "PARTICIPATION_UPDATE");
+        validateTimeSlot(request, meetingId, userId, "PARTICIPATION_UPDATE" );
 
 
         // 3. 기존 참여자 존재 확인
         MeetingParticipant participant = participantRepository
                 .findByMeeting_MeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[PARTICIPATION_UPDATE] participant not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND);
+                });
 
         UUID participantId = participant.getParticipantId();
 
@@ -177,16 +231,27 @@ public class JoinMeetingService {
 
         availabilityRepository.saveAll(availabilities);
 
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[PARTICIPATION_UPDATE] success meetingId={} userId={} participantId={} slotCount={} elapsedMs={}",
+                meetingId, userId, participantId, availabilities.size(), elapsedMs);
+
         // 6. 응답 반환
         return new JoinMeetingResponse(meetingId, participantId);
     }
 
     @Transactional(readOnly = true)
     public List<GetSelectedTime> getMyAvailableTimes(UUID meetingId, UUID userId) {
+
+        long startNs = System.nanoTime();
+        log.info("[MY_AVAILABLE_TIMES] start meetingId={} userId={}", meetingId, userId);
+
         // userId로 participant 조회
         MeetingParticipant participant = participantRepository
                 .findByMeeting_MeetingIdAndUserId(meetingId, userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("[MY_AVAILABLE_TIMES] participant not found meetingId={} userId={}", meetingId, userId);
+                    return new CustomException(ErrorCode.PARTICIPANT_NOT_FOUND);
+                });
 
         UUID participantId = participant.getParticipantId();
 
@@ -196,14 +261,25 @@ public class JoinMeetingService {
 
 
 
-        return times.stream()
+        List<GetSelectedTime> result = times.stream()
                 .map(t -> new GetSelectedTime(
                         DateTimeUtils.utcToKstString(t.getStartAt()),
                         DateTimeUtils.utcToKstString(t.getEndAt())
                 ))
                 .toList();
+
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[MY_AVAILABLE_TIMES] success meetingId={} userId={} participantId={} count={} elapsedMs={}",
+                meetingId, userId, participantId, result.size(), elapsedMs);
+
+        return result;
     }
 
+    private String safeCode(String code) {
+        if (code == null) return "null";
+        // 코드가 길어도 로그 폭탄 안 나게 제한 (필요하면 조정)
+        return code.length() > 64 ? code.substring(0, 64) + "...(truncated)" : code;
+    }
 
 }
 

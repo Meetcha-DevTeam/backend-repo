@@ -37,18 +37,18 @@ public class MeetingListController {
     @GetMapping("/{meetingId}")
     public MeetingDetailResponse getMeetingDetail(
             @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        return meetingListService.getMeetingDetail(meetingId, authorizationHeader);
+        return meetingListService.getMeetingDetail(meetingId, userId);
     }
 
     //미팅 참가자 목록 조회
     @GetMapping("/{meetingId}/participants")
     public MeetingDetailResponse getParticipants(
             @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        return meetingListService.getMeetingDetail(meetingId, authorizationHeader);
+        return meetingListService.getMeetingDetail(meetingId, userId);
     }
 
 
@@ -57,9 +57,9 @@ public class MeetingListController {
     @GetMapping("/{meetingId}/alternative-times")
     public AlternativeTimeListResponse getAlternativeTimeList(
             @PathVariable UUID meetingId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-       return alternativeTimeService.getAlternativeTimeList(meetingId, authorizationHeader);
+       return alternativeTimeService.getAlternativeTimeList(meetingId, userId);
     }
 
     //대안 시간 투표 제출
@@ -67,9 +67,9 @@ public class MeetingListController {
     public AlternativeVoteResponse submitAlternativeVote(
             @PathVariable UUID meetingId,
             @RequestBody @Valid AlternativeVoteRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @AuthUser UUID userId
     ) {
-        return alternativeTimeService.submitAlternativeVote(meetingId, request, authorizationHeader);
+        return alternativeTimeService.submitAlternativeVote(meetingId, request, userId);
     }
 
     // 미팅 참여 정보 수정
