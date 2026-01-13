@@ -50,7 +50,7 @@ public class UserScheduleController {
 
         return new CreateScheduleResponse(id);
     }
-    
+
 
     // 유저 개인 일정 수정
     @PutMapping("/schedule/update")

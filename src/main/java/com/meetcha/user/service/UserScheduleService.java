@@ -153,7 +153,6 @@ public class UserScheduleService {
 
     // 유저 일정 조회
     public List<ScheduleResponse> getSchedule(UUID userId, LocalDateTime from, LocalDateTime to) {
-        log.info("[일정 조회 요청] User ID: {}, From: {}, To: {}", userId, from, to);
         // 명세: 유효하지 않은 날짜 범위 → 400
         if (from == null || to == null || to.isBefore(from)) {
             log.warn("[일정 조회 실패] User ID: {}, 유효하지 않은 날짜 범위: {} ~ {}", userId, from, to);
@@ -169,7 +168,6 @@ public class UserScheduleService {
 
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
-        log.info("[일정 생성 시도] User ID: {}, Title: {}", userId, request.getTitle());
 
         String recurrence = request.getRecurrence();
         if ("NONE".equalsIgnoreCase(recurrence) || recurrence == null || recurrence.isBlank()) {
@@ -194,7 +192,6 @@ public class UserScheduleService {
 
     // 유저 일정 수정
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
-        log.info("[일정 수정 요청] User ID: {}, Event ID: {}", userId, request.getEventId());
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
@@ -211,7 +208,6 @@ public class UserScheduleService {
 
     // 유저 일정 삭제
     public void deleteSchedule(UUID userId, String eventId) {
-        log.info("[일정 삭제 요청] User ID: {}, Event ID: {}", userId, eventId);
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.deleteEvent(accessToken, eventId);
@@ -221,7 +217,6 @@ public class UserScheduleService {
 
     // 단일 상세 일정 조회
     public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
-        log.info("[일정 상세 조회 요청] User ID: {}, Event ID: {}", userId, eventId);
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
 
