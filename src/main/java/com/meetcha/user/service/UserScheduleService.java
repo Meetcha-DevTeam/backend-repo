@@ -160,10 +160,8 @@ public class UserScheduleService {
         }
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        List<ScheduleResponse> result = googleCalendarClient.getEvents(accessToken, from, to);
 
-        log.info("[일정 조회 성공] User ID: {}, 조회된 일정 수: {}", userId, result.size());
-        return result;
+        return googleCalendarClient.getEvents(accessToken, from, to);
     }
 
     // 유저 일정 생성
@@ -203,24 +201,17 @@ public class UserScheduleService {
                 request.getEndAt(),
                 request.getRecurrence()
         );
-        log.info("[일정 수정 성공] User ID: {}, Event ID: {}", userId, request.getEventId());
     }
 
     // 유저 일정 삭제
     public void deleteSchedule(UUID userId, String eventId) {
-
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.deleteEvent(accessToken, eventId);
-
-        log.info("[일정 삭제 성공] User ID: {}, Event ID: {}", userId, eventId);
     }
 
     // 단일 상세 일정 조회
     public ScheduleDetailResponse getScheduleDetail(UUID userId, String eventId) {
-
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-
-        log.info("[일정 상세 조회 성공] User ID: {}, Event ID: {}", userId, eventId);
         return googleCalendarClient.getEventById(accessToken, eventId);
     }
 
