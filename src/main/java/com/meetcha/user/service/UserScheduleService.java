@@ -176,7 +176,7 @@ public class UserScheduleService {
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
+        String rrule = RecurrenceUtils.buildGoogleRRule(recurrence, request.getStartAt());
 
         String eventId = googleCalendarClient.createEvent(
                 accessToken,
