@@ -1,5 +1,11 @@
 package com.meetcha.project.controller;
 
+import com.meetcha.auth.TestAuthHelper;
+import com.meetcha.auth.domain.UserEntity;
+import com.meetcha.auth.domain.UserRepository;
+import com.meetcha.global.util.DatabaseCleaner;
+import com.meetcha.project.domain.ProjectEntity;
+import com.meetcha.project.domain.ProjectRepository;
 import com.meetcha.AcceptanceTest;
 import com.meetcha.auth.TestAuthHelper;
 import com.meetcha.auth.domain.UserEntity;
@@ -13,10 +19,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
