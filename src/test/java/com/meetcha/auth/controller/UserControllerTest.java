@@ -24,9 +24,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,8 +33,6 @@ import java.util.Optional;
 import static com.meetcha.global.exception.ErrorCode.EXPIRED_REFRESH_TOKEN;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 
 class UserControllerTest extends AcceptanceTest {
     @Autowired
@@ -114,7 +110,6 @@ class UserControllerTest extends AcceptanceTest {
     void googleLoginShouldReturnAccessAndRefreshToken() throws IOException {
         // given
         mockGoogleOAuthServer("email@email.com");
-        mockLoginService();
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
@@ -162,16 +157,6 @@ class UserControllerTest extends AcceptanceTest {
         )).thenReturn(userInfoResponse);
     }
 
-
-
-    private void mockLoginService() throws IOException {
-        // 가짜 input stream 생성
-        byte[] fakeImage = new byte[]{1,2,3};
-        InputStream fakeStream = new ByteArrayInputStream(fakeImage);
-        // loadImage() 가 실제 네트워크로 나가지 않게 mock
-        doReturn(fakeStream).when(loginService).loadImageAsStream(anyString());
-    }
-
     @DisplayName("신규 사용자가 구글 로그인을 수행하면 계정이 생성된다")
     @Test
     void googleLoginShouldCreateUser_WhenNewComer() throws IOException {
@@ -179,7 +164,6 @@ class UserControllerTest extends AcceptanceTest {
         String email = "email@email.com";
 
         mockGoogleOAuthServer(email);
-        mockLoginService();
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
@@ -208,7 +192,6 @@ class UserControllerTest extends AcceptanceTest {
         testDataFactory.createUser(email);
 
         mockGoogleOAuthServer(email);
-        mockLoginService();
 
         LoginRequestDto request = new LoginRequestDto("google auth code", "redirect uri");
 
