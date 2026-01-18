@@ -162,10 +162,6 @@ public class LoginService {
         return new TokenResponseDto(jwtAccessToken, jwtRefreshToken);
     }
 
-    public InputStream loadImageAsStream(String pictureUrl) throws IOException {
-        return new URL(pictureUrl).openStream();
-    }
-
     public TestLoginResponse testLogin(TestLoginRequest testLoginRequest) {
         UserEntity user = userRepository.findByEmail(testLoginRequest.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

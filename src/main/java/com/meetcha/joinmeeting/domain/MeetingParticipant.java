@@ -10,6 +10,7 @@ import java.util.UUID;
 @Table(name = "meeting_participants")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class MeetingParticipant {
 
     @Id

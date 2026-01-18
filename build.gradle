@@ -43,11 +43,15 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.767'
 	testImplementation 'org.hamcrest:hamcrest:2.2'
 
-  //Rest Assured 라이브러리
+    //Rest Assured
 	testImplementation 'io.rest-assured:rest-assured:5.4.0'
 	testImplementation 'io.rest-assured:json-path:5.4.0'
-	//H2 (테스트용 인메모리 DB)
+
+    //H2 (테스트용 인메모리 DB)
 	testRuntimeOnly 'com.h2database:h2'
+
+    // json 형태 로깅
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
 }
 
