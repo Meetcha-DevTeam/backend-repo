@@ -1,0 +1,20 @@
+services:
+  api:
+    image: woo319/meetcha
+    container_name: kuit5-api
+    env_file:
+      - ./.env
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27
+    container_name: kuit5-nginx
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
