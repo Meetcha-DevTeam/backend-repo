@@ -38,3 +38,7 @@ out/
 
 .claude/*
 log/
+
+#env
+.env
+.env.*
