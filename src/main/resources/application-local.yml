@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:mysql://${DB_URL}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/meetcha?createDatabaseIfNotExist=true
+    username: root
+    password: pass
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     hibernate:
