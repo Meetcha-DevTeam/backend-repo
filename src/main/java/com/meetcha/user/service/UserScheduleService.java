@@ -159,8 +159,6 @@ public class UserScheduleService {
                 request.getEndAt(),
                 rrule
         );
-
-        return eventId;
     }
 
     private String normalizeRecurrence(String recurrence) {
