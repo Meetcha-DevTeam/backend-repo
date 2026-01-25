@@ -60,6 +60,9 @@ jobs:
 
             APP_DIR="/home/ec2-user/kuit5"
             cd "$APP_DIR"
+            
+            echo "⬇️ Pull latest code"
+            git pull origin main
 
             echo "🧾 Write .env from GitHub Secrets"
             cat > .env <<'ENVEOF'
