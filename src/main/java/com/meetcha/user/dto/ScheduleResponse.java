@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @Builder
 // 기존의 일정 조회 시 사용
 public class ScheduleResponse{
-        String eventId;
-        String title;
-        LocalDateTime startAt;
-        LocalDateTime endAt;
-        String recurrence;
+        private String eventId;
+        private String title;
+        private LocalDateTime startAt;
+        private LocalDateTime endAt;
+        private String recurrence;
 }

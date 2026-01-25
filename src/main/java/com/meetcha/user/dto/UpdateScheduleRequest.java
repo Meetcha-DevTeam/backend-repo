@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class UpdateScheduleRequest{
-        String eventId;
-        String title;
-        LocalDateTime startAt;
-        LocalDateTime endAt;
-        String recurrence;
+        private String eventId;
+        private String title;
+        private LocalDateTime startAt;
+        private LocalDateTime endAt;
+        private String recurrence;
 }
