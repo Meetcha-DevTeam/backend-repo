@@ -11,5 +11,5 @@ import java.util.UUID;
 public class MeetingParticipantDto {
     private UUID participantId;
     private String nickname;
-    private String profileImageUrl;
+    private String profileImageSrc;
 }

@@ -17,13 +17,14 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
     List<MeetingParticipant> findAllByMeeting_MeetingId(UUID meetingId);
 
-    List<MeetingParticipant> findByUserId(UUID userId);
+    @Query("select p.participantId from MeetingParticipant p where p.meeting.meetingId = :meetingId")
+    List<UUID> findParticipantIdsByMeetingId(@Param("meetingId") UUID meetingId);
 
     @Query("""
        SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
            p.participantId,
            COALESCE(p.nickname, u.name),
-           u.profileImgUrl
+           u.profileImgSrc
        )
        FROM MeetingParticipant p
        JOIN UserEntity u ON u.userId = p.userId
@@ -34,4 +35,6 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
     @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meeting.meetingId = :meetingId")
     List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
+
+    void deleteByMeeting_MeetingId(UUID meetingId);
 }

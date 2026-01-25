@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +34,14 @@ public class AlternativeTimeService {
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final JwtProvider jwtProvider;
 
-    public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, String authorizationHeader) {
+    public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, UUID userId) {
         //대안시간 후보 조회 로직
-        // 1. 사용자 식별
-        UUID userId = extractUserId(authorizationHeader);
+        // 로깅용 타이머
+        long startNs = System.nanoTime();
+//        // 1. 사용자 식별
+//        UUID userId = extractUserId(authorizationHeader);
+//        log.info("[ALT_TIME_LIST] start meetingId={} userId={}", meetingId, userId);
+
         // 2. 후보 시간 조회
         List<AlternativeTimeEntity> entities = alternativeTimeRepository.findByMeetingId(meetingId);
 
@@ -52,6 +55,9 @@ public class AlternativeTimeService {
                     return AlternativeTimeDto.from(entity, voteCnt, checked, excludedNames, includedNames);
                 })
                 .toList();
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[ALT_TIME_LIST] success meetingId={} userId={} candidates={} elapsedMs={}",
+                meetingId, userId, dtoList.size(), elapsedMs);
 
         return AlternativeTimeListResponse.of(dtoList);
     }
@@ -81,11 +87,12 @@ public class AlternativeTimeService {
 
 
     @Transactional
-    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, String authorizationHeader) {
+    public AlternativeVoteResponse submitAlternativeVote(UUID meetingId, AlternativeVoteRequest request, UUID userId) {
         //대안 시간 투표 제출 로직
-        UUID userId = extractUserId(authorizationHeader);
+        long startNs = System.nanoTime();
 
-        LocalDateTime utcStartTime = DateTimeUtils.kstToUtc(request.getAlternativeTime());
+        log.info("[ALT_VOTE] start meetingId={} userId={} alternativeTimeKst={}",
+                meetingId, userId, request.getAlternativeTime());
 
         // 1. 해당 시간에 해당하는 후보 조회
         AlternativeTimeEntity timeEntity = alternativeTimeRepository
@@ -95,6 +102,8 @@ public class AlternativeTimeService {
         // 2. 이미 투표했는지 확인
         boolean alreadyVoted = alternativeVoteRepository.existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(meetingId, userId);
         if (alreadyVoted) {
+            log.warn("[ALT_VOTE] already voted meetingId={} userId={} alternativeTimeId={}",
+                    meetingId, userId, timeEntity.getAlternativeTimeId());
             throw new CustomException(ErrorCode.ALREADY_VOTED_ALTERNATIVE);
         }
 
@@ -107,16 +116,13 @@ public class AlternativeTimeService {
 
         vote = alternativeVoteRepository.save(vote);
 
+        long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
+        log.info("[ALT_VOTE] success meetingId={} userId={} alternativeTimeId={} voteId={} elapsedMs={}",
+                meetingId, userId, timeEntity.getAlternativeTimeId(), vote.getVoteId(), elapsedMs);
+
         return AlternativeVoteResponse.builder()
                 .voteId(vote.getVoteId())
                 .build();
     }
 
-    private UUID extractUserId(String authorizationHeader) {
-        String token = AuthHeaderUtils.extractBearerToken(authorizationHeader);
-        if (!jwtProvider.validateToken(token)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        }
-        return jwtProvider.getUserId(token);
-    }
 }

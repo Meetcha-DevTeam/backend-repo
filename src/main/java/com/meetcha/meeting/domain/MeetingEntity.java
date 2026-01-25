@@ -70,6 +70,10 @@ public class MeetingEntity {
     @JoinColumn(name = "project_id")
     private ProjectEntity project;
 
+    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<MeetingCandidateDateEntity> candidateDates = new ArrayList<>();
+
     /** 읽기용 편의 getter */
     @Transient
     public UUID getProjectId() {
@@ -77,10 +81,7 @@ public class MeetingEntity {
     }
 
     public boolean isDeadlinePassed() {
+
         return deadline != null && deadline.isBefore(LocalDateTime.now());
     }
-
-    @OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<MeetingCandidateDateEntity> candidateDates = new ArrayList<>();
 }

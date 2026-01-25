@@ -3,10 +3,14 @@ package com.meetcha.meeting.service;
 import com.meetcha.global.exception.CustomException;
 import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.util.DateTimeUtils;
+import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.joinmeeting.domain.ParticipantAvailabilityRepository;
 import com.meetcha.meeting.domain.*;
 import com.meetcha.meeting.dto.MeetingCreateRequest;
 import com.meetcha.meeting.dto.MeetingCreateResponse;
 import com.meetcha.meeting.dto.MeetingDeleteResponse;
+import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
+import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +25,13 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class MeetingService {
-
     private final MeetingRepository meetingRepository;
     private final MeetingCandidateDateRepository candidateDateRepository;
     private final ProjectRepository projectRepository;
+    private final MeetingParticipantRepository participantRepository;
+    private final ParticipantAvailabilityRepository availabilityRepository;
+    private final AlternativeTimeRepository alternativeTimeRepository;
+    private final AlternativeVoteRepository alternativeVoteRepository;
 
     private final Clock clock = Clock.systemDefaultZone();
 
@@ -35,6 +42,59 @@ public class MeetingService {
         LocalDateTime now = LocalDateTime.now(clock);
         LocalDateTime deadline = DateTimeUtils.kstToUtc(request.getDeadline());
 
+        MeetingEntity meeting = createMeetingEntity(request, creatorId, deadline, now);
+        MeetingEntity saved = meetingRepository.save(meeting);
+
+        // 후보 날짜 저장
+        List<MeetingCandidateDateEntity> candidateDates = request.getCandidateDates().stream()
+                .map(date -> new MeetingCandidateDateEntity(saved, date))
+                .toList();
+        candidateDateRepository.saveAll(candidateDates);
+
+        return new MeetingCreateResponse(
+                saved.getMeetingId(),
+                DateTimeUtils.utcToKst(saved.getCreatedAt())
+        );
+    }
+
+    private void validateRequest(MeetingCreateRequest request) {
+        Map<String, String> errors = new HashMap<>();
+
+        validateDuration(request, errors);
+        validateCandidateDates(request, errors);
+
+        if (!errors.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
+        }
+    }
+
+    private void validateDuration(MeetingCreateRequest request, Map<String, String> errors) {
+        if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
+            errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
+        }
+    }
+
+    private void validateCandidateDates(MeetingCreateRequest request, Map<String, String> errors) {
+        List<LocalDate> dates = request.getCandidateDates();
+        if (dates == null || dates.isEmpty() || dates.size() > 10) {
+            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
+            return;
+        }
+
+        LocalDate today = LocalDate.now(clock);
+        boolean anyPastOrToday = dates.stream().anyMatch(d -> !d.isAfter(today));
+        if (anyPastOrToday) {
+            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
+        }
+
+        LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
+        LocalDateTime deadline = request.getDeadline();
+        if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
+            errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
+        }
+    }
+
+    private MeetingEntity createMeetingEntity(MeetingCreateRequest request, UUID creatorId, LocalDateTime deadline, LocalDateTime now) {
         // 먼저 meeting 생성(프로젝트는 나중에 세터로)
         MeetingEntity meeting = MeetingEntity.builder()
                 .title(request.getTitle())
@@ -54,21 +114,7 @@ public class MeetingService {
                     .orElseThrow(() -> new CustomException(ErrorCode.PROJECT_NOT_FOUND));
             meeting.setProject(project); // ★ 세터로 FK 갱신
         });
-
-        meetingRepository.save(meeting);
-
-        // 후보 날짜 저장
-        List<LocalDate> candidateDates = request.getCandidateDates();
-        if (candidateDates != null && !candidateDates.isEmpty()) {
-            for (LocalDate date : candidateDates) {
-                candidateDateRepository.save(new MeetingCandidateDateEntity(meeting, date));
-            }
-        }
-
-        return new MeetingCreateResponse(
-                meeting.getMeetingId(),
-                DateTimeUtils.utcToKst(meeting.getCreatedAt())
-        );
+        return meeting;
     }
 
     @Transactional
@@ -87,6 +133,18 @@ public class MeetingService {
             throw new CustomException(ErrorCode.CANNOT_DELETE_MEETING);
         }
 
+        // 투표 삭제 (대안 시간을 참조하므로 먼저 삭제)
+        alternativeVoteRepository.deleteByAlternativeTime_MeetingId(meetingId);
+
+        // 대안 시간 삭제
+        alternativeTimeRepository.deleteByMeetingId(meetingId);
+
+        // 참여자 가용 시간 삭제
+        availabilityRepository.deleteByMeetingId(meetingId);
+
+        // 참여자 삭제 (미팅을 참조하므로 미팅보다 먼저 삭제)
+        participantRepository.deleteByMeeting_MeetingId(meetingId);
+
         // 미팅 삭제 (cascade로 후보 날짜도 함께 삭제됨)
         meetingRepository.delete(meeting);
 
@@ -94,35 +152,5 @@ public class MeetingService {
                 .meetingId(meetingId)
                 .message("매칭 실패된 미팅이 삭제되었습니다.")
                 .build();
-    }
-
-    private void validateRequest(MeetingCreateRequest request) {
-        Map<String, String> errors = new HashMap<>();
-
-        if (request.getDurationMinutes() < 1 || request.getDurationMinutes() > 719) {
-            errors.put("durationMinutes", ErrorCode.INVALID_DURATION.getMessage());
-        }
-
-        List<LocalDate> dates = request.getCandidateDates();
-        if (dates == null || dates.isEmpty() || dates.size() > 10) {
-            errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATES.getMessage());
-        } else {
-            LocalDate today = LocalDate.now(clock);
-
-            boolean anyPastOrToday = dates.stream().anyMatch(d -> !d.isAfter(today));
-            if (anyPastOrToday) {
-                errors.put("candidateDates", ErrorCode.INVALID_CANDIDATE_DATE_IN_PAST.getMessage());
-            }
-
-            LocalDate earliestCandidate = dates.stream().min(LocalDate::compareTo).orElse(null);
-            LocalDateTime deadline = request.getDeadline();
-            if (earliestCandidate != null && deadline.toLocalDate().isAfter(earliestCandidate)) {
-                errors.put("deadline", ErrorCode.INVALID_MEETING_DEADLINE.getMessage());
-            }
-        }
-
-        if (!errors.isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_MEETING_REQUEST, errors);
-        }
     }
 }
