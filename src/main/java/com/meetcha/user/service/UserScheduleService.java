@@ -172,6 +172,12 @@ public class UserScheduleService {
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
+        String recurrence = normalizeRecurrence(request.getRecurrence());
+        String rrule = RecurrenceUtils.buildGoogleRRule(
+                recurrence,
+                request.getStartAt()
+        );
+
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
         googleCalendarClient.updateEvent(
                 accessToken,
@@ -179,9 +185,10 @@ public class UserScheduleService {
                 request.getTitle(),
                 request.getStartAt(),
                 request.getEndAt(),
-                request.getRecurrence()
+                rrule
         );
     }
+
 
     // 유저 일정 삭제
     public void deleteSchedule(UUID userId, String eventId) {
