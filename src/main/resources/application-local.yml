@@ -4,14 +4,6 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${ACCESS_KEY}
-      secret-key: ${SECRET_KEY}
-    region:
-      static: ap-northeast-2
-    s3:
-      bucket: meetcha-kuit5
-    stack:
-      auto: false
+  jpa:
+    hibernate:
+      ddl-auto: update

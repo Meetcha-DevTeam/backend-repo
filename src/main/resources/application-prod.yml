@@ -5,6 +5,10 @@ spring:
     username: ${RDS_DB_HOST}
     password: ${RDS_PASSWORD}
 
+    jpa:
+      hibernate:
+        ddl-auto: validate
+
 cloud:
   aws:
     credentials:
