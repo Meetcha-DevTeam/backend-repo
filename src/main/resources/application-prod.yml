@@ -16,3 +16,6 @@ cloud:
       bucket: meetcha-kuit5
     stack:
       auto: false
+
+server:
+  forward-headers-strategy: native
