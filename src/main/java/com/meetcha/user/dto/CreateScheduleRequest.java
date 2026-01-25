@@ -15,10 +15,13 @@ import java.time.LocalDateTime;
 @Builder
 public class CreateScheduleRequest{
         @NotBlank(message = "일정 제목은 필수입니다.")
-        String title;
+        private String title;
+
         @NotNull(message = "시작 시간은 필수입니다.")
-        LocalDateTime startAt;
+        private LocalDateTime startAt;
+
         @NotNull(message = "종료 시간은 필수입니다.")
-        LocalDateTime endAt;
-        String recurrence;
+        private LocalDateTime endAt;
+
+        private String recurrence;
 }
