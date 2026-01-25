@@ -42,6 +42,8 @@ public class LoginService {
         String code = request.getCode();
         String redirectUrl = request.getRedirectUri() + "/login-complete";
 
+        log.info("redirect url: {}", redirectUrl);
+
         // 구글 토큰 교환
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
