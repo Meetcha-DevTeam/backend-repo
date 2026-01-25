@@ -1,18 +1,13 @@
 package com.meetcha.user.controller;
 
-import com.meetcha.auth.jwt.JwtProvider;
 import com.meetcha.global.annotation.AuthUser;
-import com.meetcha.global.dto.ApiResponse;
-import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.user.dto.*;
 import com.meetcha.user.service.UserScheduleService;
 import com.meetcha.user.service.UserProfileService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -50,15 +45,6 @@ public class UserScheduleController {
 
         return new CreateScheduleResponse(id);
     }
-
-//    public String createSchedule(
-//            @RequestHeader("Authorization") String authorizationHeader,
-//            @RequestBody CreateScheduleRequest request
-//    ) {
-//        UUID userId = jwtProvider.getUserId(AuthHeaderUtils.extractBearerToken(authorizationHeader));
-//        return userScheduleService.createSchedule(userId, request);
-//    }
-
 
     // 유저 개인 일정 수정
     @PutMapping("/schedule/update")

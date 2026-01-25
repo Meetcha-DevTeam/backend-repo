@@ -140,14 +140,16 @@ public class UserScheduleService {
 
     // 유저 일정 생성
     public String createSchedule(UUID userId, CreateScheduleRequest request) {
-        String recurrence = request.getRecurrence();
-        if ("NONE".equalsIgnoreCase(recurrence) || recurrence == null || recurrence.isBlank()) {
-            recurrence = null; // NONE, 빈 값 모두 null 처리
-        }
+        String recurrence = normalizeRecurrence(request.getRecurrence());
+
         validateTimeSlot(request.getStartAt(), request.getEndAt());
 
         String accessToken = googleTokenService.ensureValidAccessToken(userId);
-        String rrule = RecurrenceUtils.buildGoogleRRule(request.getRecurrence(), request.getStartAt());
+        String rrule = RecurrenceUtils.buildGoogleRRule(
+                recurrence,
+                request.getStartAt()
+        );
+
         return googleCalendarClient.createEvent(
                 accessToken,
                 request.getTitle(),
@@ -156,6 +158,15 @@ public class UserScheduleService {
                 rrule
         );
     }
+
+    private String normalizeRecurrence(String recurrence) {
+        if (recurrence == null || recurrence.isBlank()
+                || "NONE".equalsIgnoreCase(recurrence)) {
+            return null;
+        }
+        return recurrence;
+    }
+
 
     // 유저 일정 수정
     public void updateSchedule(UUID userId, UpdateScheduleRequest request) {
