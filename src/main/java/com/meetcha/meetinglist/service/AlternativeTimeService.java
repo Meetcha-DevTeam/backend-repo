@@ -6,6 +6,10 @@ import com.meetcha.global.exception.ErrorCode;
 import com.meetcha.global.util.AuthHeaderUtils;
 import com.meetcha.global.util.DateTimeUtils;
 import com.meetcha.joinmeeting.domain.MeetingParticipantRepository;
+import com.meetcha.meeting.domain.MeetingEntity;
+import com.meetcha.meeting.domain.MeetingRepository;
+import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meeting.service.MeetingScheduleSyncService;
 import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import com.meetcha.meetinglist.dto.AlternativeTimeDto;
@@ -33,6 +37,7 @@ public class AlternativeTimeService {
     private final AlternativeVoteRepository alternativeVoteRepository;
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final JwtProvider jwtProvider;
+    private final MeetingRepository meetingRepository;
 
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, UUID userId) {
         //대안시간 후보 조회 로직
@@ -119,6 +124,39 @@ public class AlternativeTimeService {
         long elapsedMs = (System.nanoTime() - startNs) / 1_000_000;
         log.info("[ALT_VOTE] success meetingId={} userId={} alternativeTimeId={} voteId={} elapsedMs={}",
                 meetingId, userId, timeEntity.getAlternativeTimeId(), vote.getVoteId(), elapsedMs);
+
+        // 4. 모든 참여자가 최소 1개 이상 투표했는지 확인
+        int totalParticipants =
+                meetingParticipantRepository.countByMeeting_MeetingId(meetingId);
+
+        int distinctVoters =
+                alternativeVoteRepository.countDistinctVoters(meetingId);
+
+        if (distinctVoters == totalParticipants) {
+
+            List<Object[]> result =
+                    alternativeVoteRepository.findTopVotedAlternativeTime(meetingId);
+
+            if (!result.isEmpty()) {
+
+                UUID bestAlternativeTimeId = (UUID) result.get(0)[0];
+
+                AlternativeTimeEntity bestTime =
+                        alternativeTimeRepository.findById(bestAlternativeTimeId)
+                                .orElseThrow(() ->
+                                        new CustomException(ErrorCode.ALTERNATIVE_TIME_NOT_FOUND));
+
+                MeetingEntity meeting =
+                        meetingRepository.findById(meetingId)
+                                .orElseThrow(() ->
+                                        new CustomException(ErrorCode.MEETING_NOT_FOUND));
+
+                meeting.setConfirmedTime(bestTime.getStartTime());
+                meeting.setMeetingStatus(MeetingStatus.BEFORE);
+
+                meetingRepository.save(meeting);
+            }
+        }
 
         return AlternativeVoteResponse.builder()
                 .voteId(vote.getVoteId())

@@ -37,4 +37,6 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
     List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
 
     void deleteByMeeting_MeetingId(UUID meetingId);
+
+    int countByMeeting_MeetingId(UUID meetingId);
 }
