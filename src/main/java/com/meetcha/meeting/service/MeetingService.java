@@ -14,6 +14,7 @@ import com.meetcha.meetinglist.repository.AlternativeVoteRepository;
 import com.meetcha.project.domain.ProjectEntity;
 import com.meetcha.project.domain.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MeetingService {
@@ -50,6 +52,8 @@ public class MeetingService {
                 .map(date -> new MeetingCandidateDateEntity(saved, date))
                 .toList();
         candidateDateRepository.saveAll(candidateDates);
+
+        log.info("[createMeeting] Saved new meeting : meetingId = {}, creatorId = {}", saved.getMeetingId(), creatorId);
 
         return new MeetingCreateResponse(
                 saved.getMeetingId(),

@@ -1,9 +1,13 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${RDS_URL}:${RDS_PORT}/${RDS_USERNAME}?createDatabaseIfNotExist=true
-    username: ${RDS_DB_HOST}
+    url: jdbc:mysql://${RDS_HOST}:${RDS_PORT}/${RDS_DB_NAME}?createDatabaseIfNotExist=true
+    username: ${RDS_USERNAME}
     password: ${RDS_PASSWORD}
+
+    jpa:
+      hibernate:
+        ddl-auto: validate
 
 cloud:
   aws:

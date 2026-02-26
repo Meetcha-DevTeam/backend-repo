@@ -30,6 +30,15 @@ public class AlternativeTimeCalculator {
         List<AlternativeTimeEntity> results = new ArrayList<>();
         log.info("getAlternativeTimes 진입 {}",results);
 
+        LocalDate baseDate;
+
+        List<Integer> days = meeting.getCandidateDay();
+        if (days == null || days.isEmpty()) {
+            baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), 1);
+        } else {
+            baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), days.get(0));
+        }
+
         // 전략 1: 진행 시간 줄이기
         Map<Integer, Integer> timeSequenceDuration = getTimeSequence(meeting, PER, (cur, tot) -> cur == tot);
         if (!timeSequenceDuration.isEmpty()) {
@@ -37,7 +46,7 @@ public class AlternativeTimeCalculator {
             int adjustedDuration = maxHit * PER; // 줄어든 소요 시간
 
             for (Integer minutes : getLessDurationMeetingTimes(meeting)) {
-                LocalDateTime start = toLocalDateTime(minutes);
+                LocalDateTime start = toLocalDateTime(minutes, baseDate);
                 results.add(AlternativeTimeEntity.builder()
                         .alternativeTimeId(UUID.randomUUID())
                         .meetingId(meetingId)
@@ -94,9 +103,14 @@ public class AlternativeTimeCalculator {
         return results;
     }
 
-    private static LocalDateTime toLocalDateTime(int totalMinutes) {
-        LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
+    private static LocalDateTime toLocalDateTime(int totalMinutes, LocalDate baseDate) {
+        int dayOffset = totalMinutes / (24 * 60);
+        int minuteOfDay = totalMinutes % (24 * 60);
+
+        return baseDate
+                .plusDays(dayOffset)
+                .atStartOfDay()
+                .plusMinutes(minuteOfDay);
     }
 
     /**
