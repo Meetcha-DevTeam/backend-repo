@@ -60,7 +60,7 @@ public class MeetingConverter {
 
     private static int toMinutes(LocalDateTime timeUtc) {
         LocalDateTime timeKst = DateTimeUtils.utcToKst(timeUtc);
-        return timeKst.getDayOfYear() * 24 * 60 + timeKst.getHour() * 60 + timeKst.getMinute();
+        return timeKst.getHour() * 60 + timeKst.getMinute();
     }
 
     public static LocalDateTime toLocalDateTime(int totalMinutes) {
