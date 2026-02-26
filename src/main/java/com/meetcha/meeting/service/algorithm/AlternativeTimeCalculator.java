@@ -104,7 +104,13 @@ public class AlternativeTimeCalculator {
     }
 
     private static LocalDateTime toLocalDateTime(int totalMinutes, LocalDate baseDate) {
-        return baseDate.atStartOfDay().plusMinutes(totalMinutes);
+        int dayOffset = totalMinutes / (24 * 60);
+        int minuteOfDay = totalMinutes % (24 * 60);
+
+        return baseDate
+                .plusDays(dayOffset)
+                .atStartOfDay()
+                .plusMinutes(minuteOfDay);
     }
 
     /**
