@@ -34,7 +34,7 @@ public class AlternativeTimeCalculator {
 
         List<Integer> days = meeting.getCandidateDay();
         if (days == null || days.isEmpty()) {
-            baseDate = LocalDate.now();
+            baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), 1);
         } else {
             baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), days.get(0));
         }
