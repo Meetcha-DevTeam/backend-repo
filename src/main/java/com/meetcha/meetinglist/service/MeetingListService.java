@@ -47,12 +47,15 @@ public class MeetingListService {
 
         //userID에 해당하는 meetingID 인지 검증하는 로직
         // 미팅이 존재하는지 부터 검증 한 후, 자격을 검증
-        boolean isParticipant = meetingParticipantRepository.existsByMeeting_MeetingIdAndUserId(meetingId, userId);
-        if (!isParticipant) {
-            log.warn("[MEETING_DETAIL] forbidden meetingId={} userId={}", meetingId, userId);
+        boolean isParticipant =
+                meetingParticipantRepository
+                        .existsByMeeting_MeetingIdAndUserId(meetingId, userId);
+
+        boolean isCreator = meeting.getCreatedBy().equals(userId);
+
+        if (!isParticipant && !isCreator) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
-
         List<MeetingParticipantDto> participantDtos =
                 meetingParticipantRepository.findParticipantDtosByMeetingId(meetingId);
 
