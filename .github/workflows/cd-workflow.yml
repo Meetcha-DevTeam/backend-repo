@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'develop'
 
 permissions:
   contents: read
@@ -47,90 +46,54 @@ jobs:
           docker build -f Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}
 
-      - name: 🚀 deploy to server
+      - name: 🚀 deploy to server (docker compose + .env)
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_KEY }}
           port: ${{ secrets.EC2_PORT }}
-          envs: GITHUB_SHA
-          command_timeout: 30m 
+          command_timeout: 30m
           script: |
             set -e
             exec 200>/tmp/meetcha-cd.lock; flock -n 200 || { echo "Another deploy in progress. Exit."; exit 0; }
 
-            APP_NAME="meetcha"
-            IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}"
+            APP_DIR="/home/ec2-user/kuit5"
+            cd "$APP_DIR"
             
-            echo "✋🏻 Remove any container that occupies the name"
+            echo "⬇️ Pull latest code"
+            git pull origin main
 
-            # 0) 이름으로 바로 식별 가능하면 제거
-            if sudo docker inspect "$APP_NAME" >/dev/null 2>&1; then
-            sudo docker rm -f "$APP_NAME" || true
-            fi
-            
-            # 1) 정확히 같은 이름(도커 내부는 /이 붙음) 전부 제거
-            IDS_BY_NAME=$(sudo docker ps -aq -f "name=^/${APP_NAME}$" || true)
-            [ -n "$IDS_BY_NAME" ] && sudo docker rm -f $IDS_BY_NAME || true
-            
-            # 2) 동일 라벨 달린 이전 컨테이너도 제거(혹시 모를 잔재)
-            IDS_BY_LABEL=$(sudo docker ps -aq -f "label=app=${APP_NAME}" || true)
-            [ -n "$IDS_BY_LABEL" ] && sudo docker rm -f $IDS_BY_LABEL || true
-            
-            # 3) dead/exited 잔재 정리 + 이름 락 해제 대기
-            sudo docker container prune -f || true
-            sleep 2
-            
-            
-            
-            echo "🐳 Current docker containers:"
-            sudo docker ps -a
+            echo "🧾 Write .env from GitHub Secrets"
+            cat > .env <<'ENVEOF'
+            SPRING_PROFILES_ACTIVE=prod
+            SERVER_PORT=8080
 
-            echo "🥳 Pulling new image"
-            sudo docker pull "$IMAGE"
+            ACCESS_KEY=${{ secrets.ACCESS_KEY }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
 
-            echo "🌱 Running new container with ENV"
-            sudo docker run -d --name "$APP_NAME" --label app="$APP_NAME" \
-              -p 8000:8080 \
-              -e ACCESS_KEY="${{ secrets.ACCESS_KEY }}" \
-              -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
-              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              -e SPRING_DATASOURCE_URL="${{ secrets.RDS_URL }}" \
-              -e SPRING_DATASOURCE_USERNAME="${{ secrets.RDS_USERNAME }}" \
-              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.RDS_PASSWORD }}" \
-              -e SPRING_DATASOURCE_PORT="${{ secrets.RDS_PORT }}" \
-              -e GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}" \
-              -e GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-              -e GOOGLE_REDIRECT_URI="${{ secrets.GOOGLE_REDIRECT_URI }}" \
-              "$IMAGE"
+            SPRING_DATASOURCE_URL=${{ secrets.RDS_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}
 
-            echo "✅ Container status:"
-            sudo docker ps -a
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_REDIRECT_URI=${{ secrets.GOOGLE_REDIRECT_URI }}
+            ENVEOF
+            chmod 600 .env
 
-            echo "🔎 Verify env inside container (redirect URI)"
-            sudo docker exec "$APP_NAME" /bin/sh -lc 'printenv | grep -E "^GOOGLE_(CLIENT_ID|REDIRECT_URI|CLIENT_SECRET)=" || true'
-            
-            echo "🧪 Nginx config test"
-            if sudo nginx -t; then
-              echo "🔁 Reloading Nginx"
-              (sudo systemctl reload nginx || sudo service nginx reload || sudo nginx -s reload) || {
-                echo "⚠️ Reload failed — trying full restart"
-                sudo systemctl restart nginx || sudo service nginx restart
-              }
-            else
-              echo "❌ Nginx config invalid. Showing error log tail"
-              sudo tail -n 100 /var/log/nginx/error.log || true
-              exit 1
-            fi
+            echo "🐳 Pull latest images"
+            docker compose pull api
 
-            echo "🩺 Nginx status (brief)"
-            (sudo systemctl status nginx --no-pager -l || sudo service nginx status) || true
+            echo "🚀 Up (recreate if needed)"
+            docker compose up -d --remove-orphans
 
-            echo "🚮 Cleaning up old images & any old containers with the same label"
-            CUR=$(sudo docker ps -q -f "name=^${APP_NAME}$" || true)
-            OLD_LABELED=$(sudo docker ps -aq -f "label=app=${APP_NAME}" | grep -v "^${CUR}$" || true)
-            if [ -n "$OLD_LABELED" ]; then
-            sudo docker rm -f $OLD_LABELED || true
-            fi
-            sudo docker image prune -f
+            echo "🧪 Nginx config test (inside container)"
+            docker exec -i kuit5-nginx nginx -t
+
+            echo "📌 Containers"
+            docker ps
+
+            echo "🧹 Cleanup dangling images"
+            docker image prune -f
