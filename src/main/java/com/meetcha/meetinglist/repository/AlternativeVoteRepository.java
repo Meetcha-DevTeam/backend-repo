@@ -2,7 +2,9 @@ package com.meetcha.meetinglist.repository;
 
 import com.meetcha.meetinglist.domain.AlternativeVoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,4 +25,26 @@ public interface AlternativeVoteRepository extends JpaRepository<AlternativeVote
     boolean existsByAlternativeTime_MeetingIdAndUserIdAndCheckedTrue(UUID meetingId, UUID userId);
 
     void deleteByAlternativeTime_MeetingId(UUID meetingId);
+
+    // 특정 미팅에서 가장 많이 선택된 대안시간 찾기
+    @Query("""
+    SELECT t.alternativeTimeId, COUNT(v)
+    FROM AlternativeVoteEntity v
+    JOIN v.alternativeTime t
+    WHERE t.meetingId = :meetingId
+      AND v.checked = true
+    GROUP BY t.alternativeTimeId
+    ORDER BY COUNT(v) DESC
+""")
+    List<Object[]> findTopVotedAlternativeTime(UUID meetingId);
+
+    @Query("""
+    SELECT COUNT(DISTINCT v.userId)
+    FROM AlternativeVoteEntity v
+    JOIN v.alternativeTime t
+    WHERE t.meetingId = :meetingId
+      AND v.checked = true
+""")
+    int countDistinctVoters(UUID meetingId);
+
 }
