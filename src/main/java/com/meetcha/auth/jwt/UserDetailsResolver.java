@@ -29,8 +29,10 @@ public class UserDetailsResolver implements HandlerMethodArgumentResolver {
 
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mav,
-                                  NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+    public Object resolveArgument(MethodParameter parameter,
+                                  ModelAndViewContainer mav,
+                                  NativeWebRequest webRequest,
+                                  WebDataBinderFactory binderFactory) {
 
         AuthUser ann = parameter.getParameterAnnotation(AuthUser.class);
         boolean required = (ann == null) || ann.required();
@@ -43,14 +45,19 @@ public class UserDetailsResolver implements HandlerMethodArgumentResolver {
         }
 
         Object principal = auth.getPrincipal();
+
+        // 커스텀 Principal인 경우
         if (principal instanceof JwtUserPrincipal p) {
             return p.userId();
         }
 
-        // 예상과 다른 Principal 타입이면 인증 실패 처리
-        if (required) throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
-        return null;
+        // Spring Security 기본 JwtAuthenticationToken 사용하는 경우
+        // sub는 authentication.getName()에 들어있음
+        try {
+            return java.util.UUID.fromString(auth.getName());
+        } catch (Exception e) {
+            if (required) throw new CustomException(ErrorCode.UNAUTHORIZED_USER);
+            return null;
+        }
     }
-
-
 }
