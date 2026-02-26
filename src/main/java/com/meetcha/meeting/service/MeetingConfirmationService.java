@@ -39,6 +39,11 @@ public class MeetingConfirmationService {
     public void confirmMeeting(UUID meetingId) {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+
+        if (meeting.getDeadline().isAfter(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.MEETING_DEADLINE_NOT_PASSED);
+        }
+
         log.info("confirmMeeting 접근 완료");
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);

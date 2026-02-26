@@ -16,6 +16,7 @@ public enum ErrorCode implements ErrorCodeBase {
     INVALID_CANDIDATE_DATE_IN_PAST(HttpStatus.BAD_REQUEST, "모든 후보 날짜는 현재 날짜 이후여야 합니다."),
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "날짜 형식이 잘못되었거나 범위가 유효하지 않습니다."),
     MEETING_DEADLINE_PASSED(HttpStatus.BAD_REQUEST, "미팅 참여마감시간이 지났습니다."),
+    MEETING_DEADLINE_NOT_PASSED( HttpStatus.BAD_REQUEST, "참여 마감 시간이 지나야 미팅을 확정할 수 있습니다."),
     INVALID_ENTITY_FIELD(HttpStatus.BAD_REQUEST, "엔티티의 필수 필드가 누락되었습니다."),
     INVALID_TIME_SLOT(HttpStatus.BAD_REQUEST, "시작 시간은 종료 시간보다 빨라야 합니다."),
     REFLECTION_NOT_ALLOWED_FOR_MEETING_STATUS(HttpStatus.BAD_REQUEST, "완료되지 않은 미팅에 대해서는 회고를 작성할 수 없습니다."),
