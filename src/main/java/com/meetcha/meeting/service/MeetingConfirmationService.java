@@ -40,7 +40,8 @@ public class MeetingConfirmationService {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
-        if (meeting.getDeadline().isAfter(LocalDateTime.now())) {
+        if (meeting.getDeadline() != null &&
+                meeting.getDeadline().isAfter(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.MEETING_DEADLINE_NOT_PASSED);
         }
 

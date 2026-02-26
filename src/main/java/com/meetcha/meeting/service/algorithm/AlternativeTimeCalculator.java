@@ -30,8 +30,14 @@ public class AlternativeTimeCalculator {
         List<AlternativeTimeEntity> results = new ArrayList<>();
         log.info("getAlternativeTimes 진입 {}",results);
 
-        int dayOfYear = meeting.getCandidateDay().get(0);
-        LocalDate baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), dayOfYear);
+        LocalDate baseDate;
+
+        List<Integer> days = meeting.getCandidateDay();
+        if (days == null || days.isEmpty()) {
+            baseDate = LocalDate.now();
+        } else {
+            baseDate = LocalDate.ofYearDay(LocalDate.now().getYear(), days.get(0));
+        }
 
         // 전략 1: 진행 시간 줄이기
         Map<Integer, Integer> timeSequenceDuration = getTimeSequence(meeting, PER, (cur, tot) -> cur == tot);
