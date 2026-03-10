@@ -9,6 +9,7 @@ import com.meetcha.meeting.service.algorithm.TimeRange;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
         import java.util.stream.Collectors;
 /**
@@ -26,6 +27,8 @@ import java.util.*;
  */
 
 public class MeetingConverter {
+
+    private static final LocalDateTime BASE_DATE = LocalDateTime.of(2020, 1, 1, 0, 0);
 
     public static Meeting toAlgorithmMeeting(MeetingEntity entity, List<ParticipantAvailability> availabilities) {
         Map<UUID, List<TimeRange>> timeMap = new HashMap<>();
@@ -60,12 +63,11 @@ public class MeetingConverter {
 
     private static int toMinutes(LocalDateTime timeUtc) {
         LocalDateTime timeKst = DateTimeUtils.utcToKst(timeUtc);
-        return timeKst.getHour() * 60 + timeKst.getMinute();
+        return (int) ChronoUnit.MINUTES.between(BASE_DATE, timeKst);
     }
 
     public static LocalDateTime toLocalDateTime(int totalMinutes) {
-        LocalDate baseDate = LocalDate.of(LocalDate.now().getYear(), 1, 1);
-        LocalDateTime kstTime = baseDate.atStartOfDay().plusMinutes(totalMinutes);
+        LocalDateTime kstTime = BASE_DATE.plusMinutes(totalMinutes);
 
         // 다시 DB 저장용으로는 UTC 변환
         return DateTimeUtils.kstToUtc(kstTime);
