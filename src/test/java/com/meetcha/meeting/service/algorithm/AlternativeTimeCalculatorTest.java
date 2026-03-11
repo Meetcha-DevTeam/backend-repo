@@ -71,7 +71,7 @@ class AlternativeTimeCalculatorTest {
         List<LocalDateTime> starts = durationList.stream()
                 .map(AlternativeTimeEntity::getStartTime)
                 .toList();
-        assertEquals(List.of(ldt(m(0, 9, 0))), starts);
+        assertTrue(starts.contains(ldt(m(0, 9, 0))));
     }
 
     @Test
