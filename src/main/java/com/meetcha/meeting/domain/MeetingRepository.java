@@ -37,20 +37,21 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
 
     //기여도할일조회api에서 사용하는 쿼리
     @Query("""
-                SELECT COUNT(m) FROM MeetingEntity m
-                WHERE m.meetingStatus = :status
-                  AND (
-                      m.createdBy = :userId
-                      OR EXISTS (
-                          SELECT 1 FROM MeetingParticipant p
-                          WHERE p.meeting = m AND p.userId = :userId
-                      )
-                  )
-                  AND NOT EXISTS (
-                      SELECT 1 FROM MeetingReflectionEntity r
-                      WHERE r.meeting = m AND r.user.userId = :userId
-                  )
-            """)
+    SELECT COUNT(m) FROM MeetingEntity m
+    WHERE m.meetingStatus = :status
+      AND (
+          m.createdBy = :userId
+          OR EXISTS (
+              SELECT 1 FROM MeetingParticipant p
+              WHERE p.meeting = m AND p.userId = :userId
+          )
+      )
+      AND NOT EXISTS (
+          SELECT 1 FROM MeetingReflectionEntity r
+          WHERE r.meeting = m AND r.user.userId = :userId
+      )
+""")
+
     long countMeetingsNeedReflection(
             @Param("userId") UUID userId,
             @Param("status") MeetingStatus status
