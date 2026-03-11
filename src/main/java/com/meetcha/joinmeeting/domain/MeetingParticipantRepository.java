@@ -38,30 +38,5 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
 
     void deleteByMeeting_MeetingId(UUID meetingId);
 
-<<<<<<< HEAD
     int countByMeeting_MeetingId(UUID meetingId);
 }
-=======
-@Repository
-public interface ParticipantRepository extends JpaRepository<MeetingParticipant, UUID> {
-
-    List<MeetingParticipant> findByMeeting_MeetingId(UUID meetingId);
-    List<MeetingParticipant> findByUserId(UUID userId);
-    @Query("""
-   SELECT new com.meetcha.joinmeeting.dto.MeetingParticipantDto(
-       p.participantId,
-       p.nickname,
-       u.profileImgSrc
-   )
-   FROM MeetingParticipant p
-   JOIN UserEntity u ON u.userId = p.userId
-   WHERE p.meetingId = :meetingId
-   ORDER BY p.nickname ASC
-""")
-    List<MeetingParticipantDto> findParticipantDtosByMeetingId(@Param("meetingId") UUID meetingId);
-
-    @Query("SELECT p.nickname FROM MeetingParticipant p WHERE p.meetingId = :meetingId")
-    List<String> findNicknamesByMeetingId(@Param("meetingId") UUID meetingId);
-}
-*/
->>>>>>> a2d63f45550912fbc5ebd94824edd49ab1746bb9
