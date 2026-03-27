@@ -63,7 +63,7 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
                 SELECT m FROM MeetingEntity m
                 WHERE m.alternativeDeadline IS NOT NULL
                   AND m.confirmedTime IS NULL
-                  AND m.alternativeDeadline < CURRENT_TIMESTAMP
+                  AND m.alternativeDeadline < :now
                   AND m.meetingStatus = 'MATCHING'
             """)
     List<MeetingEntity> findMeetingsToConfirmFromAlternative();

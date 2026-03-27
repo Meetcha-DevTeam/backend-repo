@@ -41,7 +41,9 @@ public class MeetingConfirmationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline() != null &&
-                meeting.getDeadline().isAfter(LocalDateTime.now())) {
+                meeting.getDeadline().isAfter(LocalDateTime.now()) &&
+                meeting.getConfirmedTime() == null) {
+            // 투표로 확정된 경우는 통과
             throw new CustomException(ErrorCode.MEETING_DEADLINE_NOT_PASSED);
         }
 
