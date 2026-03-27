@@ -10,16 +10,19 @@ import com.meetcha.joinmeeting.dto.MeetingParticipantDto;
 import com.meetcha.meeting.domain.MeetingEntity;
 import com.meetcha.meeting.domain.MeetingRepository;
 import com.meetcha.meeting.domain.MeetingStatus;
+import com.meetcha.meetinglist.domain.AlternativeTimeEntity;
 import com.meetcha.meetinglist.dto.NeedReflectionResponse;
 import com.meetcha.meetinglist.dto.MeetingDetailResponse;
 import com.meetcha.meetinglist.dto.MeetingListResponse;
 import com.meetcha.meetinglist.dto.MeetingAllAvailabilitiesResponse;
+import com.meetcha.meetinglist.repository.AlternativeTimeRepository;
 import com.meetcha.reflection.domain.MeetingReflectionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +37,7 @@ public class MeetingListService {
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final MeetingReflectionRepository reflectionRepository;
     private final ParticipantAvailabilityRepository participantAvailabilityRepository;
+    private final AlternativeTimeRepository alternativeTimeRepository;
 
     public MeetingDetailResponse getMeetingDetail(UUID meetingId, UUID userId) {
         long startNs = System.nanoTime();
@@ -56,6 +60,15 @@ public class MeetingListService {
         if (!isParticipant && !isCreator) {
             throw new CustomException(ErrorCode.FORBIDDEN);
         }
+
+        List<AlternativeTimeEntity> alternatives =
+                alternativeTimeRepository.findByMeetingId(meetingId);
+
+        LocalDateTime earliestTime = alternatives.stream()
+                .map(AlternativeTimeEntity::getStartTime)
+                .min(LocalDateTime::compareTo)
+                .orElse(null);
+
         List<MeetingParticipantDto> participantDtos =
                 meetingParticipantRepository.findParticipantDtosByMeetingId(meetingId);
 
@@ -72,7 +85,8 @@ public class MeetingListService {
                 meeting.getDurationMinutes(),
                 DateTimeUtils.utcToKst(meeting.getConfirmedTime()),
                 meeting.getMeetingCode(),
-                participantDtos
+                participantDtos,
+                earliestTime != null ? DateTimeUtils.utcToKst(earliestTime) : null
         );
     }
 

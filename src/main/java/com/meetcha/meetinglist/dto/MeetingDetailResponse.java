@@ -21,4 +21,5 @@ public class MeetingDetailResponse {
     private LocalDateTime confirmedTime;
     private String meetingCode;
     private List<MeetingParticipantDto> participants;
+    private LocalDateTime earliestTime;
 }
