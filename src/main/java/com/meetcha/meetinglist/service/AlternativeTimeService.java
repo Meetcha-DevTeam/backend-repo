@@ -36,7 +36,7 @@ public class AlternativeTimeService {
     private final AlternativeTimeRepository alternativeTimeRepository;
     private final AlternativeVoteRepository alternativeVoteRepository;
     private final MeetingParticipantRepository meetingParticipantRepository;
-    private final JwtProvider jwtProvider;
+    private final MeetingScheduleSyncService syncService;
     private final MeetingRepository meetingRepository;
 
     public AlternativeTimeListResponse getAlternativeTimeList(UUID meetingId, UUID userId) {
@@ -151,10 +151,18 @@ public class AlternativeTimeService {
                                 .orElseThrow(() ->
                                         new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
+                if (meeting.getConfirmedTime() != null) {
+                    return AlternativeVoteResponse.builder()
+                            .voteId(vote.getVoteId())
+                            .build();
+                }
+
                 meeting.setConfirmedTime(bestTime.getStartTime());
                 meeting.setMeetingStatus(MeetingStatus.BEFORE);
 
                 meetingRepository.save(meeting);
+
+                syncService.syncMeetingToCalendars(meeting);
             }
         }
 
