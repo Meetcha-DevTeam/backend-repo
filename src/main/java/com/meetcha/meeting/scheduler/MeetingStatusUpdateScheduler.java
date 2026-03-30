@@ -67,9 +67,7 @@ public class MeetingStatusUpdateScheduler {
         log.info("[Scheduler] confirmMeetingForDeadlinePassed now={}", now);
 
         List<MeetingEntity> targets =
-                meetingRepository.findByMeetingStatusAndConfirmedTimeIsNullAndDeadlineBefore(
-                        MeetingStatus.MATCHING, now
-                );
+                meetingRepository.findExpiredMeetings(MeetingStatus.MATCHING);
 
         log.info("[Scheduler] 참여 마감 지난 MATCHING 미팅 수 = {}", targets.size());
 
