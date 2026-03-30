@@ -103,5 +103,11 @@ public interface MeetingRepository extends JpaRepository<MeetingEntity, UUID> {
     List<MeetingEntity> findMeetingsToConfirmFromAlternativeForUpdate(@Param("now") LocalDateTime now);
 
 
-    List<MeetingEntity> findByMeetingStatusAndConfirmedTimeIsNullAndDeadlineBefore(MeetingStatus meetingStatus, LocalDateTime now);
+    @Query("""
+SELECT m FROM MeetingEntity m
+WHERE m.meetingStatus = :status
+AND m.confirmedTime IS NULL
+AND m.deadline < CURRENT_TIMESTAMP
+""")
+    List<MeetingEntity> findExpiredMeetings(@Param("status") MeetingStatus status);
 }
