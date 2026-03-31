@@ -220,7 +220,7 @@ class JoinMeetingServiceTest {
         // given
         UUID meetingId = UUID.randomUUID();
         String meetingCode = UUID.randomUUID().toString().substring(0, 8);
-        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().plusDays(1), LocalDateTime.now(), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null, null);
+        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().plusDays(1), LocalDateTime.now(), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null,  null, null);
         when(meetingRepository.findById(eq(meetingId))).thenReturn(Optional.of(meeting));
 
         UUID cadidateDateId = UUID.randomUUID();
@@ -256,7 +256,7 @@ class JoinMeetingServiceTest {
         // given
         UUID meetingId = UUID.randomUUID();
         String meetingCode = UUID.randomUUID().toString().substring(0, 8);
-        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(2), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null, null);
+        MeetingEntity meeting = new MeetingEntity(meetingId, "title", "desc", 100, LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(2), MeetingStatus.MATCHING, null, meetingCode, null, UUID.randomUUID(), null, null, null);
         when(meetingRepository.findByMeetingCode(eq(meetingCode))).thenReturn(Optional.of(meeting));
 
         // when
