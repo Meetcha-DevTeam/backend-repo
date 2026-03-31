@@ -65,6 +65,9 @@ public class MeetingEntity {
     @Column(name = "created_by", nullable = false)
     private UUID createdBy; // NOT NULL
 
+    @Column(name = "earliest_time")
+    private LocalDateTime earliestTime;
+
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")

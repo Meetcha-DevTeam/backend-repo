@@ -73,7 +73,15 @@ public class MeetingConfirmationService {
 
             } else {
                 log.info("saveAlternativeTimeCandidates 호출");
-                saveAlternativeTimeCandidates(meetingId,alterTimes);
+                saveAlternativeTimeCandidates(meetingId, alterTimes);
+
+                LocalDateTime earliestTime = alterTimes.stream()
+                        .map(AlternativeTimeEntity::getStartTime)
+                        .min(LocalDateTime::compareTo)
+                        .orElse(null);
+
+                meeting.setEarliestTime(earliestTime);
+
 //                updateAlternativeDeadlineFromCandidates(meeting);
                 updateAlternativeDeadlineFromCandidates(meeting, alterTimes);
                 meeting.setMeetingStatus(MeetingStatus.MATCHING);
