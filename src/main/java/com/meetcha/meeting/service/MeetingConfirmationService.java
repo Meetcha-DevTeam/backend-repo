@@ -40,6 +40,10 @@ public class MeetingConfirmationService {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
+        if (meeting.getConfirmedTime() != null) {
+            return;
+        }
+
         log.info("confirmMeeting 접근 완료");
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
