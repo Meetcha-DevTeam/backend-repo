@@ -14,9 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,48 +50,32 @@ public class UserScheduleService {
                 .toList();
 
         Map<String, List<ScheduleResponse>> dailyGroups =
-                valid.stream()
-                        .collect(Collectors.groupingBy(s ->
-                                s.getTitle() + "|" + s.getStartAt().toLocalTime()
-                        ));
+                valid.stream().collect(Collectors.groupingBy(s ->
+                        s.getTitle() + "|" + s.getStartAt().toLocalTime()
+                ));
 
         Map<String, List<ScheduleResponse>> weeklyGroups =
-                valid.stream()
-                        .collect(Collectors.groupingBy(s ->
-                                s.getTitle()
-                                        + "|" + s.getStartAt().getDayOfWeek()
-                                        + "|" + s.getStartAt().toLocalTime()
-                        ));
+                valid.stream().collect(Collectors.groupingBy(s ->
+                        s.getTitle() + "|" + s.getStartAt().getDayOfWeek() + "|" + s.getStartAt().toLocalTime()
+                ));
 
         Map<String, List<ScheduleResponse>> monthlyGroups =
-                valid.stream()
-                        .collect(Collectors.groupingBy(s ->
-                                s.getTitle()
-                                        + "|" + s.getStartAt().getDayOfMonth()
-                                        + "|" + s.getStartAt().toLocalTime()
-                        ));
+                valid.stream().collect(Collectors.groupingBy(s ->
+                        s.getTitle() + "|" + s.getStartAt().getDayOfMonth() + "|" + s.getStartAt().toLocalTime()
+                ));
+
+        Set<String> seen = new HashSet<>();
 
         return valid.stream()
                 .map(s -> {
                     String dailyKey = s.getTitle() + "|" + s.getStartAt().toLocalTime();
-                    String weeklyKey = s.getTitle()
-                            + "|" + s.getStartAt().getDayOfWeek()
-                            + "|" + s.getStartAt().toLocalTime();
-                    String monthlyKey = s.getTitle()
-                            + "|" + s.getStartAt().getDayOfMonth()
-                            + "|" + s.getStartAt().toLocalTime();
+                    String weeklyKey = s.getTitle() + "|" + s.getStartAt().getDayOfWeek() + "|" + s.getStartAt().toLocalTime();
+                    String monthlyKey = s.getTitle() + "|" + s.getStartAt().getDayOfMonth() + "|" + s.getStartAt().toLocalTime();
 
-                    if (hasConsecutiveDays(dailyGroups.getOrDefault(dailyKey, List.of()))) {
-                        return ScheduleResponse.builder()
-                                .eventId(s.getEventId())
-                                .title(s.getTitle())
-                                .startAt(s.getStartAt())
-                                .endAt(s.getEndAt())
-                                .recurrence("DAILY")
-                                .build();
-                    }
-
+                    // MONTHLY
                     if (monthlyGroups.getOrDefault(monthlyKey, List.of()).size() >= 2) {
+                        if (!seen.add("M:" + monthlyKey)) return null;
+
                         return ScheduleResponse.builder()
                                 .eventId(s.getEventId())
                                 .title(s.getTitle())
@@ -103,7 +85,10 @@ public class UserScheduleService {
                                 .build();
                     }
 
+                    // WEEKLY
                     if (weeklyGroups.getOrDefault(weeklyKey, List.of()).size() >= 2) {
+                        if (!seen.add("W:" + weeklyKey)) return null;
+
                         return ScheduleResponse.builder()
                                 .eventId(s.getEventId())
                                 .title(s.getTitle())
@@ -113,8 +98,22 @@ public class UserScheduleService {
                                 .build();
                     }
 
+                    // DAILY
+                    if (hasConsecutiveDays(dailyGroups.getOrDefault(dailyKey, List.of()))) {
+                        if (!seen.add("D:" + dailyKey)) return null;
+
+                        return ScheduleResponse.builder()
+                                .eventId(s.getEventId())
+                                .title(s.getTitle())
+                                .startAt(s.getStartAt())
+                                .endAt(s.getEndAt())
+                                .recurrence("DAILY")
+                                .build();
+                    }
+
                     return s;
                 })
+                .filter(Objects::nonNull)
                 .toList();
     }
 

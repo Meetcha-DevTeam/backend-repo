@@ -22,14 +22,18 @@ public class MeetingTimeCalculator {
                 (currentCount, totalCount) -> currentCount == totalCount
         );
 
-        if (timeSequence.isEmpty()) return null;
+        Map<Integer, Integer> filtered = timeSequence.entrySet().stream()
+                .filter(entry -> entry.getValue() >= hit)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        if (filtered.isEmpty()) return null;
 
         // 2. 우선순위 1: 여유 시간이 많은 시간대
-        List<Integer> timeList = timeSequence.keySet().stream()
-                .sorted(Comparator.comparingInt(timeSequence::get))
+        List<Integer> timeList = filtered.keySet().stream()
+                .sorted(Comparator.comparingInt(filtered::get))
                 .collect(Collectors.toList());
 
-        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList,timeSequence, hit, PER);
+        List<Integer> spareCandidates = SortUtils.sortBySpare(timeList,filtered, hit, PER);
         if (spareCandidates == null || spareCandidates.isEmpty()) return null;
 
         // 3. 우선순위 2: 가장 빠른 날짜
