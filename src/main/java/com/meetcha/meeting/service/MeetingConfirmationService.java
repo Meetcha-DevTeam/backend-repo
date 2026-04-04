@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Slf4j
@@ -39,6 +40,11 @@ public class MeetingConfirmationService {
     public void confirmMeeting(UUID meetingId) {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
+
+        if (meeting.getDeadline() != null &&
+                meeting.getDeadline().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
+            return;
+        }
 
         if (meeting.getConfirmedTime() != null) {
             return;
