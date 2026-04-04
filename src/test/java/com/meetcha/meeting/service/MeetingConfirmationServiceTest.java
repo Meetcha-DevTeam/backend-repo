@@ -72,6 +72,9 @@ class MeetingConfirmationServiceTest {
 
         when(availabilityRepository.findByMeetingId(meetingId))
                 .thenReturn(availList);
+        when(meeting.getDeadline()).thenReturn(null);
+        when(meeting.getConfirmedTime()).thenReturn(null);
+        when(meeting.getDurationMinutes()).thenReturn(60);
 
         Meeting algoMeeting = new Meeting(
                 "m", List.of(), 0, 60,
@@ -87,14 +90,17 @@ class MeetingConfirmationServiceTest {
         try (MockedStatic<MeetingConverter> mc = mockStatic(MeetingConverter.class);
              MockedStatic<MeetingTimeCalculator> mt = mockStatic(MeetingTimeCalculator.class)) {
 
-            mc.when(() -> MeetingConverter.toAlgorithmMeeting(meeting, availList))
+            mc.when(() -> MeetingConverter.toAlgorithmMeeting(any(), any()))
                     .thenReturn(algoMeeting);
 
             mc.when(() -> MeetingConverter.toLocalDateTime(bestStartMinutes))
                     .thenReturn(expectedBest);
 
-            mt.when(() -> MeetingTimeCalculator.calculateMeetingTime(algoMeeting))
+            mt.when(() -> MeetingTimeCalculator.calculateMeetingTime(any()))
                     .thenReturn(bestStartMinutes);
+
+            mt.when(() -> MeetingTimeCalculator.getMaxContinuousMinutes(any()))
+                    .thenReturn(60);
 
             // when
             service.confirmMeeting(meetingId);
@@ -126,7 +132,9 @@ class MeetingConfirmationServiceTest {
 
         when(meetingRepository.findByIdForUpdate(meetingId))
                 .thenReturn(Optional.of(meeting));
-
+        when(meeting.getDeadline()).thenReturn(null);
+        when(meeting.getConfirmedTime()).thenReturn(null);
+        when(meeting.getDurationMinutes()).thenReturn(60);
         List<ParticipantAvailability> availList =
                 List.of(avail(pid, meetingId,
                         LocalDateTime.now(),

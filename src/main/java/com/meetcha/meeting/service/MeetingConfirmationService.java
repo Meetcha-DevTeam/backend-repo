@@ -42,7 +42,7 @@ public class MeetingConfirmationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
         if (meeting.getDeadline() != null &&
-                meeting.getDeadline().isAfter(LocalDateTime.now(ZoneOffset.UTC))) {
+                meeting.getDeadline().isAfter(LocalDateTime.now())) {
             return;
         }
 

@@ -7,7 +7,6 @@ import org.hibernate.annotations.JdbcType;
 import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -86,6 +85,6 @@ public class MeetingEntity {
 
     public boolean isDeadlinePassed() {
 
-        return deadline != null && deadline.isBefore(LocalDateTime.now(ZoneOffset.UTC));
+        return deadline != null && deadline.isBefore(LocalDateTime.now());
     }
 }

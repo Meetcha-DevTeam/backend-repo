@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,7 +30,7 @@ public class MeetingStatusUpdateScheduler {
 
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     public void updateMeetingStatuses() {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
 
         // 1. BEFORE → ONGOING
         List<MeetingEntity> toStart = meetingRepository.findByMeetingStatusAndConfirmedTimeBefore(
@@ -64,7 +63,7 @@ public class MeetingStatusUpdateScheduler {
     @Scheduled(fixedRate = 60_000) // 1분마다
     @Transactional
     public void confirmMeetingForDeadlinePassed() {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
         log.info("[Scheduler] confirmMeetingForDeadlinePassed now={}", now);
 
         List<MeetingEntity> targets =
@@ -86,7 +85,7 @@ public class MeetingStatusUpdateScheduler {
     @Scheduled(fixedRate = 60 * 1000) // 매 1분마다 실행
     @Transactional
     public void confirmFromAlternativeTimes() {
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now();
         List<MeetingEntity> targets = meetingRepository.findMeetingsToConfirmFromAlternativeForUpdate(now);
 
         for (MeetingEntity meeting : targets) {
