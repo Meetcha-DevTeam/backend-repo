@@ -59,6 +59,8 @@ public class MeetingConfirmationService {
 
         // 변환 후 계산
         Meeting converted = MeetingConverter.toAlgorithmMeeting(meeting, allAvailability);
+
+        int requiredMinutes = (int) Math.ceil(meeting.getDurationMinutes() * 2.0 / 3);
         Integer bestStartMinutes = MeetingTimeCalculator.calculateMeetingTime(converted);
         log.info("변환 후 계산 완료");
 
@@ -96,6 +98,23 @@ public class MeetingConfirmationService {
             meetingRepository.save(meeting);
             log.info("meetingRepository.save 완료");
 
+            return;
+        }
+
+        int actualMinutes = MeetingTimeCalculator.getMaxContinuousMinutes(converted);
+
+        if (actualMinutes < requiredMinutes) {
+            List<AlternativeTimeEntity> alterTimes =
+                    AlternativeTimeCalculator.getAlternativeTimes(converted, meetingId);
+
+            if (alterTimes.isEmpty()) {
+                meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            } else {
+                saveAlternativeTimeCandidates(meetingId, alterTimes);
+                meeting.setMeetingStatus(MeetingStatus.MATCHING);
+            }
+
+            meetingRepository.save(meeting);
             return;
         }
 
