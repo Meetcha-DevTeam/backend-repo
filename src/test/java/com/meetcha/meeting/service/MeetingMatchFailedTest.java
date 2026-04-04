@@ -78,16 +78,21 @@ class MeetingMatchFailedTest {
     void confirmMeeting_whenNoBestTime_andNoAlternatives_setsMatchFailed() {
         // given
         UUID meetingId = UUID.randomUUID();
-        UUID pid = UUID.randomUUID();
         MeetingEntity meeting = mock(MeetingEntity.class);
 
         when(meetingRepository.findByIdForUpdate(meetingId))
                 .thenReturn(Optional.of(meeting));
 
-        List<ParticipantAvailability> availList =
-                List.of(avail(pid, meetingId,
-                        LocalDateTime.now(),
-                        LocalDateTime.now().plusHours(1)));
+        UUID p1 = UUID.randomUUID();
+        UUID p2 = UUID.randomUUID();
+
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusHours(1);
+
+        List<ParticipantAvailability> availList = List.of(
+                avail(p1, meetingId, start, end),
+                avail(p2, meetingId, start, end)
+        );
 
         when(availabilityRepository.findByMeetingId(meetingId))
                 .thenReturn(availList);
