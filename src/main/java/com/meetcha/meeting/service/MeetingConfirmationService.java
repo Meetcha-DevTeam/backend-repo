@@ -53,6 +53,16 @@ public class MeetingConfirmationService {
         log.info("confirmMeeting 접근 완료");
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
+
+        Set<UUID> submittedParticipantIds = new HashSet<>();
+        for (ParticipantAvailability a : allAvailability) {
+            submittedParticipantIds.add(a.getParticipantId());
+        }
+
+        if (submittedParticipantIds.size() < 2) {
+            return;
+        }
+
         if (allAvailability.isEmpty()) {
             // 참여자가 아무도 가용시간을 안 넣고 마감된 경우 → 매칭 실패 처리
             meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
