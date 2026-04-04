@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +41,11 @@ public class MeetingConfirmationService {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
+        if (meeting.getDeadline() != null &&
+                meeting.getDeadline().isAfter(LocalDateTime.now())) {
+            return;
+        }
+
         if (meeting.getConfirmedTime() != null) {
             return;
         }
@@ -47,18 +53,27 @@ public class MeetingConfirmationService {
         log.info("confirmMeeting 접근 완료");
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
+
+        Set<UUID> submittedParticipantIds = new HashSet<>();
+        for (ParticipantAvailability a : allAvailability) {
+            submittedParticipantIds.add(a.getParticipantId());
+        }
+
         if (allAvailability.isEmpty()) {
-            // 참여자가 아무도 가용시간을 안 넣고 마감된 경우 → 매칭 실패 처리
             meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
             meetingRepository.save(meeting);
-            log.info("가용 시간 정보 없음 → MATCH_FAILED 처리, meetingId={}", meetingId);
             return;
-//            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
+        }
+
+        if (submittedParticipantIds.size() < 2) {
+            return;
         }
         log.info("참여자 가용 시간 조회 완료");
 
         // 변환 후 계산
         Meeting converted = MeetingConverter.toAlgorithmMeeting(meeting, allAvailability);
+
+        int requiredMinutes = (int) Math.ceil(meeting.getDurationMinutes() * 2.0 / 3);
         Integer bestStartMinutes = MeetingTimeCalculator.calculateMeetingTime(converted);
         log.info("변환 후 계산 완료");
 
@@ -96,6 +111,23 @@ public class MeetingConfirmationService {
             meetingRepository.save(meeting);
             log.info("meetingRepository.save 완료");
 
+            return;
+        }
+
+        int actualMinutes = MeetingTimeCalculator.getMaxContinuousMinutes(converted);
+
+        if (actualMinutes < requiredMinutes) {
+            List<AlternativeTimeEntity> alterTimes =
+                    AlternativeTimeCalculator.getAlternativeTimes(converted, meetingId);
+
+            if (alterTimes.isEmpty()) {
+                meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            } else {
+                saveAlternativeTimeCandidates(meetingId, alterTimes);
+                meeting.setMeetingStatus(MeetingStatus.MATCHING);
+            }
+
+            meetingRepository.save(meeting);
             return;
         }
 

@@ -12,6 +12,18 @@ public class MeetingTimeCalculator {
 
     private static final int PER = 30; // 시간 단위: 30분
 
+    public static int getMaxContinuousMinutes(Meeting meeting) {
+        Map<Integer, Integer> seq = getTimeSequence(
+                meeting,
+                PER,
+                (currentCount, totalCount) -> currentCount == totalCount
+        );
+
+        return seq.values().stream()
+                .max(Integer::compareTo)
+                .orElse(0) * PER;
+    }
+
     public static Integer calculateMeetingTime(Meeting meeting) {
         int hit = meeting.getDuration() / PER;
 
