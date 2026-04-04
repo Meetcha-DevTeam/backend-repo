@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Slf4j
@@ -40,6 +41,15 @@ public class MeetingConfirmationService {
         MeetingEntity meeting = meetingRepository.findByIdForUpdate(meetingId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEETING_NOT_FOUND));
 
+        if (meeting.getDeadline() != null &&
+                meeting.getDeadline().isAfter(LocalDateTime.now())) {
+            return;
+        }
+
+        if (meeting.getConfirmedTime() != null) {
+            return;
+        }
+
         log.info("confirmMeeting 접근 완료");
         // 1. 참여자 가용 시간 조회
         List<ParticipantAvailability> allAvailability = availabilityRepository.findByMeetingId(meetingId);
@@ -49,17 +59,14 @@ public class MeetingConfirmationService {
             submittedParticipantIds.add(a.getParticipantId());
         }
 
-        if (submittedParticipantIds.size() < 2) {
+        if (allAvailability.isEmpty()) {
+            meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
+            meetingRepository.save(meeting);
             return;
         }
 
-        if (allAvailability.isEmpty()) {
-            // 참여자가 아무도 가용시간을 안 넣고 마감된 경우 → 매칭 실패 처리
-            meeting.setMeetingStatus(MeetingStatus.MATCH_FAILED);
-            meetingRepository.save(meeting);
-            log.info("가용 시간 정보 없음 → MATCH_FAILED 처리, meetingId={}", meetingId);
+        if (submittedParticipantIds.size() < 2) {
             return;
-//            throw new CustomException(ErrorCode.NO_PARTICIPANT_AVAILABILITY);
         }
         log.info("참여자 가용 시간 조회 완료");
 
